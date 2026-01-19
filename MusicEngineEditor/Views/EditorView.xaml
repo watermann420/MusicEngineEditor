@@ -1,0 +1,19 @@
+<UserControl x:Class="MusicEngineEditor.Views.EditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit">
+
+    <Grid Background="{DynamicResource EditorBackgroundBrush}">
+        <avalonedit:TextEditor
+            x:Name="CodeEditor"
+            FontFamily="JetBrains Mono, Consolas, Courier New"
+            FontSize="14"
+            ShowLineNumbers="True"
+            Background="{DynamicResource EditorBackgroundBrush}"
+            Foreground="{DynamicResource ForegroundBrush}"
+            LineNumbersForeground="{DynamicResource SecondaryForegroundBrush}"
+            Padding="4"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Auto"/>
+    </Grid>
+</UserControl>

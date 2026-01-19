@@ -11,6 +11,10 @@
     <RootNamespace>MusicEngineEditor</RootNamespace>
     <!-- <ApplicationIcon>Resources\Icons\app.ico</ApplicationIcon> -->
     <Version>1.0.0</Version>
+
+    <!-- Ensure NuGet packages are restored automatically -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <DisableImplicitNuGetFallbackFolder>false</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
 
   <ItemGroup>
