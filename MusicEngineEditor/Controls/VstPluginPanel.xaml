@@ -1,0 +1,375 @@
+<UserControl x:Class="MusicEngineEditor.Controls.VstPluginPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="500" d:DesignWidth="300"
+             Background="#1E1F22">
+
+    <UserControl.Resources>
+        <!-- Colors matching the dark theme -->
+        <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#1E1F22"/>
+        <SolidColorBrush x:Key="CardBackgroundBrush" Color="#2B2D30"/>
+        <SolidColorBrush x:Key="CardHoverBrush" Color="#313335"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#393B40"/>
+        <SolidColorBrush x:Key="ForegroundBrush" Color="#BCBEC4"/>
+        <SolidColorBrush x:Key="SecondaryForegroundBrush" Color="#6F737A"/>
+        <SolidColorBrush x:Key="BrightForegroundBrush" Color="#DFE1E5"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#4B6EAF"/>
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#5A7FC4"/>
+        <SolidColorBrush x:Key="SuccessBrush" Color="#6AAB73"/>
+        <SolidColorBrush x:Key="Vst3Color" Color="#9C7CE8"/>
+        <SolidColorBrush x:Key="Vst2Color" Color="#E89C4B"/>
+        <SolidColorBrush x:Key="LoadedBrush" Color="#6AAB73"/>
+        <SolidColorBrush x:Key="UnloadedBrush" Color="#6F737A"/>
+
+        <!-- Scan Button Style -->
+        <Style x:Key="ScanButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Open Editor Button Style -->
+        <Style x:Key="OpenEditorButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background">
+                                    <Setter.Value>
+                                        <SolidColorBrush Color="#7BBF84"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Plugin Card Style -->
+        <Style x:Key="PluginCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Padding" Value="12"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource CardHoverBrush}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- VST Plugin Item Template -->
+        <DataTemplate x:Key="VstPluginItemTemplate">
+            <Border Style="{StaticResource PluginCardStyle}"
+                    Tag="{Binding}"
+                    MouseLeftButtonDown="PluginCard_MouseLeftButtonDown">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Plugin Icon/Type Badge -->
+                    <Border Grid.Column="0"
+                            Width="36" Height="36"
+                            CornerRadius="6"
+                            VerticalAlignment="Top"
+                            Margin="0,2,0,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="{Binding TypeGradientStart}" Offset="0"/>
+                                <GradientStop Color="{Binding TypeGradientEnd}" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Border.Effect>
+                            <DropShadowEffect Color="{Binding TypeGradientEnd}" BlurRadius="6" ShadowDepth="0" Opacity="0.3"/>
+                        </Border.Effect>
+                        <TextBlock Text="{Binding TypeIcon}"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Plugin Info -->
+                    <StackPanel Grid.Column="1" Margin="8,0,8,0" VerticalAlignment="Center">
+                        <!-- Plugin Name -->
+                        <TextBlock Text="{Binding Name}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource BrightForegroundBrush}"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding Name}"/>
+
+                        <!-- Plugin Type Badge -->
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <Border CornerRadius="3"
+                                    Padding="6,2"
+                                    Background="{Binding TypeBadgeBackground}"
+                                    Margin="0,0,6,0">
+                                <TextBlock Text="{Binding Type}"
+                                           FontSize="10"
+                                           FontWeight="SemiBold"
+                                           Foreground="White"/>
+                            </Border>
+
+                            <!-- Status Indicator -->
+                            <Border CornerRadius="3"
+                                    Padding="6,2"
+                                    Background="{Binding StatusBackground}"
+                                    Visibility="{Binding StatusVisibility}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="6" Height="6"
+                                             Fill="{Binding StatusDotColor}"
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,4,0"/>
+                                    <TextBlock Text="{Binding StatusText}"
+                                               FontSize="10"
+                                               Foreground="{Binding StatusForeground}"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Plugin Path -->
+                        <TextBlock Text="{Binding TruncatedPath}"
+                                   FontSize="10"
+                                   Foreground="{StaticResource SecondaryForegroundBrush}"
+                                   TextTrimming="CharacterEllipsis"
+                                   Margin="0,4,0,0"
+                                   ToolTip="{Binding FullPath}"/>
+                    </StackPanel>
+
+                    <!-- Action Button -->
+                    <Button Grid.Column="2"
+                            Style="{StaticResource OpenEditorButtonStyle}"
+                            Content="Open"
+                            VerticalAlignment="Center"
+                            Click="OpenEditor_Click"
+                            Tag="{Binding}"
+                            ToolTip="Open VST Editor Window"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header with scan button -->
+        <Border Grid.Row="0" Padding="8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="VST Plugins"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource BrightForegroundBrush}"/>
+                    <TextBlock x:Name="PluginCountText"
+                               Text="0 plugins found"
+                               FontSize="11"
+                               Foreground="{StaticResource SecondaryForegroundBrush}"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Style="{StaticResource ScanButtonStyle}"
+                        Content="Scan"
+                        Click="ScanPlugins_Click"
+                        ToolTip="Scan for VST plugins"/>
+            </Grid>
+        </Border>
+
+        <!-- Search Box -->
+        <Border Grid.Row="1" Margin="8,0,8,8">
+            <Grid>
+                <Border Background="#252628"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="8,6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="&#x1F50D;"
+                                   FontSize="12"
+                                   Foreground="{StaticResource SecondaryForegroundBrush}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"/>
+
+                        <TextBox x:Name="SearchBox"
+                                 Grid.Column="1"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Foreground="{StaticResource ForegroundBrush}"
+                                 CaretBrush="{StaticResource ForegroundBrush}"
+                                 FontSize="12"
+                                 VerticalAlignment="Center"
+                                 TextChanged="SearchBox_TextChanged"/>
+
+                        <TextBlock x:Name="SearchPlaceholder"
+                                   Grid.Column="1"
+                                   Text="Search plugins..."
+                                   FontSize="12"
+                                   Foreground="{StaticResource SecondaryForegroundBrush}"
+                                   VerticalAlignment="Center"
+                                   IsHitTestVisible="False"
+                                   Visibility="Visible"/>
+
+                        <Button x:Name="ClearSearchButton"
+                                Grid.Column="2"
+                                Content="X"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Foreground="{StaticResource SecondaryForegroundBrush}"
+                                FontSize="10"
+                                Cursor="Hand"
+                                Padding="4,0"
+                                Click="ClearSearch_Click"
+                                Visibility="Collapsed"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Plugin List -->
+        <ScrollViewer Grid.Row="2"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Padding="8,0">
+            <ItemsControl x:Name="PluginList"
+                          ItemTemplate="{StaticResource VstPluginItemTemplate}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Empty State -->
+        <Border x:Name="EmptyState"
+                Grid.Row="2"
+                Visibility="Visible"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Margin="20">
+            <StackPanel HorizontalAlignment="Center">
+                <Border Width="60" Height="60"
+                        CornerRadius="30"
+                        Background="#252628"
+                        HorizontalAlignment="Center"
+                        Margin="0,0,0,16">
+                    <TextBlock Text="V"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource SecondaryForegroundBrush}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="No VST Plugins Found"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource ForegroundBrush}"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Click 'Scan' to search for installed&#x0a;VST2 and VST3 plugins"
+                           FontSize="12"
+                           Foreground="{StaticResource SecondaryForegroundBrush}"
+                           TextAlignment="Center"
+                           HorizontalAlignment="Center"
+                           Margin="0,8,0,16"/>
+                <Button Style="{StaticResource ScanButtonStyle}"
+                        Content="Scan for Plugins"
+                        Click="ScanPlugins_Click"
+                        HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Loading Indicator -->
+        <Border x:Name="LoadingOverlay"
+                Grid.Row="0" Grid.RowSpan="3"
+                Background="#CC1E1F22"
+                Visibility="Collapsed">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Border Width="40" Height="40"
+                        CornerRadius="20"
+                        Background="{StaticResource AccentBrush}"
+                        HorizontalAlignment="Center"
+                        Margin="0,0,0,12">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#4B6EAF" BlurRadius="10" ShadowDepth="0" Opacity="0.5"/>
+                    </Border.Effect>
+                    <TextBlock Text="..."
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="Scanning for plugins..."
+                           FontSize="13"
+                           Foreground="{StaticResource ForegroundBrush}"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
