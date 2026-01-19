@@ -20,19 +20,36 @@ public class EngineService : IDisposable
     public int PatternCount { get; private set; }
     public bool IsInitialized { get; private set; }
 
+    public string? InitializationOutput { get; private set; }
+
     public async Task InitializeAsync()
     {
-        await Task.Run(() =>
+        // Capture console output during initialization to show device info
+        var outputCapture = new StringWriter();
+        var originalOut = Console.Out;
+
+        try
         {
-            _engine = new AudioEngine();
-            _engine.Initialize();
+            Console.SetOut(outputCapture);
 
-            _sequencer = new Sequencer();
-            _sequencer.Start();
+            await Task.Run(() =>
+            {
+                _engine = new AudioEngine();
+                _engine.Initialize();
 
-            _scriptHost = new ScriptHost(_engine, _sequencer);
-            IsInitialized = true;
-        });
+                _sequencer = new Sequencer();
+                _sequencer.Start();
+
+                _scriptHost = new ScriptHost(_engine, _sequencer);
+                IsInitialized = true;
+            });
+
+            InitializationOutput = outputCapture.ToString();
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+        }
     }
 
     public async Task<ScriptResult> ExecuteScriptAsync(string code)

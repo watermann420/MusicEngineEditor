@@ -65,20 +65,32 @@ public partial class MainWindow : Window
     {
         StatusText.Text = "Initializing engine...";
         OutputLine("MusicEngine Editor starting...");
+        OutputLine("");
 
         try
         {
             await _engineService.InitializeAsync();
             _statusTimer.Start();
+
+            // Show device enumeration output from engine initialization
+            if (!string.IsNullOrEmpty(_engineService.InitializationOutput))
+            {
+                OutputLine("=== Audio/MIDI Devices ===");
+                OutputLine(_engineService.InitializationOutput);
+                OutputLine("==========================");
+                OutputLine("");
+            }
+
             StatusText.Text = "Ready";
             OutputLine("Engine initialized successfully!");
-            OutputLine("Create a new project or open an existing one to get started.");
+            OutputLine("Press F5 to run the script.");
             OutputLine("");
         }
         catch (Exception ex)
         {
             StatusText.Text = "Engine initialization failed";
             OutputLine($"ERROR: Failed to initialize engine: {ex.Message}");
+            OutputLine("Check if audio devices are available and not in use by another application.");
         }
     }
 
@@ -637,25 +649,31 @@ public partial class MainWindow : Window
             // MusicEngine Script
             // Press F5 to execute or create a new project to get started
 
-            // Set BPM
-            SetBpm(120);
-            Start();
+            // Set BPM and start the sequencer
+            Sequencer.Bpm = 120;
+            Sequencer.Start();
 
-            // Create a simple synth
+            // Create a simple synth with sawtooth waveform
             var synth = CreateSynth();
-            synth.Waveform = WaveType.Sawtooth;
+            synth.SetParameter("waveform", 2);  // 0=Sine, 1=Square, 2=Sawtooth, 3=Triangle, 4=Noise
             synth.SetParameter("cutoff", 0.6f);
 
-            // Route MIDI input (device 0) to the synth
-            midi.device(0).route(synth);
+            // === TEST: Play a chord directly (no MIDI keyboard needed) ===
+            Print("Playing test chord...");
+            synth.NoteOn(60, 100);  // C4 (Middle C)
+            synth.NoteOn(64, 100);  // E4
+            synth.NoteOn(67, 100);  // G4
 
-            // Map full keyboard range
-            midi.playablekeys.range(21, 108).low.to.high.map(synth);
+            Print("You should hear a C major chord now!");
+            Print("The notes will keep playing until you press Escape (panic button).");
+            Print("");
 
-            // Map modulation wheel to filter cutoff
-            midi.device(0).cc(1).to(synth, "cutoff");
-
-            Print("Synth ready! Play your MIDI keyboard.");
+            // === MIDI Setup (only works if you have a MIDI keyboard connected) ===
+            // Check the device list above - if you see "Found MIDI Input [X]",
+            // uncomment these lines and change 0 to your device index:
+            // Engine.RouteMidiInput(0, synth);
+            // Engine.MapRange(0, 21, 108, synth, false);
+            // Print("MIDI keyboard routed to synth.");
 
             // Or load a VST plugin:
             // var vital = vst.load("Vital");
