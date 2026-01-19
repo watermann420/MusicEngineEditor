@@ -1,0 +1,84 @@
+<UserControl x:Class="MusicEngineEditor.Controls.PunchcardVisualization"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="800"
+             Background="#1E1F22"
+             ClipToBounds="True">
+
+    <UserControl.Resources>
+        <!-- Colors matching the dark theme -->
+        <SolidColorBrush x:Key="PunchcardBackgroundBrush" Color="#1E1F22"/>
+        <SolidColorBrush x:Key="GridLineBrush" Color="#393B40"/>
+        <SolidColorBrush x:Key="BeatLineBrush" Color="#4A4D52"/>
+        <SolidColorBrush x:Key="PlayheadBrush" Color="#4B6EAF"/>
+        <SolidColorBrush x:Key="TrackSeparatorBrush" Color="#2B2D30"/>
+        <SolidColorBrush x:Key="BeatLabelBrush" Color="#6F737A"/>
+        <SolidColorBrush x:Key="TrackLabelBrush" Color="#BCBEC4"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <!-- Beat number labels row -->
+            <RowDefinition Height="24"/>
+            <!-- Main visualization area -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Beat number labels -->
+        <Canvas x:Name="BeatLabelsCanvas"
+                Grid.Row="0"
+                Background="{StaticResource PunchcardBackgroundBrush}"
+                ClipToBounds="True"/>
+
+        <!-- Main visualization area with scrolling -->
+        <ScrollViewer Grid.Row="1"
+                      x:Name="MainScrollViewer"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto"
+                      Background="{StaticResource PunchcardBackgroundBrush}">
+            <Grid x:Name="VisualizationContainer">
+                <!-- Grid lines and notes canvas -->
+                <Canvas x:Name="GridCanvas"
+                        Background="{StaticResource PunchcardBackgroundBrush}"
+                        ClipToBounds="True"/>
+
+                <!-- Notes canvas (drawn on top of grid) -->
+                <Canvas x:Name="NotesCanvas"
+                        Background="Transparent"
+                        ClipToBounds="True"/>
+
+                <!-- Playhead (vertical line) -->
+                <Canvas x:Name="PlayheadCanvas"
+                        Background="Transparent"
+                        IsHitTestVisible="False"
+                        ClipToBounds="True">
+                    <Line x:Name="Playhead"
+                          Y1="0"
+                          Stroke="{StaticResource PlayheadBrush}"
+                          StrokeThickness="2"
+                          Opacity="0.9"/>
+                </Canvas>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Tooltip for note hover -->
+        <Popup x:Name="NoteTooltip"
+               Placement="Mouse"
+               AllowsTransparency="True"
+               IsOpen="False">
+            <Border Background="#3C3F41"
+                    BorderBrush="#43454A"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="8,4">
+                <TextBlock x:Name="NoteTooltipText"
+                           Foreground="#BCBEC4"
+                           FontSize="12"
+                           FontFamily="JetBrains Mono, Consolas, Courier New"/>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>

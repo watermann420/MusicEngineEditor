@@ -12,8 +12,13 @@
         WindowState="Maximized">
 
     <Window.InputBindings>
+        <!-- Run with Ctrl+Enter or F5 -->
+        <KeyBinding Key="Enter" Modifiers="Ctrl" Command="{Binding RunCommand}"/>
         <KeyBinding Key="F5" Command="{Binding RunCommand}"/>
+        <!-- Stop with Escape -->
+        <KeyBinding Key="Escape" Command="{Binding StopCommand}"/>
         <KeyBinding Key="F5" Modifiers="Shift" Command="{Binding StopCommand}"/>
+        <!-- File operations -->
         <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding SaveCommand}"/>
         <KeyBinding Key="S" Modifiers="Ctrl+Shift" Command="{Binding SaveAllCommand}"/>
         <KeyBinding Key="O" Modifiers="Ctrl+Shift" Command="{Binding OpenProjectCommand}"/>
@@ -21,7 +26,6 @@
         <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding NewFileCommand}"/>
         <KeyBinding Key="F" Modifiers="Ctrl" Command="{Binding FindCommand}"/>
         <KeyBinding Key="H" Modifiers="Ctrl" Command="{Binding ReplaceCommand}"/>
-        <KeyBinding Key="Escape" Command="{Binding StopCommand}"/>
     </Window.InputBindings>
 
     <Grid>
@@ -58,8 +62,12 @@
                 <MenuItem Header="Find and _Replace..." InputGestureText="Ctrl+H" Click="Replace_Click"/>
             </MenuItem>
             <MenuItem Header="_View">
-                <MenuItem Header="Project Explorer" IsCheckable="True" IsChecked="True" x:Name="ProjectExplorerMenuItem"/>
-                <MenuItem Header="Output" IsCheckable="True" IsChecked="True" x:Name="OutputMenuItem"/>
+                <MenuItem Header="Project Explorer" IsCheckable="True" IsChecked="True" x:Name="ProjectExplorerMenuItem" Click="ToggleProjectExplorer_Click"/>
+                <MenuItem Header="Output" IsCheckable="True" IsChecked="True" x:Name="OutputMenuItem" Click="ToggleOutput_Click"/>
+                <Separator/>
+                <MenuItem Header="MIDI Devices" IsCheckable="True" IsChecked="False" x:Name="MidiPanelMenuItem" Click="ToggleMidiPanel_Click"/>
+                <MenuItem Header="VST Plugins" IsCheckable="True" IsChecked="False" x:Name="VstPanelMenuItem" Click="ToggleVstPanel_Click"/>
+                <MenuItem Header="Audio Files" IsCheckable="True" IsChecked="False" x:Name="AudioPanelMenuItem" Click="ToggleAudioPanel_Click"/>
             </MenuItem>
             <MenuItem Header="_Project">
                 <MenuItem Header="_Add New Script..." Click="AddScript_Click"/>
@@ -70,10 +78,8 @@
                 <MenuItem Header="Project _Settings..." Click="ProjectSettings_Click"/>
             </MenuItem>
             <MenuItem Header="_Run">
-                <MenuItem Header="_Run" InputGestureText="F5" Click="RunScript_Click"/>
-                <MenuItem Header="_Stop" InputGestureText="Shift+F5" Click="Stop_Click"/>
-                <Separator/>
-                <MenuItem Header="All Notes _Off" InputGestureText="Esc" Click="Panic_Click"/>
+                <MenuItem Header="_Run" InputGestureText="Ctrl+Enter" Click="RunScript_Click"/>
+                <MenuItem Header="_Stop" InputGestureText="Esc" Click="Stop_Click"/>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_Documentation" Click="Documentation_Click"/>
@@ -100,11 +106,8 @@
                     <Rectangle Width="1" Fill="{StaticResource BorderBrush}" Margin="12,4"/>
 
                     <!-- Run Controls -->
-                    <Button x:Name="RunButton" Content="Run" Style="{StaticResource RunButtonStyle}" Click="RunScript_Click" ToolTip="Execute Script (F5)"/>
-                    <Button Content="Stop" Style="{StaticResource StopButtonStyle}" Click="Stop_Click" ToolTip="Stop (Shift+F5)" Margin="6,0,0,0"/>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Click="Panic_Click" ToolTip="All Notes Off (Esc)" Margin="6,0,0,0">
-                        <TextBlock Text="Panic" Foreground="{StaticResource WarningBrush}"/>
-                    </Button>
+                    <Button x:Name="RunButton" Content="Run" Style="{StaticResource RunButtonStyle}" Click="RunScript_Click" ToolTip="Execute Script (Ctrl+Enter)"/>
+                    <Button Content="Stop" Style="{StaticResource StopButtonStyle}" Click="Stop_Click" ToolTip="Stop (Esc)" Margin="6,0,0,0"/>
                 </StackPanel>
 
                 <!-- Right: Sequencer Status -->
@@ -121,15 +124,6 @@
 
                         <Rectangle Width="1" Fill="{StaticResource BorderBrush}" Margin="12,2"/>
 
-                        <TextBlock Text="Beat" Foreground="{StaticResource SecondaryForegroundBrush}"
-                                   VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <TextBlock x:Name="BeatDisplay" Text="0.00"
-                                   Foreground="{StaticResource BrightForegroundBrush}"
-                                   FontWeight="SemiBold" FontFamily="JetBrains Mono, Consolas"
-                                   Width="50" VerticalAlignment="Center"/>
-
-                        <Rectangle Width="1" Fill="{StaticResource BorderBrush}" Margin="8,2"/>
-
                         <TextBlock Text="Patterns" Foreground="{StaticResource SecondaryForegroundBrush}"
                                    VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <TextBlock x:Name="PatternCountDisplay" Text="0"
@@ -138,7 +132,58 @@
                     </StackPanel>
                 </Border>
 
-                <Border/> <!-- Spacer -->
+                <!-- Center: Active Instruments Display -->
+                <Border Background="{StaticResource HeaderBackgroundBrush}"
+                        CornerRadius="4" Padding="8,4" Margin="12,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Active:" Foreground="{StaticResource SecondaryForegroundBrush}"
+                                   VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11"/>
+                        <ItemsControl x:Name="ActiveInstrumentsPanel">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border x:Name="InstrumentBorder"
+                                            Background="{Binding BackgroundBrush}"
+                                            CornerRadius="3" Padding="8,3" Margin="2,0"
+                                            BorderBrush="{Binding BorderBrush}"
+                                            BorderThickness="1">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Icon}"
+                                                       Foreground="{Binding IconColor}"
+                                                       FontSize="12" Margin="0,0,4,0"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock x:Name="InstrumentName"
+                                                       Text="{Binding Name}"
+                                                       Foreground="{Binding TextColor}"
+                                                       FontWeight="{Binding FontWeight}"
+                                                       FontSize="11"
+                                                       VerticalAlignment="Center">
+                                                <TextBlock.RenderTransform>
+                                                    <ScaleTransform x:Name="NameScale" ScaleX="1" ScaleY="1"/>
+                                                </TextBlock.RenderTransform>
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding CurrentNote}"
+                                                       Foreground="{Binding NoteColor}"
+                                                       FontFamily="JetBrains Mono, Consolas"
+                                                       FontSize="10" FontWeight="Bold"
+                                                       VerticalAlignment="Center"
+                                                       Margin="6,0,0,0"
+                                                       Visibility="{Binding NoteVisibility}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock x:Name="NoInstrumentsText" Text="(keine)"
+                                   Foreground="{StaticResource SecondaryForegroundBrush}"
+                                   FontSize="11" FontStyle="Italic"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
             </DockPanel>
         </Border>
 
@@ -148,6 +193,9 @@
                 <ColumnDefinition Width="240" MinWidth="180" x:Name="LeftPanelColumn"/>
                 <ColumnDefinition Width="1"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="1" x:Name="RightSplitterColumn"/>
+                <ColumnDefinition Width="0" MinWidth="0" x:Name="RightPanelColumn"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <!-- Left Panel: Project Explorer -->
@@ -171,16 +219,16 @@
                 </DockPanel>
             </Border>
 
-            <!-- Splitter -->
+            <!-- Left Splitter -->
             <GridSplitter Grid.Column="1" Width="1" HorizontalAlignment="Stretch" ResizeDirection="Columns"
                           Background="{StaticResource BorderBrush}"/>
 
             <!-- Center: Editor + Output -->
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="3*" MinHeight="150"/>
-                    <RowDefinition Height="1"/>
-                    <RowDefinition Height="*" MinHeight="100"/>
+                    <RowDefinition Height="*" MinHeight="150"/>
+                    <RowDefinition Height="Auto" x:Name="OutputSplitterRow"/>
+                    <RowDefinition Height="Auto" x:Name="OutputPanelRow"/>
                 </Grid.RowDefinitions>
 
                 <!-- Code Editor Area -->
@@ -269,47 +317,205 @@
                     </DockPanel>
                 </Border>
 
-                <!-- Splitter -->
+                <!-- Splitter for Output -->
                 <GridSplitter Grid.Row="1" Height="1" HorizontalAlignment="Stretch" ResizeDirection="Rows"
-                              Background="{StaticResource BorderBrush}"/>
+                              Background="{StaticResource BorderBrush}" x:Name="OutputSplitter"/>
 
-                <!-- Output Panel -->
-                <Border Grid.Row="2" Background="{StaticResource PanelBackgroundBrush}" x:Name="OutputPanel">
+                <!-- Output Panel (Collapsible) -->
+                <Border Grid.Row="2" Background="{StaticResource PanelBackgroundBrush}" x:Name="OutputPanel" Height="200">
                     <DockPanel>
                         <!-- Output Header -->
                         <Border DockPanel.Dock="Top" Background="{StaticResource HeaderBackgroundBrush}"
                                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
                             <DockPanel Margin="0">
-                                <Button Content="Clear" Style="{StaticResource ToolbarButtonStyle}"
-                                        Click="ClearOutput_Click" DockPanel.Dock="Right"
-                                        FontSize="11" Padding="10,6" Margin="4"/>
+                                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                                    <Button Content="Clear" Style="{StaticResource ToolbarButtonStyle}"
+                                            Click="ClearOutput_Click" FontSize="11" Padding="10,6" Margin="4"/>
+                                    <Button Content="&#x2715;" Style="{StaticResource IconButtonStyle}"
+                                            Click="ToggleOutput_Click" ToolTip="Close Output" Margin="0,4,4,4"
+                                            Width="24" Height="24"/>
+                                </StackPanel>
 
                                 <StackPanel Orientation="Horizontal">
-                                    <Border Background="{StaticResource AccentBrush}" CornerRadius="0" Padding="14,8">
+                                    <Border x:Name="OutputTabHeader" Background="{StaticResource AccentBrush}" Padding="14,8" Cursor="Hand" MouseDown="OutputTab_Click">
                                         <TextBlock Text="Output" FontWeight="SemiBold" Foreground="White" FontSize="11"/>
                                     </Border>
-                                    <Border Background="Transparent" Padding="14,8" Cursor="Hand">
-                                        <TextBlock Text="Problems" Foreground="{StaticResource SecondaryForegroundBrush}" FontSize="11"/>
+                                    <Border x:Name="ProblemsTabHeader" Background="Transparent" Padding="14,8" Cursor="Hand" MouseDown="ProblemsTab_Click">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Problems" Foreground="{StaticResource SecondaryForegroundBrush}" FontSize="11"/>
+                                            <Border x:Name="ErrorCountBadge" Background="{StaticResource ErrorBrush}" CornerRadius="8"
+                                                    Padding="6,2" Margin="6,0,0,0" Visibility="Collapsed">
+                                                <TextBlock x:Name="ErrorCountText" Text="0" Foreground="White" FontSize="10" FontWeight="Bold"/>
+                                            </Border>
+                                        </StackPanel>
                                     </Border>
                                 </StackPanel>
                             </DockPanel>
                         </Border>
 
-                        <!-- Output Content -->
-                        <TextBox x:Name="OutputBox"
-                                 Style="{StaticResource OutputTextBoxStyle}"
-                                 TextWrapping="NoWrap"
-                                 AcceptsReturn="True"/>
+                        <!-- Output/Problems Content -->
+                        <Grid>
+                            <!-- Output Content -->
+                            <TextBox x:Name="OutputBox"
+                                     Style="{StaticResource OutputTextBoxStyle}"
+                                     TextWrapping="NoWrap"
+                                     AcceptsReturn="True"/>
+
+                            <!-- Problems List -->
+                            <ListView x:Name="ProblemsListView" Visibility="Collapsed"
+                                      Background="Transparent" BorderThickness="0"
+                                      Foreground="{StaticResource ForegroundBrush}"
+                                      MouseDoubleClick="ProblemsListView_DoubleClick">
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Header="" Width="24">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Icon}" Foreground="{Binding IconColor}" FontSize="12"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="Description" Width="400" DisplayMemberBinding="{Binding Message}"/>
+                                        <GridViewColumn Header="File" Width="150" DisplayMemberBinding="{Binding FileName}"/>
+                                        <GridViewColumn Header="Line" Width="50" DisplayMemberBinding="{Binding Line}"/>
+                                        <GridViewColumn Header="Col" Width="50" DisplayMemberBinding="{Binding Column}"/>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                        </Grid>
                     </DockPanel>
                 </Border>
             </Grid>
+
+            <!-- Right Splitter -->
+            <GridSplitter Grid.Column="3" Width="1" HorizontalAlignment="Stretch" ResizeDirection="Columns"
+                          Background="{StaticResource BorderBrush}" x:Name="RightSplitter" Visibility="Collapsed"/>
+
+            <!-- Right Panel (MIDI/VST/Audio) -->
+            <Border Grid.Column="4" Background="{StaticResource PanelBackgroundBrush}" x:Name="RightPanel" Visibility="Collapsed">
+                <DockPanel>
+                    <!-- Panel Header with Tabs -->
+                    <Border DockPanel.Dock="Top" Background="{StaticResource HeaderBackgroundBrush}"
+                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                        <DockPanel>
+                            <Button Content="&#x2715;" Style="{StaticResource IconButtonStyle}"
+                                    Click="CloseRightPanel_Click" ToolTip="Close Panel" DockPanel.Dock="Right"
+                                    Width="24" Height="24" Margin="4"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Border x:Name="MidiTabHeader" Background="{StaticResource AccentBrush}" Padding="12,8" Cursor="Hand" MouseDown="MidiTab_Click">
+                                    <TextBlock Text="MIDI" FontWeight="SemiBold" Foreground="White" FontSize="11"/>
+                                </Border>
+                                <Border x:Name="VstTabHeader" Background="Transparent" Padding="12,8" Cursor="Hand" MouseDown="VstTab_Click">
+                                    <TextBlock Text="VST" Foreground="{StaticResource SecondaryForegroundBrush}" FontSize="11"/>
+                                </Border>
+                                <Border x:Name="AudioTabHeader" Background="Transparent" Padding="12,8" Cursor="Hand" MouseDown="AudioTab_Click">
+                                    <TextBlock Text="Audio" Foreground="{StaticResource SecondaryForegroundBrush}" FontSize="11"/>
+                                </Border>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Tab Content -->
+                    <Grid>
+                        <!-- MIDI Devices Panel -->
+                        <Border x:Name="MidiDevicesPanel" Visibility="Visible" Padding="8">
+                            <DockPanel>
+                                <Button Content="Refresh" Style="{StaticResource ToolbarButtonStyle}"
+                                        DockPanel.Dock="Top" Click="RefreshMidiDevices_Click" Margin="0,0,0,8"/>
+                                <ListView x:Name="MidiDevicesList" Background="Transparent" BorderThickness="0"
+                                          Foreground="{StaticResource ForegroundBrush}">
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Header="Device" Width="150" DisplayMemberBinding="{Binding Name}"/>
+                                            <GridViewColumn Header="Type" Width="60" DisplayMemberBinding="{Binding Type}"/>
+                                            <GridViewColumn Header="Ch" Width="40" DisplayMemberBinding="{Binding Channel}"/>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+                            </DockPanel>
+                        </Border>
+
+                        <!-- VST Plugins Panel -->
+                        <Border x:Name="VstPluginsPanel" Visibility="Collapsed" Padding="8">
+                            <DockPanel>
+                                <Button Content="Scan Plugins" Style="{StaticResource ToolbarButtonStyle}"
+                                        DockPanel.Dock="Top" Click="ScanVstPlugins_Click" Margin="0,0,0,8"/>
+                                <ListView x:Name="VstPluginsList" Background="Transparent" BorderThickness="0"
+                                          Foreground="{StaticResource ForegroundBrush}"
+                                          MouseDoubleClick="VstPluginsList_DoubleClick">
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Header="Plugin" Width="150" DisplayMemberBinding="{Binding Name}"/>
+                                            <GridViewColumn Header="Type" Width="60" DisplayMemberBinding="{Binding Type}"/>
+                                            <GridViewColumn Header="Path" Width="100" DisplayMemberBinding="{Binding Path}"/>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+                            </DockPanel>
+                        </Border>
+
+                        <!-- Audio Files Panel -->
+                        <Border x:Name="AudioFilesPanel" Visibility="Collapsed" Padding="8"
+                                AllowDrop="True" Drop="AudioFilesPanel_Drop" DragOver="AudioFilesPanel_DragOver">
+                            <DockPanel>
+                                <Button Content="Import Audio" Style="{StaticResource ToolbarButtonStyle}"
+                                        DockPanel.Dock="Top" Click="ImportAudio_Click" Margin="0,0,0,8"/>
+                                <Border x:Name="AudioDropZone" BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="2" CornerRadius="4" Margin="0,0,0,8"
+                                        Background="Transparent" Padding="16"
+                                        AllowDrop="True" Drop="AudioFilesPanel_Drop" DragOver="AudioFilesPanel_DragOver">
+                                    <TextBlock Text="Drop audio files here"
+                                               Foreground="{StaticResource SecondaryForegroundBrush}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ListView x:Name="AudioFilesList" Background="Transparent" BorderThickness="0"
+                                          Foreground="{StaticResource ForegroundBrush}" MouseDoubleClick="AudioFile_DoubleClick">
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Header="Name" Width="140" DisplayMemberBinding="{Binding Alias}"/>
+                                            <GridViewColumn Header="Duration" Width="60" DisplayMemberBinding="{Binding Duration}"/>
+                                            <GridViewColumn Header="Format" Width="50" DisplayMemberBinding="{Binding Format}"/>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+                </DockPanel>
+            </Border>
+
+            <!-- Right Sidebar Tool Buttons -->
+            <Border Grid.Column="5" Background="{StaticResource ToolbarBackgroundBrush}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0">
+                <StackPanel Orientation="Vertical" Width="36">
+                    <Button Style="{StaticResource IconButtonStyle}" Click="ToggleMidiPanel_Click"
+                            ToolTip="MIDI Devices" Margin="4" x:Name="MidiToolButton">
+                        <TextBlock Text="M" FontWeight="Bold" FontSize="14"/>
+                    </Button>
+                    <Button Style="{StaticResource IconButtonStyle}" Click="ToggleVstPanel_Click"
+                            ToolTip="VST Plugins" Margin="4" x:Name="VstToolButton">
+                        <TextBlock Text="V" FontWeight="Bold" FontSize="14"/>
+                    </Button>
+                    <Button Style="{StaticResource IconButtonStyle}" Click="ToggleAudioPanel_Click"
+                            ToolTip="Audio Files" Margin="4" x:Name="AudioToolButton">
+                        <TextBlock Text="A" FontWeight="Bold" FontSize="14"/>
+                    </Button>
+
+                    <Rectangle Height="1" Fill="{StaticResource BorderBrush}" Margin="6,8"/>
+
+                    <Button Style="{StaticResource IconButtonStyle}" Click="ToggleOutput_Click"
+                            ToolTip="Toggle Output" Margin="4" x:Name="OutputToolButton">
+                        <TextBlock Text="O" FontWeight="Bold" FontSize="14"/>
+                    </Button>
+                </StackPanel>
+            </Border>
         </Grid>
 
         <!-- Status Bar -->
         <StatusBar Grid.Row="3">
             <StatusBarItem>
                 <StackPanel Orientation="Horizontal">
-                    <Ellipse Width="8" Height="8" Fill="{StaticResource SuccessBrush}" Margin="0,0,6,0"/>
+                    <Ellipse x:Name="StatusIndicator" Width="8" Height="8" Fill="{StaticResource SuccessBrush}" Margin="0,0,6,0"/>
                     <TextBlock x:Name="StatusText" Text="Ready"/>
                 </StackPanel>
             </StatusBarItem>
@@ -325,6 +531,7 @@
             <StatusBarItem HorizontalAlignment="Right">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock x:Name="CaretPositionDisplay" Text="Ln 1, Col 1" Margin="0,0,16,0"/>
+                    <TextBlock Text="Ctrl+Enter: Run | Esc: Stop" Foreground="{StaticResource SecondaryForegroundBrush}" Margin="0,0,16,0"/>
                     <TextBlock Text="UTF-8" Foreground="{StaticResource SecondaryForegroundBrush}"/>
                 </StackPanel>
             </StatusBarItem>

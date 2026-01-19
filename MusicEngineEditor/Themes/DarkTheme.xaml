@@ -45,6 +45,17 @@
     <Color x:Key="StopButtonColor">#C75450</Color>
     <Color x:Key="StopButtonHoverColor">#D96560</Color>
 
+    <!-- Run Button Gradient Colors -->
+    <Color x:Key="RunButtonGradientStartColor">#4CAF50</Color>
+    <Color x:Key="RunButtonGradientEndColor">#388E3C</Color>
+    <Color x:Key="RunButtonGlowColor">#66BB6A</Color>
+    <Color x:Key="RunButtonGlowDimColor">#2E7D32</Color>
+
+    <!-- Stop Button Colors -->
+    <Color x:Key="StopButtonMainColor">#D32F2F</Color>
+    <Color x:Key="StopButtonHoverMainColor">#E53935</Color>
+    <Color x:Key="StopButtonPressedMainColor">#B71C1C</Color>
+
     <!-- Brushes from Colors -->
     <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
     <SolidColorBrush x:Key="EditorBackgroundBrush" Color="{StaticResource EditorBackgroundColor}"/>
@@ -76,6 +87,27 @@
     <SolidColorBrush x:Key="RunButtonPressedBrush" Color="{StaticResource RunButtonPressedColor}"/>
     <SolidColorBrush x:Key="StopButtonBrush" Color="{StaticResource StopButtonColor}"/>
     <SolidColorBrush x:Key="StopButtonHoverBrush" Color="{StaticResource StopButtonHoverColor}"/>
+
+    <!-- Run Button Gradient Brush -->
+    <LinearGradientBrush x:Key="RunButtonGradientBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="{StaticResource RunButtonGradientStartColor}" Offset="0"/>
+        <GradientStop Color="{StaticResource RunButtonGradientEndColor}" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="RunButtonHoverGradientBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#5DBF61" Offset="0"/>
+        <GradientStop Color="#43A047" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="RunButtonPressedGradientBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#388E3C" Offset="0"/>
+        <GradientStop Color="#2E7D32" Offset="1"/>
+    </LinearGradientBrush>
+
+    <!-- Stop Button Brushes -->
+    <SolidColorBrush x:Key="StopButtonMainBrush" Color="{StaticResource StopButtonMainColor}"/>
+    <SolidColorBrush x:Key="StopButtonHoverMainBrush" Color="{StaticResource StopButtonHoverMainColor}"/>
+    <SolidColorBrush x:Key="StopButtonPressedMainBrush" Color="{StaticResource StopButtonPressedMainColor}"/>
 
     <!-- Window Style -->
     <Style x:Key="DarkWindowStyle" TargetType="Window">
@@ -119,9 +151,9 @@
         </Setter>
     </Style>
 
-    <!-- Run Button Style (Green like Rider) -->
+    <!-- Run Button Style (Green with Gradient and Animations) -->
     <Style x:Key="RunButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="{StaticResource RunButtonBrush}"/>
+        <Setter Property="Background" Value="{StaticResource RunButtonGradientBrush}"/>
         <Setter Property="Foreground" Value="White"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="FontSize" Value="12"/>
@@ -133,22 +165,59 @@
                     <Border x:Name="border"
                             Background="{TemplateBinding Background}"
                             Padding="{TemplateBinding Padding}"
-                            CornerRadius="4">
+                            CornerRadius="4"
+                            BorderThickness="0">
+                        <Border.Effect>
+                            <DropShadowEffect x:Name="shadowEffect"
+                                              Color="#4CAF50"
+                                              BlurRadius="0"
+                                              ShadowDepth="0"
+                                              Opacity="0"/>
+                        </Border.Effect>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="▶" FontSize="10" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="▶" FontSize="10" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="White"/>
                             <ContentPresenter VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{StaticResource RunButtonHoverBrush}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="shadowEffect"
+                                                         Storyboard.TargetProperty="BlurRadius"
+                                                         To="8" Duration="0:0:0.2"/>
+                                        <DoubleAnimation Storyboard.TargetName="shadowEffect"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0.6" Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="shadowEffect"
+                                                         Storyboard.TargetProperty="BlurRadius"
+                                                         To="0" Duration="0:0:0.2"/>
+                                        <DoubleAnimation Storyboard.TargetName="shadowEffect"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0" Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource RunButtonHoverGradientBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{StaticResource RunButtonPressedBrush}"/>
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource RunButtonPressedGradientBrush}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="border" Property="Background" Value="#3D5940"/>
                             <Setter Property="Foreground" Value="#8A8A8A"/>
+                            <Setter TargetName="border" Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect BlurRadius="0" Opacity="0" ShadowDepth="0"/>
+                                </Setter.Value>
+                            </Setter>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -156,9 +225,9 @@
         </Setter>
     </Style>
 
-    <!-- Stop Button Style (Red) -->
+    <!-- Stop Button Style (Red with Smooth Transitions) -->
     <Style x:Key="StopButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="{StaticResource StopButtonBrush}"/>
+        <Setter Property="Background" Value="{StaticResource StopButtonMainBrush}"/>
         <Setter Property="Foreground" Value="White"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="FontSize" Value="12"/>
@@ -170,18 +239,126 @@
                     <Border x:Name="border"
                             Background="{TemplateBinding Background}"
                             Padding="{TemplateBinding Padding}"
-                            CornerRadius="4">
+                            CornerRadius="4"
+                            BorderThickness="0">
+                        <Border.Effect>
+                            <DropShadowEffect x:Name="stopShadowEffect"
+                                              Color="#D32F2F"
+                                              BlurRadius="0"
+                                              ShadowDepth="0"
+                                              Opacity="0"/>
+                        </Border.Effect>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="■" FontSize="9" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="■" FontSize="9" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="White"/>
                             <ContentPresenter VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{StaticResource StopButtonHoverBrush}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="stopShadowEffect"
+                                                         Storyboard.TargetProperty="BlurRadius"
+                                                         To="6" Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="stopShadowEffect"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0.5" Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="stopShadowEffect"
+                                                         Storyboard.TargetProperty="BlurRadius"
+                                                         To="0" Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="stopShadowEffect"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0" Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource StopButtonHoverMainBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="#A84540"/>
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource StopButtonPressedMainBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Background" Value="#5C3535"/>
+                            <Setter Property="Foreground" Value="#8A8A8A"/>
+                            <Setter TargetName="border" Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect BlurRadius="0" Opacity="0" ShadowDepth="0"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Running Button Style (Animated Pulsing Glow for Active Script) -->
+    <Style x:Key="RunningButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="#4CAF50"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Padding" Value="14,6"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            Padding="{TemplateBinding Padding}"
+                            CornerRadius="4"
+                            BorderThickness="2"
+                            BorderBrush="#66BB6A">
+                        <Border.Effect>
+                            <DropShadowEffect x:Name="pulseGlow"
+                                              Color="#4CAF50"
+                                              BlurRadius="12"
+                                              ShadowDepth="0"
+                                              Opacity="0.7"/>
+                        </Border.Effect>
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                        <DoubleAnimation Storyboard.TargetName="pulseGlow"
+                                                         Storyboard.TargetProperty="BlurRadius"
+                                                         From="8" To="20"
+                                                         Duration="0:0:0.6"/>
+                                        <DoubleAnimation Storyboard.TargetName="pulseGlow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         From="0.5" To="1.0"
+                                                         Duration="0:0:0.6"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="▶" FontSize="10" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="White"/>
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#66BB6A"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#388E3C"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Background" Value="#3D5940"/>
+                            <Setter Property="Foreground" Value="#8A8A8A"/>
+                            <Setter TargetName="border" Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect BlurRadius="0" Opacity="0" ShadowDepth="0"/>
+                                </Setter.Value>
+                            </Setter>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -234,6 +411,14 @@
         <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
         <Setter Property="Padding" Value="10,5"/>
         <Setter Property="FontSize" Value="12"/>
+        <Style.Triggers>
+            <Trigger Property="IsHighlighted" Value="True">
+                <Setter Property="Foreground" Value="#1E1F22"/>
+            </Trigger>
+            <Trigger Property="IsSubmenuOpen" Value="True">
+                <Setter Property="Foreground" Value="#1E1F22"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- TreeView Style (Rider style) -->

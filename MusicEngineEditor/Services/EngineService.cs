@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MusicEngine.Core;
 using MusicEngine.Scripting;
+using NAudio.Midi;
 
 namespace MusicEngineEditor.Services;
 
@@ -125,6 +126,40 @@ public class EngineService : IDisposable
         if (_sequencer != null)
         {
             _sequencer.Bpm = bpm;
+        }
+    }
+
+    public int GetMidiInputCount()
+    {
+        return MidiIn.NumberOfDevices;
+    }
+
+    public int GetMidiOutputCount()
+    {
+        return MidiOut.NumberOfDevices;
+    }
+
+    public string GetMidiInputName(int index)
+    {
+        try
+        {
+            return MidiIn.DeviceInfo(index).ProductName;
+        }
+        catch
+        {
+            return $"MIDI Input {index}";
+        }
+    }
+
+    public string GetMidiOutputName(int index)
+    {
+        try
+        {
+            return MidiOut.DeviceInfo(index).ProductName;
+        }
+        catch
+        {
+            return $"MIDI Output {index}";
         }
     }
 
