@@ -1,40 +1,45 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Xml;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
+using MusicEngineEditor.Editor;
+using MusicEngineEditor.Models;
 using MusicEngineEditor.Services;
-using MessageBox = System.Windows.MessageBox;
-using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
-using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
+using MusicEngineEditor.Views.Dialogs;
 
 namespace MusicEngineEditor;
 
 public partial class MainWindow : Window
 {
     private readonly EngineService _engineService;
+    private readonly IProjectService _projectService;
     private readonly DispatcherTimer _statusTimer;
-    private string? _currentFilePath;
+    private MusicProject? _currentProject;
+    private readonly Dictionary<string, TabItem> _openTabs = new();
+    private readonly Dictionary<TabItem, MusicScript> _tabScripts = new();
     private bool _hasUnsavedChanges;
 
     public MainWindow()
     {
         InitializeComponent();
 
-        // Initialize engine service
-        _engineService = new EngineService();
+        // Get services from DI
+        _engineService = App.Services.GetRequiredService<EngineService>();
+        _projectService = App.Services.GetRequiredService<IProjectService>();
 
         // Load syntax highlighting
-        LoadSyntaxHighlighting();
-
-        // Configure editor
-        ConfigureEditor();
+        EditorSetup.Configure(CodeEditor);
 
         // Start status update timer
         _statusTimer = new DispatcherTimer
@@ -49,6 +54,7 @@ public partial class MainWindow : Window
 
         // Track changes
         CodeEditor.TextChanged += (s, e) => _hasUnsavedChanges = true;
+        CodeEditor.TextArea.Caret.PositionChanged += Caret_PositionChanged;
 
         // Set initial content
         CodeEditor.Text = GetDefaultScript();
@@ -66,7 +72,7 @@ public partial class MainWindow : Window
             _statusTimer.Start();
             StatusText.Text = "Ready";
             OutputLine("Engine initialized successfully!");
-            OutputLine("Press F5 or click 'Run' to execute your script.");
+            OutputLine("Create a new project or open an existing one to get started.");
             OutputLine("");
         }
         catch (Exception ex)
@@ -94,7 +100,7 @@ public partial class MainWindow : Window
 
             if (result == MessageBoxResult.Yes)
             {
-                SaveScript_Click(this, new RoutedEventArgs());
+                SaveAll_Click(this, new RoutedEventArgs());
             }
         }
 
@@ -102,55 +108,335 @@ public partial class MainWindow : Window
         _engineService.Dispose();
     }
 
-    private void LoadSyntaxHighlighting()
-    {
-        try
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            using var stream = assembly.GetManifestResourceStream("MusicEngineEditor.Editor.CSharpScript.xshd");
-
-            if (stream != null)
-            {
-                using var reader = new XmlTextReader(stream);
-                CodeEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
-            }
-            else
-            {
-                // Fallback to built-in C# highlighting
-                CodeEditor.SyntaxHighlighting = HighlightingManager.Instance.GetDefinition("C#");
-            }
-        }
-        catch
-        {
-            // Use built-in C# highlighting as fallback
-            CodeEditor.SyntaxHighlighting = HighlightingManager.Instance.GetDefinition("C#");
-        }
-    }
-
-    private void ConfigureEditor()
-    {
-        CodeEditor.Options.EnableHyperlinks = false;
-        CodeEditor.Options.EnableEmailHyperlinks = false;
-        CodeEditor.Options.ConvertTabsToSpaces = true;
-        CodeEditor.Options.IndentationSize = 4;
-        CodeEditor.Options.HighlightCurrentLine = true;
-        CodeEditor.Options.ShowEndOfLine = false;
-        CodeEditor.Options.ShowSpaces = false;
-        CodeEditor.Options.ShowTabs = false;
-
-        // Set current line highlight color
-        CodeEditor.TextArea.TextView.CurrentLineBackground = new System.Windows.Media.SolidColorBrush(
-            System.Windows.Media.Color.FromArgb(30, 255, 255, 255));
-        CodeEditor.TextArea.TextView.CurrentLineBorder = new System.Windows.Media.Pen(
-            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(50, 255, 255, 255)), 1);
-    }
-
     private void StatusTimer_Tick(object? sender, EventArgs e)
     {
-        BpmDisplay.Text = _engineService.Bpm.ToString("F0");
         BeatDisplay.Text = _engineService.CurrentBeat.ToString("F2");
         PatternCountDisplay.Text = _engineService.PatternCount.ToString();
     }
+
+    private void Caret_PositionChanged(object? sender, EventArgs e)
+    {
+        CaretPositionDisplay.Text = $"Ln {CodeEditor.TextArea.Caret.Line}, Col {CodeEditor.TextArea.Caret.Column}";
+    }
+
+    #region Project Management
+
+    private async void NewProject_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new NewProjectDialog { Owner = this };
+
+        if (dialog.ShowDialog() == true)
+        {
+            try
+            {
+                StatusText.Text = "Creating project...";
+                _currentProject = await _projectService.CreateProjectAsync(dialog.ProjectName, dialog.ProjectLocation);
+                UpdateProjectExplorer();
+                ProjectNameDisplay.Text = _currentProject.Name;
+                StatusText.Text = $"Created project: {_currentProject.Name}";
+                OutputLine($"Created new project: {_currentProject.Name}");
+
+                // Open entry point script
+                var entryScript = _currentProject.Scripts[0];
+                OpenScriptInTab(entryScript);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to create project: {ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
+
+    private async void OpenProject_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFileDialog
+        {
+            Filter = "MusicEngine Projects (*.meproj)|*.meproj|All Files (*.*)|*.*",
+            DefaultExt = ".meproj"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            try
+            {
+                StatusText.Text = "Loading project...";
+                _currentProject = await _projectService.OpenProjectAsync(dialog.FileName);
+                UpdateProjectExplorer();
+                ProjectNameDisplay.Text = _currentProject.Name;
+                StatusText.Text = $"Loaded: {_currentProject.Name}";
+                OutputLine($"Loaded project: {_currentProject.Name}");
+
+                // Open entry point script
+                foreach (var script in _currentProject.Scripts)
+                {
+                    if (script.IsEntryPoint)
+                    {
+                        OpenScriptInTab(script);
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to open project: {ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
+
+    private void UpdateProjectExplorer()
+    {
+        ProjectTree.Items.Clear();
+
+        if (_currentProject == null) return;
+
+        // Project root
+        var projectItem = new TreeViewItem
+        {
+            Header = _currentProject.Name,
+            IsExpanded = true
+        };
+
+        // Scripts folder
+        var scriptsFolder = new TreeViewItem
+        {
+            Header = "Scripts",
+            IsExpanded = true
+        };
+
+        foreach (var script in _currentProject.Scripts)
+        {
+            var scriptItem = new TreeViewItem
+            {
+                Header = script.IsEntryPoint ? $"{script.FileName} (Entry)" : script.FileName,
+                Tag = script
+            };
+            scriptsFolder.Items.Add(scriptItem);
+        }
+
+        projectItem.Items.Add(scriptsFolder);
+
+        // Audio folder
+        var audioFolder = new TreeViewItem
+        {
+            Header = "Audio",
+            IsExpanded = true
+        };
+
+        foreach (var asset in _currentProject.AudioAssets)
+        {
+            var assetItem = new TreeViewItem
+            {
+                Header = $"{asset.Alias} ({asset.FileName})",
+                Tag = asset
+            };
+            audioFolder.Items.Add(assetItem);
+        }
+
+        projectItem.Items.Add(audioFolder);
+
+        // References folder (if any)
+        if (_currentProject.References.Count > 0)
+        {
+            var refsFolder = new TreeViewItem
+            {
+                Header = "References",
+                IsExpanded = true
+            };
+
+            foreach (var reference in _currentProject.References)
+            {
+                var refItem = new TreeViewItem
+                {
+                    Header = reference.Alias,
+                    Tag = reference
+                };
+                refsFolder.Items.Add(refItem);
+            }
+
+            projectItem.Items.Add(refsFolder);
+        }
+
+        ProjectTree.Items.Add(projectItem);
+    }
+
+    private void ProjectTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (ProjectTree.SelectedItem is TreeViewItem item && item.Tag is MusicScript script)
+        {
+            OpenScriptInTab(script);
+        }
+    }
+
+    #endregion
+
+    #region Tab Management
+
+    private void OpenScriptInTab(MusicScript script)
+    {
+        // Check if already open
+        if (_openTabs.TryGetValue(script.FilePath, out var existingTab))
+        {
+            EditorTabs.SelectedItem = existingTab;
+            CodeEditor.Text = script.Content;
+            return;
+        }
+
+        // Create new tab
+        var tab = new TabItem
+        {
+            Header = script.FileName,
+            Tag = script
+        };
+
+        _openTabs[script.FilePath] = tab;
+        _tabScripts[tab] = script;
+        EditorTabs.Items.Add(tab);
+        EditorTabs.SelectedItem = tab;
+
+        CodeEditor.Text = script.Content;
+        FileNameDisplay.Text = script.FileName;
+    }
+
+    private void EditorTabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (EditorTabs.SelectedItem is TabItem tab && _tabScripts.TryGetValue(tab, out var script))
+        {
+            // Save current content to previous script
+            SaveCurrentEditorContent();
+
+            // Load selected script
+            CodeEditor.Text = script.Content;
+            FileNameDisplay.Text = script.FileName;
+        }
+    }
+
+    private void CloseTab_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is TabItem tab)
+        {
+            if (_tabScripts.TryGetValue(tab, out var script))
+            {
+                if (script.IsDirty)
+                {
+                    var result = MessageBox.Show(
+                        $"Save changes to {script.FileName}?",
+                        "Unsaved Changes",
+                        MessageBoxButton.YesNoCancel,
+                        MessageBoxImage.Question);
+
+                    if (result == MessageBoxResult.Cancel) return;
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        script.Content = CodeEditor.Text;
+                        _ = _projectService.SaveScriptAsync(script);
+                    }
+                }
+
+                _openTabs.Remove(script.FilePath);
+                _tabScripts.Remove(tab);
+            }
+
+            EditorTabs.Items.Remove(tab);
+
+            if (EditorTabs.Items.Count == 0)
+            {
+                CodeEditor.Text = "";
+                FileNameDisplay.Text = "";
+            }
+        }
+    }
+
+    private void SaveCurrentEditorContent()
+    {
+        if (EditorTabs.SelectedItem is TabItem tab && _tabScripts.TryGetValue(tab, out var script))
+        {
+            if (script.Content != CodeEditor.Text)
+            {
+                script.Content = CodeEditor.Text;
+                script.IsDirty = true;
+            }
+        }
+    }
+
+    #endregion
+
+    #region File Operations
+
+    private void NewFile_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentProject == null)
+        {
+            MessageBox.Show("Please create or open a project first.", "No Project",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        // Simple input dialog for script name
+        var name = InputDialog.Show("Enter script name:", "New Script", "NewScript", this);
+
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            var script = _projectService.CreateScript(_currentProject, name);
+            _currentProject.Scripts.Add(script);
+            UpdateProjectExplorer();
+            OpenScriptInTab(script);
+        }
+    }
+
+    private async void SaveScript_Click(object sender, RoutedEventArgs e)
+    {
+        SaveCurrentEditorContent();
+
+        if (EditorTabs.SelectedItem is TabItem tab && _tabScripts.TryGetValue(tab, out var script))
+        {
+            await _projectService.SaveScriptAsync(script);
+            StatusText.Text = $"Saved: {script.FileName}";
+        }
+        else if (_currentProject == null)
+        {
+            // Legacy mode - save as single file
+            var dialog = new SaveFileDialog
+            {
+                Filter = "C# Script Files (*.csx)|*.csx|MusicEngine Scripts (*.me)|*.me|All Files (*.*)|*.*",
+                DefaultExt = ".csx"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                File.WriteAllText(dialog.FileName, CodeEditor.Text);
+                StatusText.Text = $"Saved: {Path.GetFileName(dialog.FileName)}";
+            }
+        }
+
+        _hasUnsavedChanges = false;
+    }
+
+    private async void SaveAll_Click(object sender, RoutedEventArgs e)
+    {
+        SaveCurrentEditorContent();
+
+        foreach (var kvp in _tabScripts)
+        {
+            if (kvp.Value.IsDirty)
+            {
+                await _projectService.SaveScriptAsync(kvp.Value);
+            }
+        }
+
+        if (_currentProject != null)
+        {
+            await _projectService.SaveProjectAsync(_currentProject);
+        }
+
+        _hasUnsavedChanges = false;
+        StatusText.Text = "All files saved";
+    }
+
+    #endregion
+
+    #region Script Execution
 
     private async void RunScript_Click(object sender, RoutedEventArgs e)
     {
@@ -159,6 +445,7 @@ public partial class MainWindow : Window
 
     private async Task ExecuteScript()
     {
+        SaveCurrentEditorContent();
         var code = CodeEditor.Text;
 
         if (string.IsNullOrWhiteSpace(code))
@@ -211,6 +498,11 @@ public partial class MainWindow : Window
         RunButton.IsEnabled = true;
     }
 
+    private void Stop_Click(object sender, RoutedEventArgs e)
+    {
+        Panic_Click(sender, e);
+    }
+
     private void Panic_Click(object sender, RoutedEventArgs e)
     {
         _engineService.AllNotesOff();
@@ -218,95 +510,75 @@ public partial class MainWindow : Window
         OutputLine("All notes off (panic)");
     }
 
-    private void NewScript_Click(object sender, RoutedEventArgs e)
+    private void BpmBox_KeyDown(object sender, KeyEventArgs e)
     {
-        if (_hasUnsavedChanges)
+        if (e.Key == Key.Enter)
         {
-            var result = MessageBox.Show(
-                "You have unsaved changes. Do you want to save before creating a new script?",
-                "Unsaved Changes",
-                MessageBoxButton.YesNoCancel,
-                MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Cancel) return;
-            if (result == MessageBoxResult.Yes) SaveScript_Click(sender, e);
-        }
-
-        CodeEditor.Text = GetDefaultScript();
-        _currentFilePath = null;
-        _hasUnsavedChanges = false;
-        FileNameDisplay.Text = "Untitled";
-        StatusText.Text = "New script created";
-    }
-
-    private void OpenScript_Click(object sender, RoutedEventArgs e)
-    {
-        var dialog = new OpenFileDialog
-        {
-            Filter = "C# Script Files (*.csx)|*.csx|All Files (*.*)|*.*",
-            DefaultExt = ".csx"
-        };
-
-        if (dialog.ShowDialog() == true)
-        {
-            try
+            if (double.TryParse(BpmBox.Text, out var bpm) && bpm > 0 && bpm < 999)
             {
-                CodeEditor.Text = File.ReadAllText(dialog.FileName);
-                _currentFilePath = dialog.FileName;
-                _hasUnsavedChanges = false;
-                FileNameDisplay.Text = Path.GetFileName(dialog.FileName);
-                StatusText.Text = $"Opened: {Path.GetFileName(dialog.FileName)}";
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to open file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _engineService.SetBpm(bpm);
+                StatusText.Text = $"BPM set to {bpm}";
             }
         }
     }
 
-    private void SaveScript_Click(object sender, RoutedEventArgs e)
+    #endregion
+
+    #region Menu Handlers
+
+    private void AddScript_Click(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrEmpty(_currentFilePath))
+        NewFile_Click(sender, e);
+    }
+
+    private void ImportAudio_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentProject == null)
         {
-            SaveScriptAs_Click(sender, e);
+            MessageBox.Show("Please create or open a project first.", "No Project",
+                MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
-        try
+        var dialog = new OpenFileDialog
         {
-            File.WriteAllText(_currentFilePath, CodeEditor.Text);
-            _hasUnsavedChanges = false;
-            StatusText.Text = $"Saved: {Path.GetFileName(_currentFilePath)}";
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Failed to save file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-
-    private void SaveScriptAs_Click(object sender, RoutedEventArgs e)
-    {
-        var dialog = new SaveFileDialog
-        {
-            Filter = "C# Script Files (*.csx)|*.csx|All Files (*.*)|*.*",
-            DefaultExt = ".csx"
+            Filter = "Audio Files (*.wav;*.mp3;*.ogg;*.flac)|*.wav;*.mp3;*.ogg;*.flac|All Files (*.*)|*.*",
+            Multiselect = true
         };
 
         if (dialog.ShowDialog() == true)
         {
-            try
+            foreach (var file in dialog.FileNames)
             {
-                File.WriteAllText(dialog.FileName, CodeEditor.Text);
-                _currentFilePath = dialog.FileName;
-                _hasUnsavedChanges = false;
-                FileNameDisplay.Text = Path.GetFileName(dialog.FileName);
-                StatusText.Text = $"Saved: {Path.GetFileName(dialog.FileName)}";
+                var alias = Path.GetFileNameWithoutExtension(file);
+                _ = _projectService.ImportAudioAsync(_currentProject, file, alias);
+                OutputLine($"Imported audio: {alias}");
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to save file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+
+            UpdateProjectExplorer();
         }
+    }
+
+    private void AddReference_Click(object sender, RoutedEventArgs e)
+    {
+        MessageBox.Show("Project references are not yet implemented.", "Coming Soon",
+            MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private void ProjectSettings_Click(object sender, RoutedEventArgs e)
+    {
+        MessageBox.Show("Project settings dialog is not yet implemented.", "Coming Soon",
+            MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private void Find_Click(object sender, RoutedEventArgs e)
+    {
+        // TODO: Implement find
+    }
+
+    private void Replace_Click(object sender, RoutedEventArgs e)
+    {
+        // TODO: Implement replace
     }
 
     private void ClearOutput_Click(object sender, RoutedEventArgs e)
@@ -319,21 +591,36 @@ public partial class MainWindow : Window
         Close();
     }
 
+    private void Documentation_Click(object sender, RoutedEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = "https://github.com/watermann420/MusicEngine",
+            UseShellExecute = true
+        });
+    }
+
     private void About_Click(object sender, RoutedEventArgs e)
     {
         MessageBox.Show(
             "MusicEngine Editor v1.0\n\n" +
-            "A live code editor for MusicEngine scripts.\n\n" +
+            "A professional IDE for MusicEngine live coding.\n\n" +
             "Shortcuts:\n" +
             "  F5 - Run script\n" +
+            "  Shift+F5 - Stop\n" +
             "  Ctrl+S - Save\n" +
-            "  Ctrl+O - Open\n" +
-            "  Ctrl+N - New\n" +
+            "  Ctrl+Shift+S - Save All\n" +
+            "  Ctrl+Shift+N - New Project\n" +
+            "  Ctrl+Shift+O - Open Project\n" +
             "  Esc - All notes off (panic)",
             "About MusicEngine Editor",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
     }
+
+    #endregion
+
+    #region Helpers
 
     private void OutputLine(string text)
     {
@@ -348,7 +635,7 @@ public partial class MainWindow : Window
     {
         return """
             // MusicEngine Script
-            // Press F5 to execute
+            // Press F5 to execute or create a new project to get started
 
             // Set BPM
             SetBpm(120);
@@ -375,4 +662,6 @@ public partial class MainWindow : Window
             // vital?.from(0);
             """;
     }
+
+    #endregion
 }

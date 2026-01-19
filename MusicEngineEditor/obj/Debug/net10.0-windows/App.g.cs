@@ -8,6 +8,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using AvalonDock;
+using AvalonDock.Controls;
+using AvalonDock.Converters;
+using AvalonDock.Layout;
+using AvalonDock.Themes;
 using System;
 using System.Diagnostics;
 using System.Windows;

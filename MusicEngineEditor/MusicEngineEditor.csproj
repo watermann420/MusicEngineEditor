@@ -9,14 +9,31 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>MusicEngineEditor</AssemblyName>
     <RootNamespace>MusicEngineEditor</RootNamespace>
+    <!-- <ApplicationIcon>Resources\Icons\app.ico</ApplicationIcon> -->
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Code Editor with Syntax Highlighting -->
     <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
+
+    <!-- Docking (Rider-style panels) -->
+    <PackageReference Include="Dirkster.AvalonDock" Version="4.72.1" />
+    <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.72.1" />
+
+    <!-- MVVM -->
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+
+    <!-- Dependency Injection -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+
+    <!-- Logging -->
+    <PackageReference Include="Serilog" Version="4.2.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MusicEngine\MusicEngine.csproj" />
+    <ProjectReference Include="..\..\MusicEngine\MusicEngine.csproj" />
   </ItemGroup>
 
   <ItemGroup>

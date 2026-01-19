@@ -18,6 +18,102 @@
           "Microsoft.WindowsDesktop.App"
         ]
       },
+      "CommunityToolkit.Mvvm/8.4.0": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/CommunityToolkit.Mvvm.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/CommunityToolkit.Mvvm.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "build": {
+          "buildTransitive/CommunityToolkit.Mvvm.targets": {}
+        }
+      },
+      "Dirkster.AvalonDock/4.72.1": {
+        "type": "package",
+        "compile": {
+          "lib/net5.0-windows7.0/AvalonDock.dll": {}
+        },
+        "runtime": {
+          "lib/net5.0-windows7.0/AvalonDock.dll": {}
+        },
+        "frameworkReferences": [
+          "Microsoft.WindowsDesktop.App.WPF"
+        ],
+        "resource": {
+          "lib/net5.0-windows7.0/ca-ES/AvalonDock.resources.dll": {
+            "locale": "ca-ES"
+          },
+          "lib/net5.0-windows7.0/cs-CZ/AvalonDock.resources.dll": {
+            "locale": "cs-CZ"
+          },
+          "lib/net5.0-windows7.0/de/AvalonDock.resources.dll": {
+            "locale": "de"
+          },
+          "lib/net5.0-windows7.0/es/AvalonDock.resources.dll": {
+            "locale": "es"
+          },
+          "lib/net5.0-windows7.0/fr/AvalonDock.resources.dll": {
+            "locale": "fr"
+          },
+          "lib/net5.0-windows7.0/hu/AvalonDock.resources.dll": {
+            "locale": "hu"
+          },
+          "lib/net5.0-windows7.0/it/AvalonDock.resources.dll": {
+            "locale": "it"
+          },
+          "lib/net5.0-windows7.0/ja/AvalonDock.resources.dll": {
+            "locale": "ja"
+          },
+          "lib/net5.0-windows7.0/ko/AvalonDock.resources.dll": {
+            "locale": "ko"
+          },
+          "lib/net5.0-windows7.0/nl-BE/AvalonDock.resources.dll": {
+            "locale": "nl-BE"
+          },
+          "lib/net5.0-windows7.0/pl/AvalonDock.resources.dll": {
+            "locale": "pl"
+          },
+          "lib/net5.0-windows7.0/pt/AvalonDock.resources.dll": {
+            "locale": "pt"
+          },
+          "lib/net5.0-windows7.0/ro/AvalonDock.resources.dll": {
+            "locale": "ro"
+          },
+          "lib/net5.0-windows7.0/ru/AvalonDock.resources.dll": {
+            "locale": "ru"
+          },
+          "lib/net5.0-windows7.0/sv/AvalonDock.resources.dll": {
+            "locale": "sv"
+          },
+          "lib/net5.0-windows7.0/zh-Hans/AvalonDock.resources.dll": {
+            "locale": "zh-Hans"
+          },
+          "lib/net5.0-windows7.0/zh-Hant/AvalonDock.resources.dll": {
+            "locale": "zh-Hant"
+          }
+        }
+      },
+      "Dirkster.AvalonDock.Themes.VS2013/4.72.1": {
+        "type": "package",
+        "dependencies": {
+          "Dirkster.AvalonDock": "4.72.1"
+        },
+        "compile": {
+          "lib/net5.0-windows7.0/AvalonDock.Themes.VS2013.dll": {}
+        },
+        "runtime": {
+          "lib/net5.0-windows7.0/AvalonDock.Themes.VS2013.dll": {}
+        },
+        "frameworkReferences": [
+          "Microsoft.WindowsDesktop.App.WPF"
+        ]
+      },
       "Microsoft.CodeAnalysis.Analyzers/3.11.0": {
         "type": "package",
         "build": {
@@ -258,6 +354,41 @@
           }
         }
       },
+      "Microsoft.Extensions.DependencyInjection/9.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.0"
+        },
+        "compile": {
+          "lib/net9.0/Microsoft.Extensions.DependencyInjection.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Microsoft.Extensions.DependencyInjection.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        }
+      },
       "NAudio/2.2.1": {
         "type": "package",
         "dependencies": {
@@ -375,6 +506,35 @@
           }
         }
       },
+      "Serilog/4.2.0": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/Serilog.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Serilog.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Serilog.Sinks.File/6.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Serilog": "4.0.0"
+        },
+        "compile": {
+          "lib/net8.0/Serilog.Sinks.File.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Serilog.Sinks.File.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "MusicEngine/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
@@ -414,6 +574,129 @@
         "lib/net6.0-windows7.0/ICSharpCode.AvalonEdit.xml",
         "lib/net7.0-windows7.0/ICSharpCode.AvalonEdit.dll",
         "lib/net7.0-windows7.0/ICSharpCode.AvalonEdit.xml"
+      ]
+    },
+    "CommunityToolkit.Mvvm/8.4.0": {
+      "sha512": "tqVU8yc/ADO9oiTRyTnwhFN68hCwvkliMierptWOudIAvWY1mWCh5VFh+guwHJmpMwfg0J0rY+yyd5Oy7ty9Uw==",
+      "type": "package",
+      "path": "communitytoolkit.mvvm/8.4.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "License.md",
+        "ThirdPartyNotices.txt",
+        "analyzers/dotnet/roslyn4.0/cs/CommunityToolkit.Mvvm.CodeFixers.dll",
+        "analyzers/dotnet/roslyn4.0/cs/CommunityToolkit.Mvvm.SourceGenerators.dll",
+        "analyzers/dotnet/roslyn4.12/cs/CommunityToolkit.Mvvm.CodeFixers.dll",
+        "analyzers/dotnet/roslyn4.12/cs/CommunityToolkit.Mvvm.SourceGenerators.dll",
+        "analyzers/dotnet/roslyn4.3/cs/CommunityToolkit.Mvvm.CodeFixers.dll",
+        "analyzers/dotnet/roslyn4.3/cs/CommunityToolkit.Mvvm.SourceGenerators.dll",
+        "build/CommunityToolkit.Mvvm.FeatureSwitches.targets",
+        "build/CommunityToolkit.Mvvm.SourceGenerators.targets",
+        "build/CommunityToolkit.Mvvm.Windows.targets",
+        "build/CommunityToolkit.Mvvm.WindowsSdk.targets",
+        "build/CommunityToolkit.Mvvm.targets",
+        "buildTransitive/CommunityToolkit.Mvvm.FeatureSwitches.targets",
+        "buildTransitive/CommunityToolkit.Mvvm.SourceGenerators.targets",
+        "buildTransitive/CommunityToolkit.Mvvm.Windows.targets",
+        "buildTransitive/CommunityToolkit.Mvvm.WindowsSdk.targets",
+        "buildTransitive/CommunityToolkit.Mvvm.targets",
+        "communitytoolkit.mvvm.8.4.0.nupkg.sha512",
+        "communitytoolkit.mvvm.nuspec",
+        "lib/net8.0-windows10.0.17763/CommunityToolkit.Mvvm.dll",
+        "lib/net8.0-windows10.0.17763/CommunityToolkit.Mvvm.pdb",
+        "lib/net8.0-windows10.0.17763/CommunityToolkit.Mvvm.xml",
+        "lib/net8.0/CommunityToolkit.Mvvm.dll",
+        "lib/net8.0/CommunityToolkit.Mvvm.pdb",
+        "lib/net8.0/CommunityToolkit.Mvvm.xml",
+        "lib/netstandard2.0/CommunityToolkit.Mvvm.dll",
+        "lib/netstandard2.0/CommunityToolkit.Mvvm.pdb",
+        "lib/netstandard2.0/CommunityToolkit.Mvvm.xml",
+        "lib/netstandard2.1/CommunityToolkit.Mvvm.dll",
+        "lib/netstandard2.1/CommunityToolkit.Mvvm.pdb",
+        "lib/netstandard2.1/CommunityToolkit.Mvvm.xml"
+      ]
+    },
+    "Dirkster.AvalonDock/4.72.1": {
+      "sha512": "m5J03HVntDM3eu7GyzLWlNdr2c2TTBAoD33Pq1yCID7vEtk13VVngtlmegp67WUvpL5JUC8G2xU8n+ThZKKz0Q==",
+      "type": "package",
+      "path": "dirkster.avalondock/4.72.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "dirkster.avalondock.4.72.1.nupkg.sha512",
+        "dirkster.avalondock.nuspec",
+        "lib/net40/AvalonDock.dll",
+        "lib/net40/ca-ES/AvalonDock.resources.dll",
+        "lib/net40/cs-CZ/AvalonDock.resources.dll",
+        "lib/net40/de/AvalonDock.resources.dll",
+        "lib/net40/es/AvalonDock.resources.dll",
+        "lib/net40/fr/AvalonDock.resources.dll",
+        "lib/net40/hu/AvalonDock.resources.dll",
+        "lib/net40/it/AvalonDock.resources.dll",
+        "lib/net40/ja/AvalonDock.resources.dll",
+        "lib/net40/ko/AvalonDock.resources.dll",
+        "lib/net40/nl-BE/AvalonDock.resources.dll",
+        "lib/net40/pl/AvalonDock.resources.dll",
+        "lib/net40/pt/AvalonDock.resources.dll",
+        "lib/net40/ro/AvalonDock.resources.dll",
+        "lib/net40/ru/AvalonDock.resources.dll",
+        "lib/net40/sv/AvalonDock.resources.dll",
+        "lib/net40/zh-Hans/AvalonDock.resources.dll",
+        "lib/net40/zh-Hant/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/AvalonDock.dll",
+        "lib/net5.0-windows7.0/ca-ES/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/cs-CZ/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/de/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/es/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/fr/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/hu/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/it/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/ja/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/ko/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/nl-BE/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/pl/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/pt/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/ro/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/ru/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/sv/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/zh-Hans/AvalonDock.resources.dll",
+        "lib/net5.0-windows7.0/zh-Hant/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/AvalonDock.dll",
+        "lib/netcoreapp3.0/ca-ES/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/cs-CZ/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/de/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/es/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/fr/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/hu/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/it/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/ja/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/ko/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/nl-BE/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/pl/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/pt/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/ro/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/ru/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/sv/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/zh-Hans/AvalonDock.resources.dll",
+        "lib/netcoreapp3.0/zh-Hant/AvalonDock.resources.dll"
+      ]
+    },
+    "Dirkster.AvalonDock.Themes.VS2013/4.72.1": {
+      "sha512": "g+hcHokgRFSvznqsVWxHxPCrUMxe18MTJjXMRVQJTVNo/Kwx8krdNiRnCSUDkuVtr2z29EtC4QofZhwUB7FS+w==",
+      "type": "package",
+      "path": "dirkster.avalondock.themes.vs2013/4.72.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "dirkster.avalondock.themes.vs2013.4.72.1.nupkg.sha512",
+        "dirkster.avalondock.themes.vs2013.nuspec",
+        "lib/net40/AvalonDock.Themes.VS2013.dll",
+        "lib/net5.0-windows7.0/AvalonDock.Themes.VS2013.dll",
+        "lib/netcoreapp3.0/AvalonDock.Themes.VS2013.dll"
       ]
     },
     "Microsoft.CodeAnalysis.Analyzers/3.11.0": {
@@ -1362,6 +1645,66 @@
         "microsoft.codeanalysis.scripting.common.nuspec"
       ]
     },
+    "Microsoft.Extensions.DependencyInjection/9.0.0": {
+      "sha512": "MCPrg7v3QgNMr0vX4vzRXvkNGgLg8vKWX0nKCWUxu2uPyMsaRgiRc1tHBnbTcfJMhMKj2slE/j2M9oGkd25DNw==",
+      "type": "package",
+      "path": "microsoft.extensions.dependencyinjection/9.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/Microsoft.Extensions.DependencyInjection.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/Microsoft.Extensions.DependencyInjection.targets",
+        "lib/net462/Microsoft.Extensions.DependencyInjection.dll",
+        "lib/net462/Microsoft.Extensions.DependencyInjection.xml",
+        "lib/net8.0/Microsoft.Extensions.DependencyInjection.dll",
+        "lib/net8.0/Microsoft.Extensions.DependencyInjection.xml",
+        "lib/net9.0/Microsoft.Extensions.DependencyInjection.dll",
+        "lib/net9.0/Microsoft.Extensions.DependencyInjection.xml",
+        "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.xml",
+        "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.dll",
+        "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.xml",
+        "microsoft.extensions.dependencyinjection.9.0.0.nupkg.sha512",
+        "microsoft.extensions.dependencyinjection.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
+    "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.0": {
+      "sha512": "+6f2qv2a3dLwd5w6JanPIPs47CxRbnk+ZocMJUhv9NxP88VlOcJYZs9jY+MYSjxvady08bUZn6qgiNh7DadGgg==",
+      "type": "package",
+      "path": "microsoft.extensions.dependencyinjection.abstractions/9.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/Microsoft.Extensions.DependencyInjection.Abstractions.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/Microsoft.Extensions.DependencyInjection.Abstractions.targets",
+        "lib/net462/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/net462/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "microsoft.extensions.dependencyinjection.abstractions.9.0.0.nupkg.sha512",
+        "microsoft.extensions.dependencyinjection.abstractions.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
     "NAudio/2.2.1": {
       "sha512": "c0DzwiyyklM0TP39Y7RObwO3QkWecgM6H60ikiEnsV/aEAJPbj5MFCLaD8BSfKuZe0HGuh9GRGWWlJmSxDc9MA==",
       "type": "package",
@@ -1472,16 +1815,70 @@
         "naudio.winmm.nuspec"
       ]
     },
+    "Serilog/4.2.0": {
+      "sha512": "gmoWVOvKgbME8TYR+gwMf7osROiWAURterc6Rt2dQyX7wtjZYpqFiA/pY6ztjGQKKV62GGCyOcmtP1UKMHgSmA==",
+      "type": "package",
+      "path": "serilog/4.2.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "icon.png",
+        "lib/net462/Serilog.dll",
+        "lib/net462/Serilog.xml",
+        "lib/net471/Serilog.dll",
+        "lib/net471/Serilog.xml",
+        "lib/net6.0/Serilog.dll",
+        "lib/net6.0/Serilog.xml",
+        "lib/net8.0/Serilog.dll",
+        "lib/net8.0/Serilog.xml",
+        "lib/net9.0/Serilog.dll",
+        "lib/net9.0/Serilog.xml",
+        "lib/netstandard2.0/Serilog.dll",
+        "lib/netstandard2.0/Serilog.xml",
+        "serilog.4.2.0.nupkg.sha512",
+        "serilog.nuspec"
+      ]
+    },
+    "Serilog.Sinks.File/6.0.0": {
+      "sha512": "lxjg89Y8gJMmFxVkbZ+qDgjl+T4yC5F7WSLTvA+5q0R04tfKVLRL/EHpYoJ/MEQd2EeCKDuylBIVnAYMotmh2A==",
+      "type": "package",
+      "path": "serilog.sinks.file/6.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net462/Serilog.Sinks.File.dll",
+        "lib/net462/Serilog.Sinks.File.xml",
+        "lib/net471/Serilog.Sinks.File.dll",
+        "lib/net471/Serilog.Sinks.File.xml",
+        "lib/net6.0/Serilog.Sinks.File.dll",
+        "lib/net6.0/Serilog.Sinks.File.xml",
+        "lib/net8.0/Serilog.Sinks.File.dll",
+        "lib/net8.0/Serilog.Sinks.File.xml",
+        "lib/netstandard2.0/Serilog.Sinks.File.dll",
+        "lib/netstandard2.0/Serilog.Sinks.File.xml",
+        "serilog-sink-nuget.png",
+        "serilog.sinks.file.6.0.0.nupkg.sha512",
+        "serilog.sinks.file.nuspec"
+      ]
+    },
     "MusicEngine/1.0.0": {
       "type": "project",
-      "path": "../MusicEngine/MusicEngine.csproj",
-      "msbuildProject": "../MusicEngine/MusicEngine.csproj"
+      "path": "../../MusicEngine/MusicEngine.csproj",
+      "msbuildProject": "../../MusicEngine/MusicEngine.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net10.0-windows7.0": [
-      "AvalonEdit >= 6.3.0",
-      "MusicEngine >= 1.0.0"
+      "AvalonEdit >= 6.3.0.90",
+      "CommunityToolkit.Mvvm >= 8.4.0",
+      "Dirkster.AvalonDock >= 4.72.1",
+      "Dirkster.AvalonDock.Themes.VS2013 >= 4.72.1",
+      "Microsoft.Extensions.DependencyInjection >= 9.0.0",
+      "MusicEngine >= 1.0.0",
+      "Serilog >= 4.2.0",
+      "Serilog.Sinks.File >= 6.0.0"
     ]
   },
   "packageFolders": {
@@ -1490,11 +1887,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\null\\RiderProjects\\MusicEngineEditor\\MusicEngineEditor.csproj",
+      "projectUniqueName": "C:\\Users\\null\\RiderProjects\\MusicEditor\\MusicEngineEditor\\MusicEngineEditor.csproj",
       "projectName": "MusicEngineEditor",
-      "projectPath": "C:\\Users\\null\\RiderProjects\\MusicEngineEditor\\MusicEngineEditor.csproj",
+      "projectPath": "C:\\Users\\null\\RiderProjects\\MusicEditor\\MusicEngineEditor\\MusicEngineEditor.csproj",
       "packagesPath": "C:\\Users\\null\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\null\\RiderProjects\\MusicEngineEditor\\obj\\",
+      "outputPath": "C:\\Users\\null\\RiderProjects\\MusicEditor\\MusicEngineEditor\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\null\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -1533,7 +1930,31 @@
         "dependencies": {
           "AvalonEdit": {
             "target": "Package",
-            "version": "[6.3.0, )"
+            "version": "[6.3.0.90, )"
+          },
+          "CommunityToolkit.Mvvm": {
+            "target": "Package",
+            "version": "[8.4.0, )"
+          },
+          "Dirkster.AvalonDock": {
+            "target": "Package",
+            "version": "[4.72.1, )"
+          },
+          "Dirkster.AvalonDock.Themes.VS2013": {
+            "target": "Package",
+            "version": "[4.72.1, )"
+          },
+          "Microsoft.Extensions.DependencyInjection": {
+            "target": "Package",
+            "version": "[9.0.0, )"
+          },
+          "Serilog": {
+            "target": "Package",
+            "version": "[4.2.0, )"
+          },
+          "Serilog.Sinks.File": {
+            "target": "Package",
+            "version": "[6.0.0, )"
           }
         },
         "imports": [
@@ -1848,17 +2269,5 @@
         }
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1603",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "MusicEngineEditor depends on AvalonEdit (>= 6.3.0) but AvalonEdit 6.3.0 was not found. AvalonEdit 6.3.0.90 was resolved instead.",
-      "libraryId": "AvalonEdit",
-      "targetGraphs": [
-        "net10.0-windows7.0"
-      ]
-    }
-  ]
+  }
 }

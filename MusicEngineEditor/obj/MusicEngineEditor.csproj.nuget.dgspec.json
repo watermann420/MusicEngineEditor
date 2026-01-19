@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\null\\RiderProjects\\MusicEngineEditor\\MusicEngineEditor.csproj": {}
+    "C:\\Users\\null\\RiderProjects\\MusicEditor\\MusicEngineEditor\\MusicEngineEditor.csproj": {}
   },
   "projects": {
-    "C:\\Users\\null\\RiderProjects\\MusicEngineEditor\\MusicEngineEditor.csproj": {
+    "C:\\Users\\null\\RiderProjects\\MusicEditor\\MusicEngineEditor\\MusicEngineEditor.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\null\\RiderProjects\\MusicEngineEditor\\MusicEngineEditor.csproj",
+        "projectUniqueName": "C:\\Users\\null\\RiderProjects\\MusicEditor\\MusicEngineEditor\\MusicEngineEditor.csproj",
         "projectName": "MusicEngineEditor",
-        "projectPath": "C:\\Users\\null\\RiderProjects\\MusicEngineEditor\\MusicEngineEditor.csproj",
+        "projectPath": "C:\\Users\\null\\RiderProjects\\MusicEditor\\MusicEngineEditor\\MusicEngineEditor.csproj",
         "packagesPath": "C:\\Users\\null\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\null\\RiderProjects\\MusicEngineEditor\\obj\\",
+        "outputPath": "C:\\Users\\null\\RiderProjects\\MusicEditor\\MusicEngineEditor\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\null\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -50,7 +50,31 @@
           "dependencies": {
             "AvalonEdit": {
               "target": "Package",
-              "version": "[6.3.0, )"
+              "version": "[6.3.0.90, )"
+            },
+            "CommunityToolkit.Mvvm": {
+              "target": "Package",
+              "version": "[8.4.0, )"
+            },
+            "Dirkster.AvalonDock": {
+              "target": "Package",
+              "version": "[4.72.1, )"
+            },
+            "Dirkster.AvalonDock.Themes.VS2013": {
+              "target": "Package",
+              "version": "[4.72.1, )"
+            },
+            "Microsoft.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Serilog": {
+              "target": "Package",
+              "version": "[4.2.0, )"
+            },
+            "Serilog.Sinks.File": {
+              "target": "Package",
+              "version": "[6.0.0, )"
             }
           },
           "imports": [
