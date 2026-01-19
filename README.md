@@ -1,7 +1,8 @@
 
+![BannerEditor](https://github.com/user-attachments/assets/53c1a047-10b6-46f1-9237-443fe53e51b8)
 
 
-<img width="1536" height="1024" alt="BannerEditor" src="https://github.com/user-attachments/assets/6cb0e747-0f30-4f61-8882-1a0368e24d2f" />
+
 
 
 # MusicEngineEditor
