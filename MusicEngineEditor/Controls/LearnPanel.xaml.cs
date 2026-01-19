@@ -107,12 +107,64 @@ midi.device(0).cc(1).to(synth, ""cutoff"");"
         {
             new()
             {
-                Title = "Load a VST Plugin",
-                Description = "Load and route MIDI to a VST instrument",
+                Title = "Load Vital Synth",
+                Description = "Load the Vital VST plugin and play notes with it",
                 Category = "VST",
-                Code = @"// Load a VST plugin
+                Code = @"// Load Vital VST plugin
+// Make sure Vital is installed: https://vital.audio
 var vital = vst.load(""Vital"");
-vital?.from(0); // Route MIDI"
+
+if (vital != null)
+{
+    // Route MIDI input device 0 to Vital
+    vital.from(0);
+
+    // Or play notes directly
+    vital.NoteOn(60, 100);  // C4
+    await Task.Delay(500);
+    vital.NoteOff(60);
+
+    Print(""Vital loaded successfully!"");
+}
+else
+{
+    Print(""Vital not found. Install from vital.audio"");
+}"
+            },
+            new()
+            {
+                Title = "VST with Parameters",
+                Description = "Load VST and modify its parameters",
+                Category = "VST",
+                Code = @"// Load VST and tweak parameters
+var vital = vst.load(""Vital"");
+
+if (vital != null)
+{
+    // Open the VST editor window
+    vital.ShowEditor();
+
+    // Set a parameter (check VST docs for param IDs)
+    vital.SetParameter(0, 0.5f);  // Example param
+
+    // Route MIDI keyboard
+    vital.from(0);
+}"
+            },
+            new()
+            {
+                Title = "Multiple VST Plugins",
+                Description = "Layer multiple VST instruments",
+                Category = "VST",
+                Code = @"// Layer two VST plugins
+var vital = vst.load(""Vital"");
+var serum = vst.load(""Serum"");
+
+// Route same MIDI to both (layering)
+vital?.from(0);
+serum?.from(0);
+
+Print(""Both synths layered!"");"
             }
         };
 

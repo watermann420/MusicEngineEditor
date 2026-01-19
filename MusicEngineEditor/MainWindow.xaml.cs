@@ -93,7 +93,15 @@ public partial class MainWindow : Window
         VstPluginsList.ItemsSource = VstPlugins;
         AudioFilesList.ItemsSource = AudioFiles;
         ProblemsListView.ItemsSource = Problems;
-        ActiveInstrumentsPanel.ItemsSource = ActiveInstruments;
+
+        // Attach Find/Replace control to editor
+        FindReplaceBar.AttachToEditor(CodeEditor);
+
+        // Setup hover tooltips for code
+        var tooltipService = new Editor.CodeTooltipService(CodeEditor);
+
+        // Setup context menu for code editor
+        SetupEditorContextMenu();
 
         // Animation timer for pulsing active instruments
         _animationTimer = new DispatcherTimer
@@ -115,16 +123,215 @@ public partial class MainWindow : Window
             e.Handled = true;
             _ = ExecuteScript();
         }
-        // Handle Escape to stop
+        // Handle Escape to stop or close find/replace
         else if (e.Key == Key.Escape)
         {
+            if (FindReplaceBar.Visibility == Visibility.Visible)
+            {
+                FindReplaceBar.Hide();
+            }
+            else
+            {
+                _engineService.AllNotesOff();
+                _isRunning = false;
+                StatusText.Text = "Stopped";
+                OutputLine("Stopped (Escape pressed)");
+            }
             e.Handled = true;
-            _engineService.AllNotesOff();
-            _isRunning = false;
-            StatusText.Text = "Stopped";
-            OutputLine("Stopped (Escape pressed)");
+        }
+        // Handle Ctrl+F to find
+        else if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            e.Handled = true;
+            FindReplaceBar.ShowFind();
+        }
+        // Handle Ctrl+H to find and replace
+        else if (e.Key == Key.H && Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            e.Handled = true;
+            FindReplaceBar.ShowReplace();
+        }
+        // Handle F3 for find next
+        else if (e.Key == Key.F3 && Keyboard.Modifiers == ModifierKeys.None)
+        {
+            e.Handled = true;
+            if (FindReplaceBar.Visibility == Visibility.Visible)
+            {
+                // Find next is handled inside the control
+            }
         }
     }
+
+    #region Context Menu
+
+    private void SetupEditorContextMenu()
+    {
+        var contextMenu = new System.Windows.Controls.ContextMenu
+        {
+            Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x2B, 0x2D, 0x30)),
+            Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xBC, 0xBE, 0xC4)),
+            BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3C, 0x3F, 0x41)),
+        };
+
+        // Standard edit commands
+        var cutItem = new System.Windows.Controls.MenuItem { Header = "Cut", InputGestureText = "Ctrl+X" };
+        cutItem.Click += (s, e) => CodeEditor.Cut();
+        contextMenu.Items.Add(cutItem);
+
+        var copyItem = new System.Windows.Controls.MenuItem { Header = "Copy", InputGestureText = "Ctrl+C" };
+        copyItem.Click += (s, e) => CodeEditor.Copy();
+        contextMenu.Items.Add(copyItem);
+
+        var pasteItem = new System.Windows.Controls.MenuItem { Header = "Paste", InputGestureText = "Ctrl+V" };
+        pasteItem.Click += (s, e) => CodeEditor.Paste();
+        contextMenu.Items.Add(pasteItem);
+
+        contextMenu.Items.Add(new Separator());
+
+        // Find/Replace
+        var findItem = new System.Windows.Controls.MenuItem { Header = "Find...", InputGestureText = "Ctrl+F" };
+        findItem.Click += (s, e) => FindReplaceBar.ShowFind();
+        contextMenu.Items.Add(findItem);
+
+        var replaceItem = new System.Windows.Controls.MenuItem { Header = "Replace...", InputGestureText = "Ctrl+H" };
+        replaceItem.Click += (s, e) => FindReplaceBar.ShowReplace();
+        contextMenu.Items.Add(replaceItem);
+
+        contextMenu.Items.Add(new Separator());
+
+        // VST specific option (dynamically enabled)
+        var openVstItem = new System.Windows.Controls.MenuItem { Header = "Open VST Editor", IsEnabled = false };
+        openVstItem.Click += ContextMenu_OpenVstEditor;
+        contextMenu.Items.Add(openVstItem);
+
+        // Run selection
+        var runItem = new System.Windows.Controls.MenuItem { Header = "Run Script", InputGestureText = "Ctrl+Enter" };
+        runItem.Click += (s, e) => _ = ExecuteScript();
+        contextMenu.Items.Add(runItem);
+
+        contextMenu.Opened += (s, e) =>
+        {
+            // Check if we're on a VST variable
+            var vstName = GetVstNameAtCursor();
+            openVstItem.IsEnabled = vstName != null;
+            openVstItem.Tag = vstName;
+        };
+
+        CodeEditor.ContextMenu = contextMenu;
+
+        // Double-click handler for VST names
+        CodeEditor.TextArea.TextView.MouseLeftButtonDown += TextView_MouseLeftButtonDown;
+    }
+
+    private string? GetVstNameAtCursor()
+    {
+        var position = CodeEditor.TextArea.Caret.Position;
+        var line = CodeEditor.Document.GetLineByNumber(position.Line);
+        var lineText = CodeEditor.Document.GetText(line.Offset, line.Length);
+
+        // Find word at cursor
+        var column = position.Column - 1;
+        if (column < 0 || column >= lineText.Length) return null;
+
+        int start = column;
+        int end = column;
+
+        while (start > 0 && (char.IsLetterOrDigit(lineText[start - 1]) || lineText[start - 1] == '_'))
+            start--;
+
+        while (end < lineText.Length && (char.IsLetterOrDigit(lineText[end]) || lineText[end] == '_'))
+            end++;
+
+        if (start >= end) return null;
+
+        var word = lineText.Substring(start, end - start);
+
+        // Check if this word is a VST variable by looking for vst.load patterns
+        var vstPattern = new System.Text.RegularExpressions.Regex($@"var\s+{word}\s*=\s*vst\.load\s*\([""']([^""']+)[""']\)");
+        var match = vstPattern.Match(CodeEditor.Text);
+        if (match.Success)
+        {
+            return word;
+        }
+
+        // Also check if the word itself matches a known VST plugin
+        foreach (var plugin in VstPlugins)
+        {
+            if (plugin.Name.Equals(word, StringComparison.OrdinalIgnoreCase))
+            {
+                return word;
+            }
+        }
+
+        return null;
+    }
+
+    private void ContextMenu_OpenVstEditor(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.MenuItem item && item.Tag is string vstName)
+        {
+            OpenVstWindowByName(vstName);
+        }
+    }
+
+    private void OpenVstWindowByName(string name)
+    {
+        // Try to find or create VST window
+        if (_vstWindows.TryGetValue(name, out var existingWindow))
+        {
+            existingWindow.Show();
+            existingWindow.WindowState = WindowState.Normal;
+            existingWindow.Activate();
+        }
+        else
+        {
+            // Find the VST plugin in the list
+            var plugin = VstPlugins.FirstOrDefault(p =>
+                p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+            if (plugin != null)
+            {
+                var window = new VstPluginWindow(plugin.Name, plugin.Path);
+                _vstWindows[name] = window;
+                window.Show();
+                OutputLine($"Opened VST window: {name}");
+            }
+            else
+            {
+                OutputLine($"VST plugin not found: {name}");
+            }
+        }
+    }
+
+    private DateTime _lastClickTime = DateTime.MinValue;
+    private int _lastClickOffset = -1;
+
+    private void TextView_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        // Check for double-click
+        var now = DateTime.Now;
+        var position = CodeEditor.GetPositionFromPoint(e.GetPosition(CodeEditor));
+
+        if (position == null) return;
+
+        var offset = CodeEditor.Document.GetOffset(position.Value.Location);
+
+        if ((now - _lastClickTime).TotalMilliseconds < 300 && Math.Abs(offset - _lastClickOffset) < 5)
+        {
+            // Double-click detected - check if on VST name
+            var vstName = GetVstNameAtCursor();
+            if (vstName != null)
+            {
+                OpenVstWindowByName(vstName);
+                e.Handled = true;
+            }
+        }
+
+        _lastClickTime = now;
+        _lastClickOffset = offset;
+    }
+
+    #endregion
 
     #region Autocomplete
 
@@ -174,6 +381,25 @@ public partial class MainWindow : Window
     {
         _completionWindow = new CompletionWindow(CodeEditor.TextArea);
         _completionWindow.StartOffset -= replaceLength;
+
+        // Style the completion window with dark theme
+        _completionWindow.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x2B, 0x2D, 0x30));
+        _completionWindow.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xBC, 0xBE, 0xC4));
+        _completionWindow.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3C, 0x3F, 0x41));
+        _completionWindow.BorderThickness = new Thickness(1);
+
+        // Style the completion list
+        var completionList = _completionWindow.CompletionList;
+        completionList.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x2B, 0x2D, 0x30));
+        completionList.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xBC, 0xBE, 0xC4));
+
+        // Style the ListBox inside the completion list
+        if (completionList.ListBox != null)
+        {
+            completionList.ListBox.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x2B, 0x2D, 0x30));
+            completionList.ListBox.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xE0, 0xE0, 0xE0));
+            completionList.ListBox.BorderThickness = new Thickness(0);
+        }
 
         var data = _completionWindow.CompletionList.CompletionData;
         foreach (var completion in completions)
@@ -920,8 +1146,17 @@ public partial class MainWindow : Window
         AudioPanelMenuItem.IsChecked = RightPanel.Visibility == Visibility.Visible;
     }
 
+    private string? _currentRightPanelTab = null;
+
     private void ShowRightPanel(string tab)
     {
+        // If panel is visible and same tab is requested, toggle it off
+        if (RightPanel.Visibility == Visibility.Visible && _currentRightPanelTab == tab)
+        {
+            HideRightPanel();
+            return;
+        }
+
         // If panel is hidden, show it
         if (RightPanel.Visibility == Visibility.Collapsed)
         {
@@ -932,7 +1167,22 @@ public partial class MainWindow : Window
         }
 
         // Switch to the requested tab
+        _currentRightPanelTab = tab;
         SwitchRightPanelTab(tab);
+    }
+
+    private void HideRightPanel()
+    {
+        RightPanel.Visibility = Visibility.Collapsed;
+        RightSplitter.Visibility = Visibility.Collapsed;
+        RightPanelColumn.Width = new GridLength(0);
+        RightPanelColumn.MinWidth = 0;
+        _currentRightPanelTab = null;
+
+        // Update menu checkboxes
+        MidiPanelMenuItem.IsChecked = false;
+        VstPanelMenuItem.IsChecked = false;
+        AudioPanelMenuItem.IsChecked = false;
     }
 
     private void SwitchRightPanelTab(string tab)
@@ -1024,7 +1274,8 @@ public partial class MainWindow : Window
                 {
                     Name = _engineService.GetMidiInputName(i),
                     Type = "Input",
-                    Channel = "All"
+                    DeviceIndex = i,
+                    Channel = $"Ch {i}"
                 });
             }
 
@@ -1035,14 +1286,15 @@ public partial class MainWindow : Window
                 {
                     Name = _engineService.GetMidiOutputName(i),
                     Type = "Output",
-                    Channel = "-"
+                    DeviceIndex = i,
+                    Channel = $"Ch {i}"
                 });
             }
         }
         catch
         {
             // If engine methods don't exist yet, add placeholder
-            MidiDevices.Add(new MidiDeviceInfo { Name = "No devices found", Type = "-", Channel = "-" });
+            MidiDevices.Add(new MidiDeviceInfo { Name = "No devices found", Type = "-", DeviceIndex = -1, Channel = "-" });
         }
     }
 
@@ -1221,12 +1473,12 @@ public partial class MainWindow : Window
 
     private void Find_Click(object sender, RoutedEventArgs e)
     {
-        // TODO: Implement find
+        FindReplaceBar.ShowFind();
     }
 
     private void Replace_Click(object sender, RoutedEventArgs e)
     {
-        // TODO: Implement replace
+        FindReplaceBar.ShowReplace();
     }
 
     private void ClearOutput_Click(object sender, RoutedEventArgs e)
@@ -1537,7 +1789,7 @@ public partial class MainWindow : Window
 
     private void UpdateNoInstrumentsVisibility()
     {
-        NoInstrumentsText.Visibility = ActiveInstruments.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        // Active instruments display has been removed from toolbar
     }
 
     #endregion
@@ -1548,6 +1800,7 @@ public class MidiDeviceInfo
 {
     public string Name { get; set; } = "";
     public string Type { get; set; } = "";
+    public int DeviceIndex { get; set; } = -1;
     public string Channel { get; set; } = "";
 }
 
