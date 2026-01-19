@@ -39,5 +39,3 @@ This editor is designed to improve workflow, manage patterns, instruments, and o
 1. Clone or download this repository:
     ```bash
     git clone https://github.com/watermann420/MusicEngineEditor.git
-    
-
