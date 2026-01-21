@@ -269,3 +269,5 @@ C:\Users\null\RiderProjects\MusicEditor\MusicEngineEditor\bin\Debug\net10.0-wind
 C:\Users\null\RiderProjects\MusicEditor\MusicEngineEditor\bin\Debug\net10.0-windows\Serilog.Enrichers.Thread.dll
 C:\Users\null\RiderProjects\MusicEditor\MusicEngineEditor\bin\Debug\net10.0-windows\Serilog.Extensions.Logging.dll
 C:\Users\null\RiderProjects\MusicEditor\MusicEngineEditor\bin\Debug\net10.0-windows\Serilog.Sinks.Console.dll
+C:\Users\null\RiderProjects\MusicEditor\MusicEngineEditor\obj\Debug\net10.0-windows\Controls\LevelMeter.baml
+C:\Users\null\RiderProjects\MusicEditor\MusicEngineEditor\obj\Debug\net10.0-windows\Controls\LevelMeter.g.cs

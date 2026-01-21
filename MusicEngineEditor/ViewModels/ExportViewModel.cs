@@ -204,7 +204,7 @@ public partial class ExportViewModel : ViewModelBase
     private void UpdateCustomPreset()
     {
         // Update the custom preset with current settings
-        _selectedPreset = ExportPresets.Custom(
+        SelectedPreset = ExportPresets.Custom(
             format: SelectedFormat,
             sampleRate: SelectedSampleRate,
             bitDepth: SelectedBitDepth,
