@@ -453,16 +453,16 @@ public partial class StemExportViewModel : ViewModelBase
 
     /// <summary>
     /// Loads stems from an audio engine.
+    /// Note: The engine does not currently expose individual channel outputs.
+    /// Use LoadFromSources with your own ISampleProvider sources instead.
     /// </summary>
     public void LoadFromEngine(AudioEngine engine)
     {
         ClearStems();
 
-        // Add master output
-        var masterCapture = engine.GetRecordingCaptureProvider();
-        AddStem("Master", masterCapture, true);
-
-        // Additional channels/buses would be added here if exposed by the engine
+        // The engine does not currently expose individual channel outputs.
+        // Users should manually configure stems using LoadFromSources.
+        // This method is provided for future extension when channel access is available.
     }
 
     /// <summary>

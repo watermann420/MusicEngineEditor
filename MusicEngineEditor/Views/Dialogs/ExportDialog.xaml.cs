@@ -17,17 +17,11 @@ public partial class ExportDialog : Window
     /// <summary>
     /// Creates a new export dialog.
     /// </summary>
-    public ExportDialog() : this(new AudioRecorder()) { }
-
-    /// <summary>
-    /// Creates a new export dialog with the specified audio recorder.
-    /// </summary>
-    /// <param name="recorder">The audio recorder to use for export.</param>
-    public ExportDialog(AudioRecorder recorder)
+    public ExportDialog()
     {
         InitializeComponent();
 
-        _viewModel = new ExportViewModel(recorder);
+        _viewModel = new ExportViewModel();
         _viewModel.ExportCompleted += OnExportCompleted;
         _viewModel.CancelRequested += OnCancelRequested;
         DataContext = _viewModel;
@@ -37,8 +31,7 @@ public partial class ExportDialog : Window
     /// Creates a new export dialog with a pre-selected input file.
     /// </summary>
     /// <param name="inputFilePath">Path to the input audio file.</param>
-    /// <param name="recorder">The audio recorder to use for export.</param>
-    public ExportDialog(string inputFilePath, AudioRecorder recorder) : this(recorder)
+    public ExportDialog(string inputFilePath) : this()
     {
         _viewModel.SetInputFile(inputFilePath);
     }

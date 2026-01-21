@@ -15,7 +15,6 @@ namespace MusicEngineEditor.ViewModels;
 /// </summary>
 public partial class ExportViewModel : ViewModelBase
 {
-    private readonly AudioRecorder _recorder;
     private CancellationTokenSource? _cancellationTokenSource;
 
     // Preset selection
@@ -101,11 +100,8 @@ public partial class ExportViewModel : ViewModelBase
     /// </summary>
     public event EventHandler? CancelRequested;
 
-    public ExportViewModel() : this(new AudioRecorder()) { }
-
-    public ExportViewModel(AudioRecorder recorder)
+    public ExportViewModel()
     {
-        _recorder = recorder;
         _selectedPreset = ExportPresets.YouTube;
 
         InitializeCollections();
@@ -312,7 +308,7 @@ public partial class ExportViewModel : ViewModelBase
                 }
             });
 
-            LastResult = await _recorder.ExportWithPresetAsync(
+            LastResult = await AudioRecorder.ExportWithPresetAsync(
                 InputPath,
                 fullOutputPath,
                 preset,
