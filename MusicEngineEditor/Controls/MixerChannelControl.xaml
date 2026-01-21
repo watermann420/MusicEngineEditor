@@ -1,0 +1,339 @@
+<UserControl x:Class="MusicEngineEditor.Controls.MixerChannelControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:MusicEngineEditor.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="400" d:DesignWidth="80"
+             MinWidth="70"
+             MaxWidth="100">
+
+    <UserControl.Resources>
+        <!-- Colors -->
+        <Color x:Key="ChannelBackgroundColor">#252629</Color>
+        <Color x:Key="ChannelBorderColor">#393B40</Color>
+        <Color x:Key="FaderTrackColor">#1A1A1A</Color>
+        <Color x:Key="FaderThumbColor">#5C5F66</Color>
+        <Color x:Key="FaderThumbHoverColor">#7A7D85</Color>
+        <Color x:Key="TextPrimaryColor">#BCBEC4</Color>
+        <Color x:Key="TextSecondaryColor">#6F737A</Color>
+        <Color x:Key="MuteActiveColor">#FF5555</Color>
+        <Color x:Key="SoloActiveColor">#FFDD55</Color>
+        <Color x:Key="ArmActiveColor">#FF3333</Color>
+        <Color x:Key="ButtonInactiveColor">#3C3F44</Color>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="ChannelBackgroundBrush" Color="{StaticResource ChannelBackgroundColor}"/>
+        <SolidColorBrush x:Key="ChannelBorderBrush" Color="{StaticResource ChannelBorderColor}"/>
+        <SolidColorBrush x:Key="FaderTrackBrush" Color="{StaticResource FaderTrackColor}"/>
+        <SolidColorBrush x:Key="FaderThumbBrush" Color="{StaticResource FaderThumbColor}"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
+        <SolidColorBrush x:Key="MuteActiveBrush" Color="{StaticResource MuteActiveColor}"/>
+        <SolidColorBrush x:Key="SoloActiveBrush" Color="{StaticResource SoloActiveColor}"/>
+        <SolidColorBrush x:Key="ArmActiveBrush" Color="{StaticResource ArmActiveColor}"/>
+        <SolidColorBrush x:Key="ButtonInactiveBrush" Color="{StaticResource ButtonInactiveColor}"/>
+
+        <!-- Vertical Fader Slider Style -->
+        <Style x:Key="FaderSliderStyle" TargetType="Slider">
+            <Setter Property="Orientation" Value="Vertical"/>
+            <Setter Property="Minimum" Value="0"/>
+            <Setter Property="Maximum" Value="1.25"/>
+            <Setter Property="LargeChange" Value="0.1"/>
+            <Setter Property="SmallChange" Value="0.01"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <!-- Track background -->
+                            <Border Width="6"
+                                    Background="{StaticResource FaderTrackBrush}"
+                                    CornerRadius="3"
+                                    HorizontalAlignment="Center"/>
+
+                            <!-- Unity mark (0dB) -->
+                            <Rectangle Width="20" Height="1"
+                                       Fill="{StaticResource TextSecondaryBrush}"
+                                       VerticalAlignment="Top"
+                                       Margin="0,20,0,0"
+                                       HorizontalAlignment="Center"
+                                       Opacity="0.5"/>
+
+                            <!-- Track for slider -->
+                            <Track x:Name="PART_Track" Grid.Row="1">
+                                <Track.Thumb>
+                                    <Thumb Width="24" Height="12">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Border Background="{StaticResource FaderThumbBrush}"
+                                                        CornerRadius="2"
+                                                        BorderBrush="{StaticResource ChannelBorderBrush}"
+                                                        BorderThickness="1">
+                                                    <!-- Grip lines -->
+                                                    <StackPanel Orientation="Horizontal"
+                                                                HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center">
+                                                        <Rectangle Width="1" Height="6" Fill="#888" Margin="1,0"/>
+                                                        <Rectangle Width="1" Height="6" Fill="#888" Margin="1,0"/>
+                                                        <Rectangle Width="1" Height="6" Fill="#888" Margin="1,0"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Pan Slider Style (Horizontal) -->
+        <Style x:Key="PanSliderStyle" TargetType="Slider">
+            <Setter Property="Orientation" Value="Horizontal"/>
+            <Setter Property="Minimum" Value="-1"/>
+            <Setter Property="Maximum" Value="1"/>
+            <Setter Property="LargeChange" Value="0.1"/>
+            <Setter Property="SmallChange" Value="0.01"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid Height="16">
+                            <!-- Track background -->
+                            <Border Height="4"
+                                    Background="{StaticResource FaderTrackBrush}"
+                                    CornerRadius="2"
+                                    VerticalAlignment="Center"/>
+
+                            <!-- Center mark -->
+                            <Rectangle Width="1" Height="8"
+                                       Fill="{StaticResource TextSecondaryBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Opacity="0.5"/>
+
+                            <!-- Track for slider -->
+                            <Track x:Name="PART_Track">
+                                <Track.Thumb>
+                                    <Thumb Width="10" Height="14">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Fill="{StaticResource FaderThumbBrush}"
+                                                         Stroke="{StaticResource ChannelBorderBrush}"
+                                                         StrokeThickness="1"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Toggle Button Style for M/S/R -->
+        <Style x:Key="ChannelToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="Background" Value="{StaticResource ButtonInactiveBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="3"
+                                Padding="2">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="{StaticResource ChannelBackgroundBrush}"
+            BorderBrush="{StaticResource ChannelBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="4"
+            Padding="4">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>      <!-- Channel name -->
+                <RowDefinition Height="Auto"/>      <!-- M/S/R buttons -->
+                <RowDefinition Height="*"/>         <!-- Fader + Meter -->
+                <RowDefinition Height="Auto"/>      <!-- Pan -->
+                <RowDefinition Height="Auto"/>      <!-- dB display -->
+            </Grid.RowDefinitions>
+
+            <!-- Channel Name -->
+            <Border Grid.Row="0"
+                    Background="{Binding ChannelColor, FallbackValue=#4A9EFF}"
+                    CornerRadius="3"
+                    Padding="4,2"
+                    Margin="0,0,0,4">
+                <TextBlock Text="{Binding ChannelName, FallbackValue=Channel}"
+                           Foreground="White"
+                           FontSize="10"
+                           FontWeight="SemiBold"
+                           TextTrimming="CharacterEllipsis"
+                           HorizontalAlignment="Center"
+                           ToolTip="{Binding ChannelName}"/>
+            </Border>
+
+            <!-- Mute / Solo / Record Arm Buttons -->
+            <StackPanel Grid.Row="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Margin="0,0,0,4">
+                <!-- Mute -->
+                <ToggleButton x:Name="MuteButton"
+                              Style="{StaticResource ChannelToggleButtonStyle}"
+                              Content="M"
+                              IsChecked="{Binding IsMuted, Mode=TwoWay}"
+                              ToolTip="Mute (M)"
+                              Margin="0,0,2,0">
+                    <ToggleButton.Triggers>
+                        <EventTrigger RoutedEvent="ToggleButton.Checked">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetProperty="(ToggleButton.Background).(SolidColorBrush.Color)"
+                                                    To="{StaticResource MuteActiveColor}" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="ToggleButton.Unchecked">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetProperty="(ToggleButton.Background).(SolidColorBrush.Color)"
+                                                    To="{StaticResource ButtonInactiveColor}" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </ToggleButton.Triggers>
+                </ToggleButton>
+
+                <!-- Solo -->
+                <ToggleButton x:Name="SoloButton"
+                              Style="{StaticResource ChannelToggleButtonStyle}"
+                              Content="S"
+                              IsChecked="{Binding IsSoloed, Mode=TwoWay}"
+                              ToolTip="Solo (S)"
+                              Margin="0,0,2,0">
+                    <ToggleButton.Triggers>
+                        <EventTrigger RoutedEvent="ToggleButton.Checked">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetProperty="(ToggleButton.Background).(SolidColorBrush.Color)"
+                                                    To="{StaticResource SoloActiveColor}" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="ToggleButton.Unchecked">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetProperty="(ToggleButton.Background).(SolidColorBrush.Color)"
+                                                    To="{StaticResource ButtonInactiveColor}" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </ToggleButton.Triggers>
+                </ToggleButton>
+
+                <!-- Record Arm -->
+                <ToggleButton x:Name="ArmButton"
+                              Style="{StaticResource ChannelToggleButtonStyle}"
+                              Content="R"
+                              IsChecked="{Binding IsArmed, Mode=TwoWay}"
+                              ToolTip="Record Arm (R)">
+                    <ToggleButton.Triggers>
+                        <EventTrigger RoutedEvent="ToggleButton.Checked">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetProperty="(ToggleButton.Background).(SolidColorBrush.Color)"
+                                                    To="{StaticResource ArmActiveColor}" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="ToggleButton.Unchecked">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetProperty="(ToggleButton.Background).(SolidColorBrush.Color)"
+                                                    To="{StaticResource ButtonInactiveColor}" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </ToggleButton.Triggers>
+                </ToggleButton>
+            </StackPanel>
+
+            <!-- Fader and Meter Area -->
+            <Grid Grid.Row="2" Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Volume Fader -->
+                <Slider x:Name="VolumeFader"
+                        Grid.Column="0"
+                        Style="{StaticResource FaderSliderStyle}"
+                        Value="{Binding Volume, Mode=TwoWay, FallbackValue=0.8}"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Center"
+                        Margin="0,10"
+                        MouseDoubleClick="VolumeFader_MouseDoubleClick"/>
+
+                <!-- Level Meter -->
+                <controls:LevelMeter x:Name="ChannelMeter"
+                                     Grid.Column="1"
+                                     Width="30"
+                                     LeftLevel="{Binding MeterLeft, FallbackValue=0}"
+                                     RightLevel="{Binding MeterRight, FallbackValue=0}"
+                                     ShowScale="False"
+                                     ShowChannelLabels="False"
+                                     ShowPeakHold="True"
+                                     Margin="4,0,0,0"/>
+            </Grid>
+
+            <!-- Pan Control -->
+            <StackPanel Grid.Row="3" Margin="0,4">
+                <TextBlock Text="PAN"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           FontSize="8"
+                           HorizontalAlignment="Center"/>
+                <Slider x:Name="PanSlider"
+                        Style="{StaticResource PanSliderStyle}"
+                        Value="{Binding Pan, Mode=TwoWay, FallbackValue=0}"
+                        Margin="2,2"
+                        MouseDoubleClick="PanSlider_MouseDoubleClick"/>
+            </StackPanel>
+
+            <!-- Volume dB Display -->
+            <Border Grid.Row="4"
+                    Background="#1A1A1A"
+                    CornerRadius="2"
+                    Padding="4,2"
+                    Margin="0,4,0,0">
+                <TextBlock x:Name="VolumeDisplay"
+                           Text="{Binding VolumeDb, StringFormat={}{0:F1} dB, FallbackValue=0.0 dB}"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           FontSize="10"
+                           FontFamily="Consolas"
+                           HorizontalAlignment="Center"/>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>
