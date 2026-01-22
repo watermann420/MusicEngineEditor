@@ -172,6 +172,7 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>      <!-- Channel name -->
+                <RowDefinition Height="Auto"/>      <!-- Effect slots -->
                 <RowDefinition Height="Auto"/>      <!-- M/S/R buttons -->
                 <RowDefinition Height="*"/>         <!-- Fader + Meter -->
                 <RowDefinition Height="Auto"/>      <!-- Pan -->
@@ -193,8 +194,63 @@
                            ToolTip="{Binding ChannelName}"/>
             </Border>
 
+            <!-- Effect Slots Section -->
+            <Border Grid.Row="1"
+                    Background="#1E1F22"
+                    CornerRadius="2"
+                    Padding="2"
+                    Margin="0,0,0,4">
+                <StackPanel>
+                    <!-- Header with FX label and bypass all toggle -->
+                    <DockPanel Margin="0,0,0,2">
+                        <TextBlock Text="FX"
+                                   FontSize="9"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+                        <ToggleButton DockPanel.Dock="Right"
+                                      Content="B"
+                                      ToolTip="Bypass All Effects"
+                                      IsChecked="{Binding IsEffectChainBypassed, Mode=TwoWay}"
+                                      Width="14"
+                                      Height="14"
+                                      FontSize="8"
+                                      FontWeight="SemiBold"
+                                      Foreground="{StaticResource TextSecondaryBrush}"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      Cursor="Hand">
+                            <ToggleButton.Style>
+                                <Style TargetType="ToggleButton">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter Property="Foreground" Value="#FF5555"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ToggleButton.Style>
+                        </ToggleButton>
+                        <TextBlock Text="{Binding EffectCount, StringFormat=({0}), FallbackValue=(0)}"
+                                   FontSize="8"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center"
+                                   Margin="4,0,0,0"/>
+                    </DockPanel>
+                    <!-- Effect Slots List -->
+                    <ItemsControl ItemsSource="{Binding EffectSlots}"
+                                  MaxHeight="100">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <controls:EffectSlotControl EffectSlot="{Binding}"
+                                                            Margin="0,1"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
             <!-- Mute / Solo / Record Arm Buttons -->
-            <StackPanel Grid.Row="1"
+            <StackPanel Grid.Row="2"
                         Orientation="Horizontal"
                         HorizontalAlignment="Center"
                         Margin="0,0,0,4">
@@ -280,7 +336,7 @@
             </StackPanel>
 
             <!-- Fader and Meter Area -->
-            <Grid Grid.Row="2" Margin="0,4">
+            <Grid Grid.Row="3" Margin="0,4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
@@ -309,7 +365,7 @@
             </Grid>
 
             <!-- Pan Control -->
-            <StackPanel Grid.Row="3" Margin="0,4">
+            <StackPanel Grid.Row="4" Margin="0,4">
                 <TextBlock Text="PAN"
                            Foreground="{StaticResource TextSecondaryBrush}"
                            FontSize="8"
@@ -322,7 +378,7 @@
             </StackPanel>
 
             <!-- Volume dB Display -->
-            <Border Grid.Row="4"
+            <Border Grid.Row="5"
                     Background="#1A1A1A"
                     CornerRadius="2"
                     Padding="4,2"

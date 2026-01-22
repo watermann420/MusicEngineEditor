@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MusicEngine.Core;
 
 namespace MusicEngineEditor.Models;
 
@@ -76,6 +78,49 @@ public partial class EffectSlot : ObservableObject
     private string _category = string.Empty;
 
     /// <summary>
+    /// Gets or sets whether this is a VST effect.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isVstEffect;
+
+    /// <summary>
+    /// Gets or sets the VST plugin path for serialization.
+    /// </summary>
+    [ObservableProperty]
+    private string? _vstPluginPath;
+
+    /// <summary>
+    /// Gets or sets the VST format string ("VST2" or "VST3").
+    /// </summary>
+    [ObservableProperty]
+    private string _vstFormat = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the VST plugin state for serialization.
+    /// </summary>
+    [ObservableProperty]
+    private byte[]? _vstState;
+
+    /// <summary>
+    /// Gets the underlying VST plugin instance.
+    /// Not serialized - must be restored when loading.
+    /// </summary>
+    [JsonIgnore]
+    public IVstPlugin? VstPlugin { get; set; }
+
+    /// <summary>
+    /// Gets the underlying VST effect adapter instance.
+    /// Not serialized - must be restored when loading.
+    /// </summary>
+    [JsonIgnore]
+    public VstEffectAdapter? VstAdapter { get; set; }
+
+    /// <summary>
+    /// Gets the type badge for display (VST2, VST3, or INT for internal).
+    /// </summary>
+    public string TypeBadge => IsVstEffect ? VstFormat : "INT";
+
+    /// <summary>
     /// Gets the collection of effect parameters.
     /// </summary>
     public ObservableCollectionEx<EffectParameter> Parameters { get; } = [];
@@ -124,6 +169,21 @@ public partial class EffectSlot : ObservableObject
     /// </summary>
     public void ClearEffect()
     {
+        // Dispose VST resources if present
+        if (VstAdapter != null)
+        {
+            try
+            {
+                VstAdapter.Dispose();
+            }
+            catch
+            {
+                // Ignore disposal errors
+            }
+            VstAdapter = null;
+        }
+        VstPlugin = null;
+
         EffectType = string.Empty;
         DisplayName = "Empty";
         IsEmpty = true;
@@ -132,6 +192,88 @@ public partial class EffectSlot : ObservableObject
         Parameters.Clear();
         EffectColor = "#6B7280";
         Category = string.Empty;
+        IsVstEffect = false;
+        VstPluginPath = null;
+        VstFormat = string.Empty;
+        VstState = null;
+    }
+
+    /// <summary>
+    /// Loads a VST effect into this slot.
+    /// </summary>
+    /// <param name="vstPath">The path to the VST plugin file.</param>
+    /// <param name="displayName">The display name for the effect.</param>
+    /// <param name="plugin">The loaded VST plugin instance.</param>
+    /// <param name="adapter">The VST effect adapter.</param>
+    /// <param name="format">The VST format ("VST2" or "VST3").</param>
+    public void LoadVstEffect(string vstPath, string displayName, IVstPlugin plugin, VstEffectAdapter adapter, string format)
+    {
+        // Clear any existing effect first
+        ClearEffect();
+
+        EffectType = "VstEffect";
+        DisplayName = displayName;
+        IsEmpty = false;
+        IsBypassed = false;
+        Mix = 1.0f;
+        IsVstEffect = true;
+        VstPluginPath = vstPath;
+        VstFormat = format;
+        VstPlugin = plugin;
+        VstAdapter = adapter;
+        EffectColor = "#9C7CE8"; // Purple for VST
+        Category = "VST";
+
+        // Load parameters from the VST plugin
+        LoadVstParameters();
+    }
+
+    /// <summary>
+    /// Loads parameters from the VST plugin into the Parameters collection.
+    /// </summary>
+    private void LoadVstParameters()
+    {
+        Parameters.Clear();
+
+        if (VstPlugin == null) return;
+
+        int paramCount = VstPlugin.GetParameterCount();
+        for (int i = 0; i < paramCount; i++)
+        {
+            string name = VstPlugin.GetParameterName(i);
+            float value = VstPlugin.GetParameterValue(i);
+
+            var param = new EffectParameter(name, value, 0f, 1f)
+            {
+                DisplayFormat = "{0:F3}",
+                Unit = string.Empty
+            };
+
+            Parameters.Add(param);
+        }
+    }
+
+    /// <summary>
+    /// Saves the current VST plugin state to the VstState property.
+    /// </summary>
+    public void SaveVstState()
+    {
+        if (VstAdapter != null)
+        {
+            VstState = VstAdapter.SaveState();
+        }
+    }
+
+    /// <summary>
+    /// Restores the VST plugin state from the VstState property.
+    /// </summary>
+    public void RestoreVstState()
+    {
+        if (VstAdapter != null && VstState != null)
+        {
+            VstAdapter.LoadState(VstState);
+            LoadVstParameters(); // Refresh parameters after state restore
+        }
     }
 
     /// <summary>
