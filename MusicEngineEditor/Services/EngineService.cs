@@ -28,6 +28,14 @@ public class EngineService : IDisposable
 
     public async Task InitializeAsync()
     {
+        // Check for Safe Mode - skip audio initialization
+        if (App.SafeMode)
+        {
+            InitializationOutput = "Safe Mode: Audio engine disabled. Use --safe to start without audio.";
+            IsInitialized = false;
+            return;
+        }
+
         // Capture console output during initialization to show device info
         var outputCapture = new StringWriter();
         var originalOut = Console.Out;

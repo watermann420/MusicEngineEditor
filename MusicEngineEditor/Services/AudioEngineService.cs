@@ -179,6 +179,13 @@ public sealed class AudioEngineService : IDisposable
     {
         ThrowIfDisposed();
 
+        // Check for Safe Mode - skip audio initialization
+        if (App.SafeMode)
+        {
+            System.Diagnostics.Debug.WriteLine("AudioEngineService: Safe Mode - skipping initialization");
+            return;
+        }
+
         if (_isInitialized)
         {
             return;
