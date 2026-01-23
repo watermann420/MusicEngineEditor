@@ -3,7 +3,10 @@
 
 
 
-
+![License](https://img.shields.io/badge/license-MEL-blue)
+![C#](https://img.shields.io/badge/language-C%23-blue)
+![.NET](https://img.shields.io/badge/.NET-10.0-purple)
+![Status](https://img.shields.io/badge/status-Work_in_Progress-orange)
 
 
 # MusicEngineEditor
