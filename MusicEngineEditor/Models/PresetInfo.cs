@@ -169,12 +169,28 @@ public class PresetInfo
 /// <summary>
 /// Represents a category node in the hierarchical preset view.
 /// </summary>
-public class PresetCategoryNode
+public class PresetCategoryNode : System.ComponentModel.INotifyPropertyChanged
 {
+    private string _name = string.Empty;
+    private bool _isExpanded = true;
+    private bool _isSelected;
+
     /// <summary>
     /// Gets or sets the name of the category.
     /// </summary>
-    public string Name { get; set; } = string.Empty;
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            if (_name != value)
+            {
+                _name = value;
+                OnPropertyChanged(nameof(Name));
+                OnPropertyChanged(nameof(DisplayName));
+            }
+        }
+    }
 
     /// <summary>
     /// Gets or sets the presets in this category.
@@ -182,35 +198,150 @@ public class PresetCategoryNode
     public List<PresetInfo> Presets { get; set; } = [];
 
     /// <summary>
-    /// Gets the count of presets in this category.
+    /// Gets or sets the child categories (subcategories).
     /// </summary>
-    public int Count => Presets.Count;
+    public List<PresetCategoryNode> Children { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets whether this category is expanded in the tree view.
+    /// </summary>
+    public bool IsExpanded
+    {
+        get => _isExpanded;
+        set
+        {
+            if (_isExpanded != value)
+            {
+                _isExpanded = value;
+                OnPropertyChanged(nameof(IsExpanded));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets whether this category is selected.
+    /// </summary>
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            if (_isSelected != value)
+            {
+                _isSelected = value;
+                OnPropertyChanged(nameof(IsSelected));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the count of presets in this category (including subcategories).
+    /// </summary>
+    public int Count => Presets.Count + Children.Sum(c => c.Count);
 
     /// <summary>
     /// Gets a display string with the count.
     /// </summary>
     public string DisplayName => $"{Name} ({Count})";
+
+    /// <summary>
+    /// Gets whether this category has any children.
+    /// </summary>
+    public bool HasChildren => Children.Count > 0;
+
+    /// <summary>
+    /// Event raised when a property changes.
+    /// </summary>
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Raises the PropertyChanged event.
+    /// </summary>
+    protected virtual void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+    }
 }
 
 /// <summary>
 /// Represents a bank node in the hierarchical preset view.
 /// </summary>
-public class PresetBankNode
+public class PresetBankNode : System.ComponentModel.INotifyPropertyChanged
 {
+    private string _id = string.Empty;
+    private string _name = string.Empty;
+    private bool _isExpanded = true;
+    private bool _isSelected;
+
     /// <summary>
     /// Gets or sets the bank ID.
     /// </summary>
-    public string Id { get; set; } = string.Empty;
+    public string Id
+    {
+        get => _id;
+        set
+        {
+            if (_id != value)
+            {
+                _id = value;
+                OnPropertyChanged(nameof(Id));
+            }
+        }
+    }
 
     /// <summary>
     /// Gets or sets the name of the bank.
     /// </summary>
-    public string Name { get; set; } = string.Empty;
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            if (_name != value)
+            {
+                _name = value;
+                OnPropertyChanged(nameof(Name));
+                OnPropertyChanged(nameof(DisplayName));
+            }
+        }
+    }
 
     /// <summary>
     /// Gets or sets the categories in this bank.
     /// </summary>
     public List<PresetCategoryNode> Categories { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets whether this bank is expanded in the tree view.
+    /// </summary>
+    public bool IsExpanded
+    {
+        get => _isExpanded;
+        set
+        {
+            if (_isExpanded != value)
+            {
+                _isExpanded = value;
+                OnPropertyChanged(nameof(IsExpanded));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets whether this bank is selected.
+    /// </summary>
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            if (_isSelected != value)
+            {
+                _isSelected = value;
+                OnPropertyChanged(nameof(IsSelected));
+            }
+        }
+    }
 
     /// <summary>
     /// Gets the total count of presets in this bank.
@@ -221,6 +352,19 @@ public class PresetBankNode
     /// Gets a display string with the count.
     /// </summary>
     public string DisplayName => $"{Name} ({TotalCount})";
+
+    /// <summary>
+    /// Event raised when a property changes.
+    /// </summary>
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Raises the PropertyChanged event.
+    /// </summary>
+    protected virtual void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+    }
 }
 
 /// <summary>

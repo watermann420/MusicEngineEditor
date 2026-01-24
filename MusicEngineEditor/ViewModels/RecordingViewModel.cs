@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MusicEngine.Core;
 using NAudio.Wave;
+using CoreInputDeviceInfo = MusicEngine.Core.InputDeviceInfo;
 
 namespace MusicEngineEditor.ViewModels;
 
@@ -24,10 +25,10 @@ public partial class RecordingViewModel : ViewModelBase, IDisposable
 
     // Device Selection
     [ObservableProperty]
-    private InputDeviceInfo? _selectedDevice;
+    private CoreInputDeviceInfo? _selectedDevice;
 
     [ObservableProperty]
-    private ObservableCollection<InputDeviceInfo> _availableDevices = [];
+    private ObservableCollection<CoreInputDeviceInfo> _availableDevices = [];
 
     // Recording Format
     [ObservableProperty]
@@ -173,12 +174,12 @@ public partial class RecordingViewModel : ViewModelBase, IDisposable
     {
         AvailableDevices.Clear();
 
-        foreach (var device in InputDeviceInfo.GetAvailableDevices())
+        foreach (var device in CoreInputDeviceInfo.GetAvailableDevices())
         {
             AvailableDevices.Add(device);
         }
 
-        SelectedDevice = InputDeviceInfo.GetDefaultDevice();
+        SelectedDevice = CoreInputDeviceInfo.GetDefaultDevice();
 
         if (AvailableDevices.Count == 0)
         {
@@ -505,7 +506,7 @@ public partial class RecordingViewModel : ViewModelBase, IDisposable
         IsClipping = false;
     }
 
-    partial void OnSelectedDeviceChanged(InputDeviceInfo? value)
+    partial void OnSelectedDeviceChanged(CoreInputDeviceInfo? value)
     {
         OnPropertyChanged(nameof(CanRecord));
 

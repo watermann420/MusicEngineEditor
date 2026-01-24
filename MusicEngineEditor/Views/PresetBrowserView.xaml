@@ -385,7 +385,18 @@
                                                  Width="160"
                                                  Margin="4"
                                                  MouseDoubleClick="PresetCard_MouseDoubleClick"
-                                                 PreviewMouseLeftButtonDown="PresetCard_PreviewMouseLeftButtonDown"/>
+                                                 PreviewMouseLeftButtonDown="PresetCard_PreviewMouseLeftButtonDown">
+                                <controls:PresetCard.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Load Preset" Click="ContextMenu_LoadPreset_Click"/>
+                                        <Separator/>
+                                        <MenuItem Header="Toggle Favorite" Click="ContextMenu_ToggleFavorite_Click"/>
+                                        <Separator/>
+                                        <MenuItem Header="Rename..." Click="ContextMenu_Rename_Click"/>
+                                        <MenuItem Header="Delete" Click="ContextMenu_Delete_Click"/>
+                                    </ContextMenu>
+                                </controls:PresetCard.ContextMenu>
+                            </controls:PresetCard>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -399,6 +410,16 @@
                           BorderThickness="0"
                           Padding="4"
                           MouseDoubleClick="PresetListView_MouseDoubleClick">
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Load Preset" Click="ContextMenu_LoadPreset_Click"/>
+                            <Separator/>
+                            <MenuItem Header="Toggle Favorite" Click="ContextMenu_ToggleFavorite_Click"/>
+                            <Separator/>
+                            <MenuItem Header="Rename..." Click="ContextMenu_Rename_Click"/>
+                            <MenuItem Header="Delete" Click="ContextMenu_Delete_Click"/>
+                        </ContextMenu>
+                    </ListView.ContextMenu>
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Name" Width="140" DisplayMemberBinding="{Binding Name}"/>

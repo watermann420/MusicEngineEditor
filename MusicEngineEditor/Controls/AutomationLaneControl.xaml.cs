@@ -1,9 +1,11 @@
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using MusicEngine.Core.Automation;
+using MusicEngineEditor.ViewModels;
 using MenuItem = System.Windows.Controls.MenuItem;
 using ColorConverter = System.Windows.Media.ColorConverter;
 
@@ -43,6 +45,14 @@ public partial class AutomationLaneControl : UserControl
     public static readonly DependencyProperty GridSubdivisionProperty =
         DependencyProperty.Register(nameof(GridSubdivision), typeof(double), typeof(AutomationLaneControl),
             new PropertyMetadata(0.25, OnGridSubdivisionChanged));
+
+    public static readonly DependencyProperty IsCollapsedProperty =
+        DependencyProperty.Register(nameof(IsCollapsed), typeof(bool), typeof(AutomationLaneControl),
+            new PropertyMetadata(false, OnIsCollapsedChanged));
+
+    public static readonly DependencyProperty AvailableParametersProperty =
+        DependencyProperty.Register(nameof(AvailableParameters), typeof(ObservableCollection<AutomationParameterInfo>), typeof(AutomationLaneControl),
+            new PropertyMetadata(null, OnAvailableParametersChanged));
 
     /// <summary>
     /// Gets or sets the automation lane being edited.
@@ -107,6 +117,24 @@ public partial class AutomationLaneControl : UserControl
         set => SetValue(GridSubdivisionProperty, value);
     }
 
+    /// <summary>
+    /// Gets or sets whether the lane is collapsed (header only).
+    /// </summary>
+    public bool IsCollapsed
+    {
+        get => (bool)GetValue(IsCollapsedProperty);
+        set => SetValue(IsCollapsedProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the available parameters for selection.
+    /// </summary>
+    public ObservableCollection<AutomationParameterInfo>? AvailableParameters
+    {
+        get => (ObservableCollection<AutomationParameterInfo>?)GetValue(AvailableParametersProperty);
+        set => SetValue(AvailableParametersProperty, value);
+    }
+
     #endregion
 
     #region Events
@@ -130,6 +158,16 @@ public partial class AutomationLaneControl : UserControl
     /// Fired when lane settings change (mute, solo, arm).
     /// </summary>
     public event EventHandler? LaneSettingsChanged;
+
+    /// <summary>
+    /// Fired when the selected parameter changes.
+    /// </summary>
+    public event EventHandler<AutomationParameterInfo?>? ParameterChanged;
+
+    /// <summary>
+    /// Fired when visibility is toggled.
+    /// </summary>
+    public event EventHandler<bool>? VisibilityToggled;
 
     #endregion
 
@@ -240,6 +278,22 @@ public partial class AutomationLaneControl : UserControl
         }
     }
 
+    private static void OnIsCollapsedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is AutomationLaneControl control)
+        {
+            control.UpdateCollapsedState();
+        }
+    }
+
+    private static void OnAvailableParametersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is AutomationLaneControl control)
+        {
+            control.UpdateParameterSelector();
+        }
+    }
+
     #endregion
 
     #region UI Event Handlers
@@ -278,6 +332,29 @@ public partial class AutomationLaneControl : UserControl
         {
             Lane.IsArmed = ArmButton.IsChecked == true;
             LaneSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private void ShowHideButton_Click(object sender, RoutedEventArgs e)
+    {
+        bool isVisible = ShowHideButton.IsChecked == true;
+        VisibilityToggled?.Invoke(this, isVisible);
+    }
+
+    private void ParameterSelectorCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ParameterSelectorCombo.SelectedItem is AutomationParameterInfo param && Lane != null)
+        {
+            Lane.ParameterName = param.Name;
+            Lane.MinValue = param.MinValue;
+            Lane.MaxValue = param.MaxValue;
+            Lane.DefaultValue = param.DefaultValue;
+            Lane.Name = param.DisplayName;
+
+            UpdateLaneHeader();
+            Redraw();
+
+            ParameterChanged?.Invoke(this, param);
         }
     }
 
@@ -998,6 +1075,61 @@ public partial class AutomationLaneControl : UserControl
         TimeOffset = Math.Max(0, TimeOffset);
 
         Redraw();
+    }
+
+    /// <summary>
+    /// Sets the available parameters for the lane.
+    /// </summary>
+    /// <param name="parameters">The list of available parameters.</param>
+    public void SetAvailableParameters(IEnumerable<AutomationParameterInfo> parameters)
+    {
+        AvailableParameters = new ObservableCollection<AutomationParameterInfo>(parameters);
+    }
+
+    /// <summary>
+    /// Sets the selected parameter by name.
+    /// </summary>
+    /// <param name="parameterName">The parameter name to select.</param>
+    public void SetSelectedParameter(string parameterName)
+    {
+        if (AvailableParameters == null) return;
+
+        var param = AvailableParameters.FirstOrDefault(p => p.Name == parameterName);
+        if (param != null)
+        {
+            ParameterSelectorCombo.SelectedItem = param;
+        }
+    }
+
+    private void UpdateParameterSelector()
+    {
+        if (AvailableParameters != null)
+        {
+            ParameterSelectorCombo.ItemsSource = AvailableParameters;
+
+            // Select the current parameter if the lane already has one set
+            if (Lane != null && !string.IsNullOrEmpty(Lane.ParameterName))
+            {
+                var currentParam = AvailableParameters.FirstOrDefault(p => p.Name == Lane.ParameterName);
+                if (currentParam != null)
+                {
+                    ParameterSelectorCombo.SelectedItem = currentParam;
+                }
+            }
+        }
+    }
+
+    private void UpdateCollapsedState()
+    {
+        // When collapsed, reduce height to show only header
+        if (IsCollapsed)
+        {
+            Height = 32;
+        }
+        else
+        {
+            Height = double.NaN; // Auto
+        }
     }
 
     #endregion

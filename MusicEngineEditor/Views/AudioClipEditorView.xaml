@@ -1,0 +1,437 @@
+<UserControl x:Class="MusicEngineEditor.Views.AudioClipEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:MusicEngineEditor.Controls"
+             xmlns:vm="clr-namespace:MusicEngineEditor.ViewModels"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="1200"
+             d:DataContext="{d:DesignInstance Type=vm:AudioClipEditorViewModel}"
+             Background="{DynamicResource BackgroundBrush}">
+
+    <UserControl.Resources>
+        <!-- Colors -->
+        <Color x:Key="WaveformColor">#4CAF50</Color>
+        <Color x:Key="SelectionColor">#404B6EAF</Color>
+        <Color x:Key="SelectionBorderColor">#4B6EAF</Color>
+        <Color x:Key="PlayheadColor">#FFFFFF</Color>
+        <Color x:Key="RulerBackgroundColor">#252629</Color>
+        <Color x:Key="FadeOverlayColor">#60000000</Color>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="WaveformBrush" Color="{StaticResource WaveformColor}"/>
+        <SolidColorBrush x:Key="SelectionBrush" Color="{StaticResource SelectionColor}"/>
+        <SolidColorBrush x:Key="SelectionBorderBrush" Color="{StaticResource SelectionBorderColor}"/>
+        <SolidColorBrush x:Key="PlayheadBrush" Color="{StaticResource PlayheadColor}"/>
+        <SolidColorBrush x:Key="RulerBackgroundBrush" Color="{StaticResource RulerBackgroundColor}"/>
+        <SolidColorBrush x:Key="FadeOverlayBrush" Color="{StaticResource FadeOverlayColor}"/>
+
+        <!-- Toolbar Button Style -->
+        <Style x:Key="EditorToolbarButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{DynamicResource SubtleBorderBrush}"
+                                BorderThickness="1"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3C3F41"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource DisabledForegroundBrush}"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Small Icon Button Style -->
+        <Style x:Key="IconButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryForegroundBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="6"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3C3F41"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Separator Style -->
+        <Style x:Key="ToolbarSeparatorStyle" TargetType="Rectangle">
+            <Setter Property="Width" Value="1"/>
+            <Setter Property="Fill" Value="{DynamicResource SubtleBorderBrush}"/>
+            <Setter Property="Margin" Value="8,6"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <!-- Toolbar -->
+            <RowDefinition Height="Auto"/>
+            <!-- Main Content -->
+            <RowDefinition Height="*"/>
+            <!-- Status Bar -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource ToolbarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="8,6">
+            <DockPanel>
+                <!-- Left Section: Clip Info and Edit Actions -->
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <!-- Clip Name -->
+                    <TextBlock Text="{Binding ClipName}"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource BrightForegroundBrush}"
+                               VerticalAlignment="Center"
+                               MaxWidth="200"
+                               TextTrimming="CharacterEllipsis"/>
+
+                    <Rectangle Style="{StaticResource ToolbarSeparatorStyle}"/>
+
+                    <!-- Zoom Controls -->
+                    <TextBlock Text="Zoom:"
+                               FontSize="11"
+                               Foreground="{DynamicResource SecondaryForegroundBrush}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,6,0"/>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="X" FontSize="10" Foreground="{DynamicResource SecondaryForegroundBrush}" VerticalAlignment="Center" Margin="0,0,2,0"/>
+                        <Button Style="{StaticResource IconButtonStyle}" Content="-" Command="{Binding ZoomOutXCommand}" ToolTip="Zoom Out Horizontal"/>
+                        <Button Style="{StaticResource IconButtonStyle}" Content="+" Command="{Binding ZoomInXCommand}" ToolTip="Zoom In Horizontal"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="8,0,0,0">
+                        <TextBlock Text="Y" FontSize="10" Foreground="{DynamicResource SecondaryForegroundBrush}" VerticalAlignment="Center" Margin="0,0,2,0"/>
+                        <Button Style="{StaticResource IconButtonStyle}" Content="-" Command="{Binding ZoomOutYCommand}" ToolTip="Zoom Out Vertical"/>
+                        <Button Style="{StaticResource IconButtonStyle}" Content="+" Command="{Binding ZoomInYCommand}" ToolTip="Zoom In Vertical"/>
+                    </StackPanel>
+
+                    <Button Style="{StaticResource IconButtonStyle}"
+                            Content="1:1"
+                            Command="{Binding ResetZoomCommand}"
+                            ToolTip="Reset Zoom"
+                            Margin="4,0,0,0"/>
+
+                    <Rectangle Style="{StaticResource ToolbarSeparatorStyle}"/>
+
+                    <!-- Edit Actions -->
+                    <Button Content="Trim to Selection"
+                            Style="{StaticResource EditorToolbarButtonStyle}"
+                            Command="{Binding TrimToSelectionCommand}"
+                            ToolTip="Trim clip to current selection"/>
+
+                    <Button Content="Split"
+                            Style="{StaticResource EditorToolbarButtonStyle}"
+                            Command="{Binding SplitAtPlayheadCommand}"
+                            ToolTip="Split at playhead position"
+                            Margin="4,0,0,0"/>
+
+                    <Rectangle Style="{StaticResource ToolbarSeparatorStyle}"/>
+
+                    <!-- Quick Actions -->
+                    <Button Content="Normalize"
+                            Style="{StaticResource EditorToolbarButtonStyle}"
+                            Command="{Binding NormalizeCommand}"
+                            ToolTip="Normalize to 0 dB"/>
+
+                    <Button Content="Reverse"
+                            Style="{StaticResource EditorToolbarButtonStyle}"
+                            Command="{Binding ReverseCommand}"
+                            ToolTip="Toggle reverse playback"
+                            Margin="4,0,0,0"/>
+                </StackPanel>
+
+                <!-- Right Section: Additional Info -->
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" Margin="8,0,0,0">
+                    <TextBlock Text="{Binding ClipLength, StringFormat=Length: {0:F2} beats}"
+                               FontSize="11"
+                               Foreground="{DynamicResource SecondaryForegroundBrush}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Spacer -->
+                <Border/>
+            </DockPanel>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <!-- Waveform Area -->
+                <ColumnDefinition Width="*"/>
+                <!-- Splitter -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Properties Panel -->
+                <ColumnDefinition Width="280" MinWidth="200" MaxWidth="400"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Waveform Editor Area -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <!-- Time Ruler -->
+                    <RowDefinition Height="24"/>
+                    <!-- Waveform Display -->
+                    <RowDefinition Height="*"/>
+                    <!-- Horizontal ScrollBar -->
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Time Ruler -->
+                <Border Grid.Row="0"
+                        Background="{StaticResource RulerBackgroundBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="0,0,0,1">
+                    <Canvas x:Name="TimeRulerCanvas" ClipToBounds="True">
+                        <!-- Time markers drawn in code-behind -->
+                    </Canvas>
+                </Border>
+
+                <!-- Waveform Display with Selection and Playhead -->
+                <Grid Grid.Row="1" ClipToBounds="True">
+                    <!-- Main Waveform -->
+                    <controls:WaveformDisplay x:Name="WaveformDisplay"
+                                               WaveformColor="{StaticResource WaveformColor}"
+                                               SelectionColor="{StaticResource SelectionColor}"
+                                               PlayheadColor="{StaticResource PlayheadColor}"
+                                               ShowPlayhead="True"
+                                               ShowCenterLine="True"
+                                               DisplayMode="Mixed"
+                                               SelectionStart="{Binding SelectionStart, Mode=TwoWay}"
+                                               SelectionEnd="{Binding SelectionEnd, Mode=TwoWay}"
+                                               PlayheadPosition="{Binding PlayheadPosition, Mode=TwoWay}"
+                                               SelectionChanged="WaveformDisplay_SelectionChanged"
+                                               PlayheadRequested="WaveformDisplay_PlayheadRequested"/>
+
+                    <!-- Fade In Overlay -->
+                    <Canvas x:Name="FadeInOverlay"
+                            IsHitTestVisible="False"
+                            HorizontalAlignment="Left"
+                            ClipToBounds="True">
+                        <Path x:Name="FadeInPath"
+                              Fill="{StaticResource FadeOverlayBrush}"
+                              IsHitTestVisible="False"/>
+                    </Canvas>
+
+                    <!-- Fade Out Overlay -->
+                    <Canvas x:Name="FadeOutOverlay"
+                            IsHitTestVisible="False"
+                            HorizontalAlignment="Right"
+                            ClipToBounds="True">
+                        <Path x:Name="FadeOutPath"
+                              Fill="{StaticResource FadeOverlayBrush}"
+                              IsHitTestVisible="False"/>
+                    </Canvas>
+
+                    <!-- Selection Handles -->
+                    <Canvas x:Name="SelectionHandlesCanvas" IsHitTestVisible="True">
+                        <!-- Start Handle -->
+                        <Border x:Name="SelectionStartHandle"
+                                Width="8"
+                                Background="{StaticResource SelectionBorderBrush}"
+                                Cursor="SizeWE"
+                                Visibility="Collapsed"
+                                MouseLeftButtonDown="SelectionHandle_MouseLeftButtonDown"
+                                MouseMove="SelectionHandle_MouseMove"
+                                MouseLeftButtonUp="SelectionHandle_MouseLeftButtonUp"/>
+
+                        <!-- End Handle -->
+                        <Border x:Name="SelectionEndHandle"
+                                Width="8"
+                                Background="{StaticResource SelectionBorderBrush}"
+                                Cursor="SizeWE"
+                                Visibility="Collapsed"
+                                MouseLeftButtonDown="SelectionHandle_MouseLeftButtonDown"
+                                MouseMove="SelectionHandle_MouseMove"
+                                MouseLeftButtonUp="SelectionHandle_MouseLeftButtonUp"/>
+                    </Canvas>
+                </Grid>
+
+                <!-- Horizontal ScrollBar -->
+                <ScrollBar Grid.Row="2"
+                           x:Name="HorizontalScrollBar"
+                           Orientation="Horizontal"
+                           Minimum="0"
+                           Maximum="100"
+                           Value="{Binding ScrollOffset}"
+                           ViewportSize="20"
+                           SmallChange="1"
+                           LargeChange="10"/>
+            </Grid>
+
+            <!-- Splitter -->
+            <GridSplitter Grid.Column="1"
+                          Width="5"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch"
+                          Background="{DynamicResource BorderBrush}"
+                          ShowsPreview="True"/>
+
+            <!-- Properties Panel -->
+            <Border Grid.Column="2"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- Properties Header -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Properties Content -->
+                        <RowDefinition Height="*"/>
+                        <!-- Fade Curve Editors -->
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Properties Header -->
+                    <Border Grid.Row="0"
+                            Background="{DynamicResource ToolbarBackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="0,0,0,1"
+                            Padding="12,8">
+                        <TextBlock Text="Clip Properties"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource BrightForegroundBrush}"/>
+                    </Border>
+
+                    <!-- Properties Panel -->
+                    <controls:ClipPropertyPanel Grid.Row="1" DataContext="{Binding}"/>
+
+                    <!-- Fade Curve Editors -->
+                    <StackPanel Grid.Row="2">
+                        <controls:FadeCurveEditor x:Name="FadeInEditor"
+                                                   Title="Fade In"
+                                                   IsFadeIn="True"
+                                                   Height="140"
+                                                   FadeType="{Binding FadeInType, Mode=TwoWay}"
+                                                   Duration="{Binding FadeInDuration, Mode=TwoWay}"
+                                                   FadeTypeChanged="FadeEditor_FadeTypeChanged"
+                                                   DurationChanged="FadeEditor_DurationChanged"/>
+
+                        <controls:FadeCurveEditor x:Name="FadeOutEditor"
+                                                   Title="Fade Out"
+                                                   IsFadeIn="False"
+                                                   Height="140"
+                                                   FadeType="{Binding FadeOutType, Mode=TwoWay}"
+                                                   Duration="{Binding FadeOutDuration, Mode=TwoWay}"
+                                                   FadeTypeChanged="FadeEditor_FadeTypeChanged"
+                                                   DurationChanged="FadeEditor_DurationChanged"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource StatusBarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="12,4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Status Message -->
+                <TextBlock Grid.Column="0"
+                           Text="{Binding StatusMessage}"
+                           FontSize="11"
+                           Foreground="{DynamicResource SecondaryForegroundBrush}"
+                           VerticalAlignment="Center"/>
+
+                <!-- Playhead Position -->
+                <TextBlock Grid.Column="1"
+                           Text="{Binding PlayheadPosition, StringFormat=Playhead: {0:F2}}"
+                           FontSize="11"
+                           Foreground="{DynamicResource ForegroundBrush}"
+                           VerticalAlignment="Center"
+                           Margin="16,0"/>
+
+                <!-- Selection Info -->
+                <TextBlock Grid.Column="2"
+                           FontSize="11"
+                           Foreground="{DynamicResource ForegroundBrush}"
+                           VerticalAlignment="Center"
+                           Margin="0,0,16,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="No Selection"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasSelection}" Value="True">
+                                    <Setter Property="Text">
+                                        <Setter.Value>
+                                            <MultiBinding StringFormat="Selection: {0:F2} - {1:F2}">
+                                                <Binding Path="SelectionStart"/>
+                                                <Binding Path="SelectionEnd"/>
+                                            </MultiBinding>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <!-- Zoom Level -->
+                <TextBlock Grid.Column="3"
+                           Text="{Binding ZoomLevelX, StringFormat=Zoom: {0:P0}}"
+                           FontSize="11"
+                           Foreground="{DynamicResource SecondaryForegroundBrush}"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,253 @@
+<UserControl x:Class="MusicEngineEditor.Controls.ClipControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:MusicEngineEditor.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="60" d:DesignWidth="200"
+             ClipToBounds="True"
+             Cursor="Hand">
+
+    <UserControl.Resources>
+        <!-- Clip Border Style -->
+        <Style x:Key="ClipBorderStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.2" Color="#000000"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Resize Handle Style -->
+        <Style x:Key="ResizeHandleStyle" TargetType="Border">
+            <Setter Property="Width" Value="6"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="SizeWE"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#40FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Fade Handle Style -->
+        <Style x:Key="FadeHandleStyle" TargetType="Ellipse">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Height" Value="10"/>
+            <Setter Property="Fill" Value="#80FFFFFF"/>
+            <Setter Property="Stroke" Value="#FFFFFF"/>
+            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Fill" Value="#FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Header Button Style -->
+        <Style x:Key="HeaderButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="2">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#40FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#60FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid x:Name="RootGrid">
+        <!-- Main Clip Border -->
+        <Border x:Name="ClipBorder"
+                Style="{StaticResource ClipBorderStyle}"
+                BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header Bar -->
+                <Border x:Name="HeaderBar"
+                        Grid.Row="0"
+                        CornerRadius="4,4,0,0"
+                        Padding="4,2">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Clip Name -->
+                        <TextBlock x:Name="ClipNameText"
+                                   Grid.Column="0"
+                                   Text="{Binding Name}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   Margin="2,0,0,0"/>
+
+                        <!-- Header Buttons (visible on hover) -->
+                        <StackPanel x:Name="HeaderButtons"
+                                    Grid.Column="1"
+                                    Orientation="Horizontal">
+                            <Button x:Name="MuteButton"
+                                    Style="{StaticResource HeaderButtonStyle}"
+                                    Content="M"
+                                    ToolTip="Mute"
+                                    Click="MuteButton_Click"/>
+                            <Button x:Name="LockButton"
+                                    Style="{StaticResource HeaderButtonStyle}"
+                                    Content="L"
+                                    ToolTip="Lock"
+                                    Click="LockButton_Click"
+                                    Margin="2,0,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Content Area (for waveform or notes) -->
+                <Border x:Name="ContentArea"
+                        Grid.Row="1"
+                        Background="Transparent"
+                        ClipToBounds="True">
+                    <!-- Content will be drawn by derived classes or set programmatically -->
+                    <Canvas x:Name="ContentCanvas" ClipToBounds="True"/>
+                </Border>
+
+                <!-- Muted Overlay -->
+                <Border x:Name="MutedOverlay"
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        Background="#60000000"
+                        CornerRadius="4"
+                        Visibility="Collapsed"
+                        IsHitTestVisible="False">
+                    <TextBlock Text="MUTED"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="#80FFFFFF"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+
+                <!-- Locked Overlay -->
+                <Border x:Name="LockedOverlay"
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        Background="Transparent"
+                        CornerRadius="4"
+                        Visibility="Collapsed"
+                        IsHitTestVisible="False">
+                    <Path Data="M 0,0 L 8,8 M 8,0 L 0,8"
+                          Stroke="#40FFFFFF"
+                          StrokeThickness="1"
+                          VerticalAlignment="Top"
+                          HorizontalAlignment="Right"
+                          Margin="4"/>
+                </Border>
+
+                <!-- Selection Highlight -->
+                <Border x:Name="SelectionBorder"
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        BorderBrush="{DynamicResource AccentBrush}"
+                        BorderThickness="2"
+                        CornerRadius="4"
+                        Visibility="Collapsed"
+                        IsHitTestVisible="False"/>
+            </Grid>
+        </Border>
+
+        <!-- Left Resize Handle -->
+        <Border x:Name="LeftResizeHandle"
+                Style="{StaticResource ResizeHandleStyle}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Stretch"
+                MouseLeftButtonDown="LeftResizeHandle_MouseDown"/>
+
+        <!-- Right Resize Handle -->
+        <Border x:Name="RightResizeHandle"
+                Style="{StaticResource ResizeHandleStyle}"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Stretch"
+                MouseLeftButtonDown="RightResizeHandle_MouseDown"/>
+
+        <!-- Fade In Handle (top-left corner) -->
+        <Ellipse x:Name="FadeInHandle"
+                 Style="{StaticResource FadeHandleStyle}"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Top"
+                 Margin="8,4,0,0"
+                 MouseLeftButtonDown="FadeInHandle_MouseDown"
+                 ToolTip="Drag to adjust fade-in"/>
+
+        <!-- Fade Out Handle (top-right corner) -->
+        <Ellipse x:Name="FadeOutHandle"
+                 Style="{StaticResource FadeHandleStyle}"
+                 HorizontalAlignment="Right"
+                 VerticalAlignment="Top"
+                 Margin="0,4,8,0"
+                 MouseLeftButtonDown="FadeOutHandle_MouseDown"
+                 ToolTip="Drag to adjust fade-out"/>
+
+        <!-- Context Menu -->
+        <Grid.ContextMenu>
+            <ContextMenu x:Name="ClipContextMenu">
+                <MenuItem Header="Edit" Click="EditMenuItem_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="E" FontSize="10" FontWeight="Bold"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="Split at Playhead" Click="SplitMenuItem_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="|" FontSize="10" FontWeight="Bold"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Duplicate" Click="DuplicateMenuItem_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="D" FontSize="10" FontWeight="Bold"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
+                <MenuItem x:Name="MuteMenuItem" Header="Mute" Click="MuteMenuItem_Click"/>
+                <MenuItem x:Name="LockMenuItem" Header="Lock" Click="LockMenuItem_Click"/>
+                <Separator/>
+                <MenuItem x:Name="BounceMenuItem" Header="Bounce to Audio" Click="BounceMenuItem_Click"/>
+                <Separator/>
+                <MenuItem Header="Delete" Click="DeleteMenuItem_Click" InputGestureText="Del">
+                    <MenuItem.Icon>
+                        <TextBlock Text="X" FontSize="10" FontWeight="Bold" Foreground="#F75464"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </ContextMenu>
+        </Grid.ContextMenu>
+    </Grid>
+</UserControl>

@@ -512,5 +512,55 @@ public partial class PresetBrowserViewModel : ViewModelBase
     /// </summary>
     public PresetManager PresetManager => _presetManager;
 
+    /// <summary>
+    /// Renames the currently selected preset.
+    /// </summary>
+    /// <param name="newName">The new name for the preset.</param>
+    public void RenameSelectedPreset(string newName)
+    {
+        if (SelectedPreset?.SourcePreset == null || string.IsNullOrWhiteSpace(newName))
+            return;
+
+        SelectedPreset.Name = newName;
+        SelectedPreset.SourcePreset.Name = newName;
+        SelectedPreset.SourcePreset.ModifiedDate = DateTime.UtcNow;
+
+        // Save the updated preset
+        var bank = _presetManager.GetBankById(SelectedPreset.BankId);
+        if (bank != null)
+        {
+            _presetManager.SavePreset(SelectedPreset.SourcePreset, bank);
+        }
+
+        // Refresh the filtered list to update the display
+        ApplyFilters();
+        StatusMessage = $"Preset renamed to '{newName}'";
+    }
+
+    /// <summary>
+    /// Deletes the currently selected preset.
+    /// </summary>
+    public void DeleteSelectedPreset()
+    {
+        if (SelectedPreset?.SourcePreset == null)
+            return;
+
+        var presetName = SelectedPreset.Name;
+        var bank = _presetManager.GetBankById(SelectedPreset.BankId);
+
+        if (bank != null)
+        {
+            _presetManager.DeletePreset(SelectedPreset.SourcePreset, bank);
+        }
+
+        // Remove from local lists
+        _allPresets.Remove(SelectedPreset);
+        FilteredPresets.Remove(SelectedPreset);
+        SelectedPreset = null;
+
+        ApplyFilters();
+        StatusMessage = $"Preset '{presetName}' deleted";
+    }
+
     #endregion
 }

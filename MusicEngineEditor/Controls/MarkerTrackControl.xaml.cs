@@ -8,6 +8,8 @@ using System.Windows.Shapes;
 using MusicEngine.Core;
 using ColorConverter = System.Windows.Media.ColorConverter;
 using Rectangle = System.Windows.Shapes.Rectangle;
+using CoreMarkerTrack = MusicEngine.Core.MarkerTrack;
+using CoreMarkerType = MusicEngine.Core.MarkerType;
 
 namespace MusicEngineEditor.Controls;
 
@@ -16,7 +18,7 @@ namespace MusicEngineEditor.Controls;
 /// </summary>
 public partial class MarkerTrackControl : UserControl
 {
-    private MarkerTrack? _markerTrack;
+    private CoreMarkerTrack? _markerTrack;
     private readonly Dictionary<Guid, UIElement> _markerElements = [];
     private Marker? _selectedMarker;
     private Marker? _draggingMarker;
@@ -28,7 +30,7 @@ public partial class MarkerTrackControl : UserControl
     /// <summary>
     /// Gets or sets the marker track to display.
     /// </summary>
-    public MarkerTrack? MarkerTrack
+    public CoreMarkerTrack? MarkerTrack
     {
         get => _markerTrack;
         set
@@ -186,7 +188,7 @@ public partial class MarkerTrackControl : UserControl
         container.MouseLeave += MarkerElement_MouseLeave;
 
         // For loop markers, add end marker
-        if (marker.Type == MarkerType.Loop && marker.EndPosition.HasValue)
+        if (marker.Type == CoreMarkerType.Loop && marker.EndPosition.HasValue)
         {
             var endLine = new Rectangle
             {
@@ -234,7 +236,7 @@ public partial class MarkerTrackControl : UserControl
         }
 
         // Position loop region and end marker
-        if (marker.Type == MarkerType.Loop && marker.EndPosition.HasValue)
+        if (marker.Type == CoreMarkerType.Loop && marker.EndPosition.HasValue)
         {
             var endX = (marker.EndPosition.Value - ScrollOffset) * pixelsPerBeat;
             var width = endX - x;
@@ -417,14 +419,14 @@ public partial class MarkerTrackControl : UserControl
         var typeString = typeItem?.Tag?.ToString() ?? "Cue";
         var type = typeString switch
         {
-            "Loop" => MarkerType.Loop,
-            "Section" => MarkerType.Section,
-            _ => MarkerType.Cue
+            "Loop" => CoreMarkerType.Loop,
+            "Section" => CoreMarkerType.Section,
+            _ => CoreMarkerType.Cue
         };
 
         var marker = new Marker(position, $"{type} {_markerTrack.Count + 1}", type);
 
-        if (type == MarkerType.Loop)
+        if (type == CoreMarkerType.Loop)
         {
             marker.EndPosition = position + 4; // Default 4 beats loop
         }

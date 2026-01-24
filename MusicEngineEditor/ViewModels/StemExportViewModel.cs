@@ -87,6 +87,20 @@ public partial class StemExportViewModel : ViewModelBase
     [ObservableProperty]
     private bool _createSubfolder = true;
 
+    // Format selection
+    [ObservableProperty]
+    private string _selectedFormat = "WAV (32-bit Float)";
+
+    // Naming options
+    [ObservableProperty]
+    private string _filePrefix = string.Empty;
+
+    [ObservableProperty]
+    private string _fileSuffix = string.Empty;
+
+    [ObservableProperty]
+    private bool _addTrackNumbers = true;
+
     // Duration settings
     [ObservableProperty]
     private double _durationMinutes = 5.0;
@@ -125,6 +139,36 @@ public partial class StemExportViewModel : ViewModelBase
 
     // Collections
     public ObservableCollection<ExportPreset> Presets { get; } = new();
+    public ObservableCollection<string> ExportFormats { get; } = new();
+
+    /// <summary>
+    /// Gets a preview of the output file name.
+    /// </summary>
+    public string FileNamePreview
+    {
+        get
+        {
+            var sampleName = Stems.FirstOrDefault()?.Name ?? "StemName";
+            var prefix = !string.IsNullOrEmpty(FilePrefix) ? $"{FilePrefix}_" : "";
+            var suffix = !string.IsNullOrEmpty(FileSuffix) ? $"_{FileSuffix}" : "";
+            var number = AddTrackNumbers ? "01_" : "";
+            var extension = GetExtensionForFormat(SelectedFormat);
+            return $"{prefix}{number}{sampleName}{suffix}{extension}";
+        }
+    }
+
+    private static string GetExtensionForFormat(string format)
+    {
+        return format.ToUpperInvariant() switch
+        {
+            var f when f.Contains("WAV") => ".wav",
+            var f when f.Contains("MP3") => ".mp3",
+            var f when f.Contains("FLAC") => ".flac",
+            var f when f.Contains("OGG") => ".ogg",
+            var f when f.Contains("AIFF") => ".aiff",
+            _ => ".wav"
+        };
+    }
 
     /// <summary>
     /// Event raised when export is complete and dialog should close.
@@ -158,6 +202,40 @@ public partial class StemExportViewModel : ViewModelBase
         {
             Presets.Add(preset);
         }
+
+        // Add export formats
+        ExportFormats.Add("WAV (16-bit)");
+        ExportFormats.Add("WAV (24-bit)");
+        ExportFormats.Add("WAV (32-bit Float)");
+        ExportFormats.Add("MP3 (128 kbps)");
+        ExportFormats.Add("MP3 (192 kbps)");
+        ExportFormats.Add("MP3 (320 kbps)");
+        ExportFormats.Add("FLAC (16-bit)");
+        ExportFormats.Add("FLAC (24-bit)");
+        ExportFormats.Add("OGG Vorbis (192 kbps)");
+        ExportFormats.Add("OGG Vorbis (320 kbps)");
+        ExportFormats.Add("AIFF (16-bit)");
+        ExportFormats.Add("AIFF (24-bit)");
+    }
+
+    partial void OnFilePrefixChanged(string value)
+    {
+        OnPropertyChanged(nameof(FileNamePreview));
+    }
+
+    partial void OnFileSuffixChanged(string value)
+    {
+        OnPropertyChanged(nameof(FileNamePreview));
+    }
+
+    partial void OnAddTrackNumbersChanged(bool value)
+    {
+        OnPropertyChanged(nameof(FileNamePreview));
+    }
+
+    partial void OnSelectedFormatChanged(string value)
+    {
+        OnPropertyChanged(nameof(FileNamePreview));
     }
 
     partial void OnOutputDirectoryChanged(string value)

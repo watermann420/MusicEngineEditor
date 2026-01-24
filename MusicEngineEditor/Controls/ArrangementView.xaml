@@ -218,18 +218,85 @@
         <Grid Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
+            <!-- Marker Track -->
+            <local:MarkerTrack x:Name="ArrangementMarkerTrack"
+                               Grid.Row="0"
+                               Height="28"
+                               PixelsPerBeat="{Binding PixelsPerBeat, ElementName=SectionCanvas}"
+                               ScrollOffset="{Binding ScrollOffset}"
+                               PlayheadPosition="{Binding PlaybackPosition}"
+                               BeatsPerBar="4"
+                               PlayheadRequested="ArrangementMarkerTrack_PlayheadRequested"/>
+
             <!-- Timeline Ruler -->
-            <Canvas Grid.Row="0"
+            <Canvas Grid.Row="1"
                     x:Name="TimelineRuler"
                     Height="24"
                     Background="{DynamicResource PanelBackgroundBrush}"
                     ClipToBounds="True"/>
 
+            <!-- Clips Area -->
+            <Border Grid.Row="2"
+                    x:Name="ClipsAreaBorder"
+                    Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    MinHeight="80"
+                    MaxHeight="200"
+                    Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Track Headers for Clips -->
+                    <Border Grid.Column="0"
+                            Width="100"
+                            Background="{DynamicResource ToolbarBackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="0,0,1,0">
+                        <StackPanel VerticalAlignment="Top">
+                            <TextBlock Text="Clips"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource BrightForegroundBrush}"
+                                       Padding="8,4"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Clips Canvas -->
+                    <Canvas x:Name="ClipsCanvas"
+                            Grid.Column="1"
+                            Background="Transparent"
+                            ClipToBounds="True"
+                            MouseLeftButtonDown="ClipsCanvas_MouseLeftButtonDown"
+                            MouseLeftButtonUp="ClipsCanvas_MouseLeftButtonUp"
+                            MouseMove="ClipsCanvas_MouseMove"
+                            MouseRightButtonDown="ClipsCanvas_MouseRightButtonDown">
+
+                        <!-- Clips will be added programmatically -->
+
+                        <!-- Clips Context Menu -->
+                        <Canvas.ContextMenu>
+                            <ContextMenu x:Name="ClipsContextMenu">
+                                <MenuItem Header="Add Audio Clip..." Click="AddAudioClip_Click"/>
+                                <MenuItem Header="Add MIDI Clip..." Click="AddMidiClip_Click"/>
+                                <Separator/>
+                                <MenuItem Header="Paste Clip" Click="PasteClip_Click" InputGestureText="Ctrl+V"/>
+                            </ContextMenu>
+                        </Canvas.ContextMenu>
+                    </Canvas>
+                </Grid>
+            </Border>
+
             <!-- Section Canvas -->
-            <ScrollViewer Grid.Row="1"
+            <ScrollViewer Grid.Row="3"
                           x:Name="SectionScrollViewer"
                           HorizontalScrollBarVisibility="Auto"
                           VerticalScrollBarVisibility="Disabled"

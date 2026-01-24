@@ -304,9 +304,22 @@
                     BorderThickness="1,0,0,0"
                     Padding="8"
                     MinWidth="100">
-                <controls:MixerChannelControl DataContext="{Binding MasterChannel}"
-                                              MinWidth="90"
-                                              MaxWidth="110"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <controls:MixerChannelControl Grid.Row="0"
+                                                  DataContext="{Binding MasterChannel}"
+                                                  MinWidth="90"
+                                                  MaxWidth="110"/>
+
+                    <!-- PDC Display in Master Section -->
+                    <controls:PdcDisplayControl x:Name="PdcDisplay"
+                                                Grid.Row="1"
+                                                Margin="0,8,0,0"/>
+                </Grid>
             </Border>
         </Grid>
     </Grid>

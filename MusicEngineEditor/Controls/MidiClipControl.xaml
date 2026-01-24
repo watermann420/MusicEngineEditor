@@ -1,0 +1,208 @@
+<UserControl x:Class="MusicEngineEditor.Controls.MidiClipControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:MusicEngineEditor.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="60" d:DesignWidth="200"
+             ClipToBounds="True"
+             Cursor="Hand">
+
+    <UserControl.Resources>
+        <!-- MIDI Clip Colors -->
+        <Color x:Key="MidiClipColor">#2196F3</Color>
+        <Color x:Key="MidiClipFillColor">#B02196F3</Color>
+        <SolidColorBrush x:Key="MidiClipBrush" Color="{StaticResource MidiClipColor}"/>
+        <SolidColorBrush x:Key="MidiClipFillBrush" Color="{StaticResource MidiClipFillColor}"/>
+        <SolidColorBrush x:Key="NoteBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="LoopIndicatorBrush" Color="#64B5F6"/>
+
+        <!-- Clip Border Style -->
+        <Style x:Key="MidiClipBorderStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.2" Color="#000000"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Resize Handle Style -->
+        <Style x:Key="ResizeHandleStyle" TargetType="Border">
+            <Setter Property="Width" Value="6"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="SizeWE"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#40FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid x:Name="RootGrid">
+        <!-- Main Clip Border -->
+        <Border x:Name="ClipBorder"
+                Style="{StaticResource MidiClipBorderStyle}"
+                Background="{StaticResource MidiClipFillBrush}"
+                BorderBrush="{StaticResource MidiClipBrush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header Bar -->
+                <Border x:Name="HeaderBar"
+                        Grid.Row="0"
+                        Background="{StaticResource MidiClipBrush}"
+                        CornerRadius="4,4,0,0"
+                        Padding="4,2">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- MIDI Icon -->
+                        <TextBlock Grid.Column="0"
+                                   Text="M"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,4,0"
+                                   ToolTip="MIDI Clip"/>
+
+                        <!-- Clip Name -->
+                        <TextBlock x:Name="ClipNameText"
+                                   Grid.Column="1"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"/>
+
+                        <!-- Loop Indicator -->
+                        <Border x:Name="LoopIndicator"
+                                Grid.Column="2"
+                                Background="{StaticResource LoopIndicatorBrush}"
+                                CornerRadius="2"
+                                Padding="4,1"
+                                Margin="4,0,0,0"
+                                Visibility="Collapsed">
+                            <TextBlock Text="LOOP"
+                                       FontSize="8"
+                                       FontWeight="SemiBold"
+                                       Foreground="White"/>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Mini Piano Roll Area -->
+                <Canvas x:Name="NoteCanvas"
+                        Grid.Row="1"
+                        Background="Transparent"
+                        ClipToBounds="True">
+
+                    <!-- Loop Boundary Lines -->
+                    <Canvas x:Name="LoopLinesCanvas"
+                            Visibility="Collapsed"/>
+                </Canvas>
+
+                <!-- Note Count Display (for small clips) -->
+                <TextBlock x:Name="NoteCountText"
+                           Grid.Row="1"
+                           FontSize="9"
+                           Foreground="#80FFFFFF"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Visibility="Collapsed"/>
+
+                <!-- Muted Overlay -->
+                <Border x:Name="MutedOverlay"
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        Background="#60000000"
+                        CornerRadius="4"
+                        Visibility="Collapsed"
+                        IsHitTestVisible="False">
+                    <TextBlock Text="MUTED"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="#80FFFFFF"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+
+                <!-- Selection Highlight -->
+                <Border x:Name="SelectionBorder"
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        BorderBrush="{DynamicResource AccentBrush}"
+                        BorderThickness="2"
+                        CornerRadius="4"
+                        Visibility="Collapsed"
+                        IsHitTestVisible="False"/>
+            </Grid>
+        </Border>
+
+        <!-- Left Resize Handle -->
+        <Border x:Name="LeftResizeHandle"
+                Style="{StaticResource ResizeHandleStyle}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Stretch"
+                MouseLeftButtonDown="LeftResizeHandle_MouseDown"/>
+
+        <!-- Right Resize Handle -->
+        <Border x:Name="RightResizeHandle"
+                Style="{StaticResource ResizeHandleStyle}"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Stretch"
+                MouseLeftButtonDown="RightResizeHandle_MouseDown"/>
+
+        <!-- Context Menu -->
+        <Grid.ContextMenu>
+            <ContextMenu x:Name="MidiClipContextMenu">
+                <MenuItem Header="Edit in Piano Roll" Click="EditMenuItem_Click"/>
+                <Separator/>
+                <MenuItem Header="Split at Playhead" Click="SplitMenuItem_Click"/>
+                <MenuItem Header="Duplicate" Click="DuplicateMenuItem_Click"/>
+                <Separator/>
+                <MenuItem Header="Loop">
+                    <MenuItem x:Name="EnableLoopMenuItem" Header="Enable Loop" Click="EnableLoop_Click"/>
+                    <MenuItem Header="Set Loop Length">
+                        <MenuItem Header="1 Beat" Tag="1" Click="SetLoopLength_Click"/>
+                        <MenuItem Header="2 Beats" Tag="2" Click="SetLoopLength_Click"/>
+                        <MenuItem Header="4 Beats" Tag="4" Click="SetLoopLength_Click"/>
+                        <MenuItem Header="8 Beats" Tag="8" Click="SetLoopLength_Click"/>
+                        <MenuItem Header="16 Beats" Tag="16" Click="SetLoopLength_Click"/>
+                    </MenuItem>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="Transpose">
+                    <MenuItem Header="+12 (Octave Up)" Tag="12" Click="Transpose_Click"/>
+                    <MenuItem Header="+1 (Semitone Up)" Tag="1" Click="Transpose_Click"/>
+                    <MenuItem Header="-1 (Semitone Down)" Tag="-1" Click="Transpose_Click"/>
+                    <MenuItem Header="-12 (Octave Down)" Tag="-12" Click="Transpose_Click"/>
+                </MenuItem>
+                <MenuItem Header="Quantize">
+                    <MenuItem Header="1/4 Note" Tag="1" Click="Quantize_Click"/>
+                    <MenuItem Header="1/8 Note" Tag="0.5" Click="Quantize_Click"/>
+                    <MenuItem Header="1/16 Note" Tag="0.25" Click="Quantize_Click"/>
+                    <MenuItem Header="1/32 Note" Tag="0.125" Click="Quantize_Click"/>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="Bounce to Audio" Click="BounceMenuItem_Click"/>
+                <Separator/>
+                <MenuItem x:Name="MuteMenuItem" Header="Mute" Click="MuteMenuItem_Click"/>
+                <MenuItem x:Name="LockMenuItem" Header="Lock" Click="LockMenuItem_Click"/>
+                <Separator/>
+                <MenuItem Header="Delete" Click="DeleteMenuItem_Click" InputGestureText="Del"/>
+            </ContextMenu>
+        </Grid.ContextMenu>
+    </Grid>
+</UserControl>

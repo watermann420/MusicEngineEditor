@@ -1,0 +1,397 @@
+<UserControl x:Class="MusicEngineEditor.Controls.ClipPropertyPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MusicEngineEditor.ViewModels"
+             xmlns:core="clr-namespace:MusicEngine.Core;assembly=MusicEngine"
+             mc:Ignorable="d"
+             d:DesignHeight="500" d:DesignWidth="280"
+             d:DataContext="{d:DesignInstance Type=vm:AudioClipEditorViewModel}"
+             Background="{DynamicResource PanelBackgroundBrush}">
+
+    <UserControl.Resources>
+        <!-- Section Header Style -->
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrightForegroundBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <!-- Property Label Style -->
+        <Style x:Key="PropertyLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryForegroundBrush}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+        </Style>
+
+        <!-- Property Value Style -->
+        <Style x:Key="PropertyValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Small Button Style -->
+        <Style x:Key="SmallButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryForegroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SubtleBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3C3F41"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Toggle Button Style -->
+        <Style x:Key="PropertyToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryForegroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SubtleBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3C3F41"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Slider Style for Gain -->
+        <Style x:Key="GainSliderStyle" TargetType="Slider">
+            <Setter Property="Minimum" Value="-96"/>
+            <Setter Property="Maximum" Value="12"/>
+            <Setter Property="TickFrequency" Value="6"/>
+            <Setter Property="IsSnapToTickEnabled" Value="False"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- ComboBox Style for FadeType -->
+        <Style x:Key="FadeTypeComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SubtleBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="MinWidth" Value="100"/>
+        </Style>
+
+        <!-- Input TextBox Style -->
+        <Style x:Key="PropertyInputStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SubtleBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="12">
+        <StackPanel>
+            <!-- Clip Info Section -->
+            <Border Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="12"
+                    Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Clip Info" Style="{StaticResource SectionHeaderStyle}"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Name:" Style="{StaticResource PropertyLabelStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ClipName}" Style="{StaticResource PropertyValueStyle}" TextTrimming="CharacterEllipsis"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Length:" Style="{StaticResource PropertyLabelStyle}" Margin="0,6,8,0"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ClipLength, StringFormat={}{0:F2} beats}" Style="{StaticResource PropertyValueStyle}" Margin="0,6,0,0"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Gain Section -->
+            <Border Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="12"
+                    Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Gain" Style="{StaticResource SectionHeaderStyle}"/>
+
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Slider Grid.Column="0"
+                                x:Name="GainSlider"
+                                Style="{StaticResource GainSliderStyle}"
+                                Value="{Binding GainDb, Mode=TwoWay}"
+                                IsEnabled="{Binding CanEdit}"
+                                ToolTip="Gain adjustment in dB"/>
+
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding GainDb, StringFormat={}{0:F1} dB}"
+                                   Style="{StaticResource PropertyValueStyle}"
+                                   HorizontalAlignment="Right"
+                                   Margin="8,0,0,0"/>
+
+                        <Button Grid.Column="2"
+                                Content="Reset"
+                                Style="{StaticResource SmallButtonStyle}"
+                                Command="{Binding ResetGainCommand}"
+                                ToolTip="Reset gain to 0 dB"
+                                Margin="8,0,0,0"/>
+                    </Grid>
+
+                    <!-- Normalize -->
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock Text="Target:" Style="{StaticResource PropertyLabelStyle}"/>
+                            <TextBox Width="50"
+                                     Text="{Binding NormalizeTargetDb, StringFormat={}{0:F1}}"
+                                     Style="{StaticResource PropertyInputStyle}"/>
+                            <TextBlock Text="dB" Style="{StaticResource PropertyLabelStyle}" Margin="4,0,0,0"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Content="Normalize"
+                                Style="{StaticResource SmallButtonStyle}"
+                                Command="{Binding NormalizeCommand}"
+                                ToolTip="Normalize to target peak level"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Playback Section -->
+            <Border Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="12"
+                    Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Playback" Style="{StaticResource SectionHeaderStyle}"/>
+
+                    <!-- Reverse Toggle -->
+                    <ToggleButton Content="Reverse"
+                                  Style="{StaticResource PropertyToggleButtonStyle}"
+                                  IsChecked="{Binding IsReversed, Mode=TwoWay}"
+                                  IsEnabled="{Binding CanEdit}"
+                                  HorizontalAlignment="Stretch"
+                                  ToolTip="Toggle reverse playback"/>
+
+                    <!-- Time Stretch -->
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Time Stretch:" Style="{StaticResource PropertyLabelStyle}"/>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <TextBox Width="60"
+                                     Text="{Binding TimeStretchFactor, StringFormat={}{0:F2}}"
+                                     Style="{StaticResource PropertyInputStyle}"
+                                     IsEnabled="{Binding CanEdit}"/>
+                            <TextBlock Text="x" Style="{StaticResource PropertyLabelStyle}" Margin="4,0,0,0"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="2"
+                                Content="1.0x"
+                                Style="{StaticResource SmallButtonStyle}"
+                                Command="{Binding ResetTimeStretchCommand}"
+                                ToolTip="Reset to original speed"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Fade In Section -->
+            <Border Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="12"
+                    Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Fade In" Style="{StaticResource SectionHeaderStyle}"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Duration:" Style="{StaticResource PropertyLabelStyle}"/>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                            <TextBox Width="60"
+                                     Text="{Binding FadeInDuration, StringFormat={}{0:F2}}"
+                                     Style="{StaticResource PropertyInputStyle}"
+                                     IsEnabled="{Binding CanEdit}"/>
+                            <TextBlock Text="beats" Style="{StaticResource PropertyLabelStyle}" Margin="4,0,0,0"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Curve:" Style="{StaticResource PropertyLabelStyle}" Margin="0,8,8,0"/>
+                        <ComboBox Grid.Row="1" Grid.Column="1"
+                                  Style="{StaticResource FadeTypeComboBoxStyle}"
+                                  ItemsSource="{Binding FadeTypes}"
+                                  SelectedItem="{Binding FadeInType, Mode=TwoWay}"
+                                  IsEnabled="{Binding CanEdit}"
+                                  Margin="0,8,0,0"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Fade Out Section -->
+            <Border Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="12"
+                    Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Fade Out" Style="{StaticResource SectionHeaderStyle}"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Duration:" Style="{StaticResource PropertyLabelStyle}"/>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                            <TextBox Width="60"
+                                     Text="{Binding FadeOutDuration, StringFormat={}{0:F2}}"
+                                     Style="{StaticResource PropertyInputStyle}"
+                                     IsEnabled="{Binding CanEdit}"/>
+                            <TextBlock Text="beats" Style="{StaticResource PropertyLabelStyle}" Margin="4,0,0,0"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Curve:" Style="{StaticResource PropertyLabelStyle}" Margin="0,8,8,0"/>
+                        <ComboBox Grid.Row="1" Grid.Column="1"
+                                  Style="{StaticResource FadeTypeComboBoxStyle}"
+                                  ItemsSource="{Binding FadeTypes}"
+                                  SelectedItem="{Binding FadeOutType, Mode=TwoWay}"
+                                  IsEnabled="{Binding CanEdit}"
+                                  Margin="0,8,0,0"/>
+                    </Grid>
+
+                    <!-- Remove All Fades Button -->
+                    <Button Content="Remove All Fades"
+                            Style="{StaticResource SmallButtonStyle}"
+                            Command="{Binding RemoveFadesCommand}"
+                            HorizontalAlignment="Stretch"
+                            Margin="0,12,0,0"
+                            ToolTip="Remove all fade-in and fade-out"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Actions Section -->
+            <Border Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="12">
+                <StackPanel>
+                    <TextBlock Text="Edit Actions" Style="{StaticResource SectionHeaderStyle}"/>
+
+                    <Button Content="Trim to Selection"
+                            Style="{StaticResource SmallButtonStyle}"
+                            Command="{Binding TrimToSelectionCommand}"
+                            HorizontalAlignment="Stretch"
+                            Margin="0,0,0,8"
+                            ToolTip="Trim clip to current selection"/>
+
+                    <Button Content="Split at Playhead"
+                            Style="{StaticResource SmallButtonStyle}"
+                            Command="{Binding SplitAtPlayheadCommand}"
+                            HorizontalAlignment="Stretch"
+                            ToolTip="Split clip at current playhead position"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

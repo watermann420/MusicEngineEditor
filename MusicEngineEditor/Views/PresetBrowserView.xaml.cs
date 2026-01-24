@@ -156,6 +156,50 @@ public partial class PresetBrowserView : UserControl
         _viewModel?.OnPresetDoubleClick();
     }
 
+    private void ContextMenu_LoadPreset_Click(object sender, RoutedEventArgs e)
+    {
+        _viewModel?.LoadPresetCommand.Execute(null);
+    }
+
+    private void ContextMenu_ToggleFavorite_Click(object sender, RoutedEventArgs e)
+    {
+        _viewModel?.ToggleFavoriteCommand.Execute(null);
+    }
+
+    private void ContextMenu_Rename_Click(object sender, RoutedEventArgs e)
+    {
+        if (_viewModel?.SelectedPreset == null) return;
+
+        var dialog = new Views.Dialogs.InputDialog
+        {
+            Title = "Rename Preset",
+            Prompt = "Enter new name:",
+            Value = _viewModel.SelectedPreset.Name,
+            Owner = Window.GetWindow(this)
+        };
+
+        if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.Value))
+        {
+            _viewModel.RenameSelectedPreset(dialog.Value);
+        }
+    }
+
+    private void ContextMenu_Delete_Click(object sender, RoutedEventArgs e)
+    {
+        if (_viewModel?.SelectedPreset == null) return;
+
+        var result = MessageBox.Show(
+            $"Are you sure you want to delete the preset '{_viewModel.SelectedPreset.Name}'?",
+            "Delete Preset",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            _viewModel.DeleteSelectedPreset();
+        }
+    }
+
     /// <summary>
     /// Gets the ViewModel for external access.
     /// </summary>

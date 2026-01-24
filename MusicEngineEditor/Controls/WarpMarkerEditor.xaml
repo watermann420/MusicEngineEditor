@@ -1,0 +1,176 @@
+<UserControl x:Class="MusicEngineEditor.Controls.WarpMarkerEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="200" d:DesignWidth="600"
+             Background="{DynamicResource PanelBackgroundBrush}">
+
+    <UserControl.Resources>
+        <!-- Marker Style -->
+        <Style x:Key="WarpMarkerStyle" TargetType="Border">
+            <Setter Property="Width" Value="8"/>
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="CornerRadius" Value="2,2,0,0"/>
+            <Setter Property="Cursor" Value="SizeWE"/>
+            <Style.Triggers>
+                <Trigger Property="Tag" Value="Downbeat">
+                    <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+                </Trigger>
+                <Trigger Property="Tag" Value="Manual">
+                    <Setter Property="Background" Value="{DynamicResource WarningBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Border BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="6">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Toolbar -->
+            <Border Grid.Row="0"
+                    Background="{DynamicResource BackgroundBrush}"
+                    Padding="8,6"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,0,0,1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Button x:Name="AddMarkerButton"
+                                Content="+ Add"
+                                Click="AddMarkerButton_Click"
+                                Style="{DynamicResource ToolbarButtonStyle}"
+                                ToolTip="Add marker at playhead"/>
+
+                        <Button x:Name="DeleteMarkerButton"
+                                Content="Delete"
+                                Click="DeleteMarkerButton_Click"
+                                Style="{DynamicResource ToolbarButtonStyle}"
+                                IsEnabled="False"
+                                ToolTip="Delete selected marker"/>
+
+                        <Separator Width="1" Margin="8,4"/>
+
+                        <Button x:Name="AutoDetectButton"
+                                Content="Auto Detect"
+                                Click="AutoDetectButton_Click"
+                                Style="{DynamicResource ToolbarButtonStyle}"
+                                ToolTip="Auto-detect markers from transients"/>
+
+                        <Button x:Name="ClearAllButton"
+                                Content="Clear All"
+                                Click="ClearAllButton_Click"
+                                Style="{DynamicResource ToolbarButtonStyle}"
+                                ToolTip="Remove all markers"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <CheckBox x:Name="SnapToTransientsCheckBox"
+                                  Content="Snap to Transients"
+                                  IsChecked="True"
+                                  VerticalAlignment="Center"
+                                  Margin="0,0,12,0"/>
+
+                        <CheckBox x:Name="ShowGridCheckBox"
+                                  Content="Show Grid"
+                                  IsChecked="True"
+                                  Checked="ShowGridCheckBox_Changed"
+                                  Unchecked="ShowGridCheckBox_Changed"
+                                  VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Timeline Canvas -->
+            <Grid Grid.Row="1" Margin="0">
+                <!-- Grid Overlay -->
+                <Canvas x:Name="GridCanvas"
+                        Background="Transparent"
+                        IsHitTestVisible="False"/>
+
+                <!-- Waveform Background (placeholder) -->
+                <Canvas x:Name="WaveformCanvas"
+                        Background="Transparent"
+                        IsHitTestVisible="False"
+                        Opacity="0.3"/>
+
+                <!-- Marker Canvas -->
+                <Canvas x:Name="MarkerCanvas"
+                        Background="Transparent"
+                        ClipToBounds="True"
+                        MouseLeftButtonDown="MarkerCanvas_MouseLeftButtonDown"
+                        MouseMove="MarkerCanvas_MouseMove"
+                        MouseLeftButtonUp="MarkerCanvas_MouseLeftButtonUp"/>
+
+                <!-- Playhead -->
+                <Canvas x:Name="PlayheadCanvas" IsHitTestVisible="False">
+                    <Line x:Name="PlayheadLine"
+                          X1="0" Y1="0" X2="0" Y2="200"
+                          Stroke="{DynamicResource ErrorBrush}"
+                          StrokeThickness="2"
+                          Visibility="Collapsed"/>
+                </Canvas>
+            </Grid>
+
+            <!-- Status Bar -->
+            <Border Grid.Row="2"
+                    Background="{DynamicResource BackgroundBrush}"
+                    Padding="8,4"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,1,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               x:Name="StatusText"
+                               Text="Ready"
+                               FontSize="11"
+                               Foreground="{DynamicResource SecondaryForegroundBrush}"
+                               VerticalAlignment="Center"/>
+
+                    <TextBlock Grid.Column="1"
+                               x:Name="MarkerCountText"
+                               Text="0 markers"
+                               FontSize="11"
+                               Foreground="{DynamicResource SecondaryForegroundBrush}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,16,0"/>
+
+                    <TextBlock Grid.Column="2"
+                               x:Name="TempoText"
+                               Text="BPM: ---"
+                               FontSize="11"
+                               Foreground="{DynamicResource ForegroundBrush}"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Margin="0,0,16,0"/>
+
+                    <TextBlock Grid.Column="3"
+                               x:Name="PositionText"
+                               Text="Position: 0.000s"
+                               FontSize="11"
+                               Foreground="{DynamicResource SecondaryForegroundBrush}"
+                               VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

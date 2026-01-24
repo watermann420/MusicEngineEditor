@@ -3,9 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:MusicEngineEditor.Controls"
         mc:Ignorable="d"
         Title="Recording Setup"
-        Width="500" Height="550"
+        Width="500" Height="700"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
@@ -399,6 +400,15 @@
                                     Margin="8,0,0,0"
                                     Padding="12,6"/>
                         </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Input Monitor Section -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="INPUT MONITORING" Style="{StaticResource SectionHeaderStyle}"/>
+                        <controls:InputMonitorPanel x:Name="InputMonitor"
+                                                    Margin="-12,-6"/>
                     </StackPanel>
                 </Border>
             </StackPanel>

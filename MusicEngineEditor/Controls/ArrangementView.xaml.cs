@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -43,6 +44,19 @@ public partial class ArrangementView : UserControl
     private WaveformData? _audioWaveformData;
     private string? _loadedAudioFilePath;
 
+    // Clips support
+    private readonly ObservableCollection<ClipViewModel> _clips = [];
+    private readonly Dictionary<Guid, UIElement> _clipElements = [];
+    private ClipViewModel? _selectedClip;
+    private ClipViewModel? _draggingClip;
+    private bool _isClipDragging;
+    private bool _isClipResizingLeft;
+    private bool _isClipResizingRight;
+    private Point _clipDragStartPoint;
+    private double _clipDragStartPosition;
+    private double _clipDragStartLength;
+    private double _clipContextMenuPosition;
+
     /// <summary>
     /// Gets or sets the view model.
     /// </summary>
@@ -79,11 +93,33 @@ public partial class ArrangementView : UserControl
     /// </summary>
     public event EventHandler<ArrangementSection>? SectionSelected;
 
+    /// <summary>
+    /// Event raised when a clip is selected.
+    /// </summary>
+    public event EventHandler<ClipViewModel>? ClipSelected;
+
+    /// <summary>
+    /// Gets the collection of clips in the arrangement.
+    /// </summary>
+    public ObservableCollection<ClipViewModel> Clips => _clips;
+
+    /// <summary>
+    /// Gets or sets whether the clips area is visible.
+    /// </summary>
+    public bool IsClipsAreaVisible
+    {
+        get => ClipsAreaBorder.Visibility == Visibility.Visible;
+        set => ClipsAreaBorder.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     public ArrangementView()
     {
         InitializeComponent();
         SizeChanged += (_, _) => RefreshView();
         Loaded += ArrangementView_Loaded;
+
+        // Subscribe to clips collection changes
+        _clips.CollectionChanged += (_, _) => RefreshClips();
     }
 
     private void ArrangementView_Loaded(object sender, RoutedEventArgs e)
@@ -128,7 +164,19 @@ public partial class ArrangementView : UserControl
     {
         RefreshTimeline();
         RefreshSections();
+        RefreshClips();
         UpdatePlayhead();
+        UpdateMarkerTrack();
+    }
+
+    private void UpdateMarkerTrack()
+    {
+        if (_viewModel == null) return;
+
+        var pixelsPerBeat = SectionCanvas.ActualWidth / _viewModel.VisibleBeats;
+        ArrangementMarkerTrack.PixelsPerBeat = pixelsPerBeat;
+        ArrangementMarkerTrack.ScrollOffset = _viewModel.ScrollOffset;
+        ArrangementMarkerTrack.PlayheadPosition = _viewModel.PlaybackPosition;
     }
 
     private void RefreshTimeline()
@@ -1026,6 +1074,439 @@ public partial class ArrangementView : UserControl
         {
             SyncWaveformToArrangement();
         }
+    }
+
+    #endregion
+
+    #region Clips Management
+
+    /// <summary>
+    /// Shows the clips area.
+    /// </summary>
+    public void ShowClipsArea()
+    {
+        IsClipsAreaVisible = true;
+        RefreshClips();
+    }
+
+    /// <summary>
+    /// Hides the clips area.
+    /// </summary>
+    public void HideClipsArea()
+    {
+        IsClipsAreaVisible = false;
+    }
+
+    /// <summary>
+    /// Adds an audio clip to the arrangement.
+    /// </summary>
+    /// <param name="name">The clip name.</param>
+    /// <param name="startPosition">Start position in beats.</param>
+    /// <param name="length">Length in beats.</param>
+    /// <param name="filePath">Optional file path for the audio.</param>
+    /// <param name="trackIndex">Track index (default 0).</param>
+    /// <returns>The created clip view model.</returns>
+    public ClipViewModel AddAudioClip(string name, double startPosition, double length, string? filePath = null, int trackIndex = 0)
+    {
+        var clip = ClipViewModel.CreateAudioClip(name, startPosition, length, filePath);
+        clip.TrackIndex = trackIndex;
+
+        // Subscribe to clip events
+        SubscribeToClipEvents(clip);
+
+        _clips.Add(clip);
+        ShowClipsArea();
+
+        return clip;
+    }
+
+    /// <summary>
+    /// Adds a MIDI clip to the arrangement.
+    /// </summary>
+    /// <param name="name">The clip name.</param>
+    /// <param name="startPosition">Start position in beats.</param>
+    /// <param name="length">Length in beats.</param>
+    /// <param name="trackIndex">Track index (default 0).</param>
+    /// <returns>The created clip view model.</returns>
+    public ClipViewModel AddMidiClip(string name, double startPosition, double length, int trackIndex = 0)
+    {
+        var clip = ClipViewModel.CreateMidiClip(name, startPosition, length);
+        clip.TrackIndex = trackIndex;
+
+        // Subscribe to clip events
+        SubscribeToClipEvents(clip);
+
+        _clips.Add(clip);
+        ShowClipsArea();
+
+        return clip;
+    }
+
+    /// <summary>
+    /// Removes a clip from the arrangement.
+    /// </summary>
+    /// <param name="clip">The clip to remove.</param>
+    public void RemoveClip(ClipViewModel clip)
+    {
+        UnsubscribeFromClipEvents(clip);
+        _clips.Remove(clip);
+
+        if (_clips.Count == 0)
+        {
+            HideClipsArea();
+        }
+    }
+
+    /// <summary>
+    /// Clears all clips from the arrangement.
+    /// </summary>
+    public void ClearClips()
+    {
+        foreach (var clip in _clips)
+        {
+            UnsubscribeFromClipEvents(clip);
+        }
+        _clips.Clear();
+        HideClipsArea();
+    }
+
+    private void SubscribeToClipEvents(ClipViewModel clip)
+    {
+        clip.DeleteRequested += Clip_DeleteRequested;
+        clip.DuplicateRequested += Clip_DuplicateRequested;
+        clip.SplitRequested += Clip_SplitRequested;
+        clip.PropertyChanged += Clip_PropertyChanged;
+    }
+
+    private void UnsubscribeFromClipEvents(ClipViewModel clip)
+    {
+        clip.DeleteRequested -= Clip_DeleteRequested;
+        clip.DuplicateRequested -= Clip_DuplicateRequested;
+        clip.SplitRequested -= Clip_SplitRequested;
+        clip.PropertyChanged -= Clip_PropertyChanged;
+    }
+
+    private void Clip_DeleteRequested(object? sender, ClipViewModel clip)
+    {
+        RemoveClip(clip);
+    }
+
+    private void Clip_DuplicateRequested(object? sender, ClipViewModel newClip)
+    {
+        SubscribeToClipEvents(newClip);
+        _clips.Add(newClip);
+    }
+
+    private void Clip_SplitRequested(object? sender, ClipSplitEventArgs e)
+    {
+        SplitClipAt(e.OriginalClip, e.SplitPosition);
+    }
+
+    private void Clip_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(ClipViewModel.StartPosition) or nameof(ClipViewModel.Length) or nameof(ClipViewModel.TrackIndex))
+        {
+            RefreshClips();
+        }
+    }
+
+    /// <summary>
+    /// Splits a clip at the specified position.
+    /// </summary>
+    /// <param name="clip">The clip to split.</param>
+    /// <param name="position">The position in beats.</param>
+    public void SplitClipAt(ClipViewModel clip, double position)
+    {
+        if (position <= clip.StartPosition || position >= clip.EndPosition)
+            return;
+
+        var splitOffset = position - clip.StartPosition;
+
+        // Create the second clip
+        var secondClip = new ClipViewModel(clip.ClipType)
+        {
+            Name = clip.Name + " (2)",
+            StartPosition = position,
+            Length = clip.Length - splitOffset,
+            TrackIndex = clip.TrackIndex,
+            Color = clip.Color,
+            SourceOffset = clip.SourceOffset + splitOffset,
+            OriginalLength = clip.OriginalLength,
+            FilePath = clip.FilePath,
+            WaveformData = clip.WaveformData,
+            NoteData = clip.NoteData,
+            IsLooping = clip.IsLooping,
+            LoopLength = clip.LoopLength,
+            FadeOutDuration = clip.FadeOutDuration // Transfer fade out to second clip
+        };
+
+        // Modify the first clip
+        clip.Length = splitOffset;
+        clip.FadeOutDuration = 0; // Remove fade out from first clip
+
+        SubscribeToClipEvents(secondClip);
+        _clips.Add(secondClip);
+    }
+
+    /// <summary>
+    /// Refreshes the clips display.
+    /// </summary>
+    public void RefreshClips()
+    {
+        // Clear existing clip elements
+        foreach (var element in _clipElements.Values)
+        {
+            ClipsCanvas.Children.Remove(element);
+        }
+        _clipElements.Clear();
+
+        if (_viewModel == null || ClipsCanvas.ActualWidth <= 0 || !IsClipsAreaVisible)
+            return;
+
+        var pixelsPerBeat = ClipsCanvas.ActualWidth / _viewModel.VisibleBeats;
+
+        // Group clips by track
+        var clipsByTrack = new Dictionary<int, List<ClipViewModel>>();
+        foreach (var clip in _clips)
+        {
+            if (!clipsByTrack.ContainsKey(clip.TrackIndex))
+            {
+                clipsByTrack[clip.TrackIndex] = [];
+            }
+            clipsByTrack[clip.TrackIndex].Add(clip);
+        }
+
+        var trackHeight = 60.0;
+        var trackY = 0.0;
+
+        foreach (var trackClips in clipsByTrack.Values)
+        {
+            foreach (var clip in trackClips)
+            {
+                var element = CreateClipElement(clip);
+                _clipElements[clip.Guid] = element;
+                ClipsCanvas.Children.Add(element);
+                PositionClipElement(clip, element, pixelsPerBeat, trackY, trackHeight);
+            }
+            trackY += trackHeight;
+        }
+
+        // Update canvas height
+        ClipsCanvas.Height = Math.Max(80, trackY);
+    }
+
+    private UIElement CreateClipElement(ClipViewModel clip)
+    {
+        if (clip.ClipType == ClipType.Audio)
+        {
+            var audioClipControl = new AudioClipControl
+            {
+                Clip = clip,
+                IsSelected = clip.IsSelected,
+                PlayheadPosition = _viewModel?.PlaybackPosition ?? 0
+            };
+
+            audioClipControl.ClipSelected += ClipControl_ClipSelected;
+            audioClipControl.ClipMoved += ClipControl_ClipMoved;
+            audioClipControl.ClipResized += ClipControl_ClipResized;
+            audioClipControl.SplitRequested += ClipControl_SplitRequested;
+
+            if (clip.WaveformData != null)
+            {
+                audioClipControl.WaveformData = clip.WaveformData;
+            }
+
+            return audioClipControl;
+        }
+        else
+        {
+            var midiClipControl = new MidiClipControl
+            {
+                Clip = clip,
+                IsSelected = clip.IsSelected,
+                PlayheadPosition = _viewModel?.PlaybackPosition ?? 0
+            };
+
+            midiClipControl.ClipSelected += ClipControl_ClipSelected;
+            midiClipControl.ClipMoved += ClipControl_ClipMoved;
+            midiClipControl.ClipResized += ClipControl_ClipResized;
+            midiClipControl.SplitRequested += ClipControl_SplitRequested;
+
+            if (clip.NoteData != null)
+            {
+                midiClipControl.NoteData = clip.NoteData;
+            }
+
+            return midiClipControl;
+        }
+    }
+
+    private void PositionClipElement(ClipViewModel clip, UIElement element, double pixelsPerBeat, double trackY, double trackHeight)
+    {
+        var x = (clip.StartPosition - (_viewModel?.ScrollOffset ?? 0)) * pixelsPerBeat;
+        var width = clip.Length * pixelsPerBeat;
+
+        Canvas.SetLeft(element, x);
+        Canvas.SetTop(element, trackY);
+
+        if (element is FrameworkElement fe)
+        {
+            fe.Width = Math.Max(20, width);
+            fe.Height = trackHeight - 4;
+        }
+    }
+
+    private void ClipControl_ClipSelected(object? sender, ClipViewModel clip)
+    {
+        // Deselect all other clips
+        foreach (var c in _clips)
+        {
+            c.IsSelected = c == clip;
+        }
+
+        _selectedClip = clip;
+        ClipSelected?.Invoke(this, clip);
+    }
+
+    private void ClipControl_ClipMoved(object? sender, ClipMovedEventArgs e)
+    {
+        RefreshClips();
+    }
+
+    private void ClipControl_ClipResized(object? sender, ClipResizedEventArgs e)
+    {
+        RefreshClips();
+    }
+
+    private void ClipControl_SplitRequested(object? sender, ClipSplitRequestedEventArgs e)
+    {
+        SplitClipAt(e.Clip, e.SplitPosition);
+    }
+
+    private void ClipsCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        // Double-click to seek
+        if (e.ClickCount == 2)
+        {
+            var position = PositionToBeatsInClips(e.GetPosition(ClipsCanvas).X);
+            SeekRequested?.Invoke(this, position);
+            return;
+        }
+
+        // Single click - deselect clips if clicking in empty area
+        var hitClip = GetClipAtPosition(e.GetPosition(ClipsCanvas));
+        if (hitClip == null)
+        {
+            foreach (var clip in _clips)
+            {
+                clip.IsSelected = false;
+            }
+            _selectedClip = null;
+        }
+    }
+
+    private void ClipsCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        _isClipDragging = false;
+        _isClipResizingLeft = false;
+        _isClipResizingRight = false;
+        _draggingClip = null;
+    }
+
+    private void ClipsCanvas_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (_draggingClip != null && e.LeftButton == MouseButtonState.Pressed && !_draggingClip.IsLocked)
+        {
+            var currentPoint = e.GetPosition(ClipsCanvas);
+            var deltaX = currentPoint.X - _clipDragStartPoint.X;
+
+            if (!_isClipDragging && Math.Abs(deltaX) > 5)
+            {
+                _isClipDragging = true;
+            }
+
+            if (_isClipDragging)
+            {
+                var pixelsPerBeat = ClipsCanvas.ActualWidth / (_viewModel?.VisibleBeats ?? 64);
+                var deltaBeat = deltaX / pixelsPerBeat;
+
+                if (_isClipResizingLeft)
+                {
+                    var newStart = _clipDragStartPosition + deltaBeat;
+                    newStart = Math.Round(newStart * 4) / 4; // Snap to quarter
+                    _draggingClip.ResizeLeft(Math.Max(0, newStart));
+                }
+                else if (_isClipResizingRight)
+                {
+                    var newLength = _clipDragStartLength + deltaBeat;
+                    newLength = Math.Round(newLength * 4) / 4;
+                    _draggingClip.Resize(Math.Max(0.25, newLength));
+                }
+                else
+                {
+                    var newPosition = _clipDragStartPosition + deltaBeat;
+                    newPosition = Math.Round(newPosition * 4) / 4;
+                    _draggingClip.StartPosition = Math.Max(0, newPosition);
+                }
+
+                RefreshClips();
+            }
+        }
+    }
+
+    private void ClipsCanvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _clipContextMenuPosition = PositionToBeatsInClips(e.GetPosition(ClipsCanvas).X);
+    }
+
+    private double PositionToBeatsInClips(double x)
+    {
+        if (_viewModel == null || ClipsCanvas.ActualWidth <= 0)
+            return 0;
+
+        var pixelsPerBeat = ClipsCanvas.ActualWidth / _viewModel.VisibleBeats;
+        return (x / pixelsPerBeat) + _viewModel.ScrollOffset;
+    }
+
+    private ClipViewModel? GetClipAtPosition(Point point)
+    {
+        var beat = PositionToBeatsInClips(point.X);
+
+        foreach (var clip in _clips)
+        {
+            if (beat >= clip.StartPosition && beat < clip.EndPosition)
+            {
+                return clip;
+            }
+        }
+
+        return null;
+    }
+
+    private void AddAudioClip_Click(object sender, RoutedEventArgs e)
+    {
+        var position = Math.Round(_clipContextMenuPosition * 4) / 4;
+        var clip = AddAudioClip("Audio Clip", position, 4.0);
+
+        // In a full implementation, show a file dialog to load audio
+    }
+
+    private void AddMidiClip_Click(object sender, RoutedEventArgs e)
+    {
+        var position = Math.Round(_clipContextMenuPosition * 4) / 4;
+        var clip = AddMidiClip("MIDI Clip", position, 4.0);
+
+        // In a full implementation, open piano roll editor
+    }
+
+    private void PasteClip_Click(object sender, RoutedEventArgs e)
+    {
+        // In a full implementation, paste clip from clipboard
+    }
+
+    private void ArrangementMarkerTrack_PlayheadRequested(object? sender, double position)
+    {
+        SeekRequested?.Invoke(this, position);
     }
 
     #endregion

@@ -1,0 +1,343 @@
+<UserControl x:Class="MusicEngineEditor.Controls.AutomationPointEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="200" d:DesignWidth="280"
+             Background="#252628"
+             BorderBrush="#393B40"
+             BorderThickness="1">
+
+    <UserControl.Resources>
+        <!-- Theme Colors -->
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#252628"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#393B40"/>
+        <SolidColorBrush x:Key="ForegroundBrush" Color="#BCBEC4"/>
+        <SolidColorBrush x:Key="SecondaryForegroundBrush" Color="#6F737A"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#4B6EAF"/>
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#5A7FC4"/>
+        <SolidColorBrush x:Key="InputBackgroundBrush" Color="#1E1F22"/>
+        <SolidColorBrush x:Key="DeleteBrush" Color="#C75450"/>
+        <SolidColorBrush x:Key="DeleteHoverBrush" Color="#D96560"/>
+
+        <!-- TextBox Style -->
+        <Style x:Key="EditorTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="{StaticResource InputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="CaretBrush" Value="{StaticResource ForegroundBrush}"/>
+            <Setter Property="SelectionBrush" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ComboBox Style -->
+        <Style x:Key="EditorComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="{StaticResource InputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Height" Value="28"/>
+        </Style>
+
+        <!-- Button Style -->
+        <Style x:Key="EditorButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3A5A9F"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Delete Button Style -->
+        <Style x:Key="DeleteButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource DeleteBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource DeleteHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#A84440"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0"
+                   Text="Edit Point"
+                   FontSize="14"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource ForegroundBrush}"
+                   Margin="0,0,0,12"/>
+
+        <!-- Time Input -->
+        <Grid Grid.Row="1" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0"
+                       Text="Time:"
+                       Foreground="{StaticResource SecondaryForegroundBrush}"
+                       VerticalAlignment="Center"
+                       FontSize="11"/>
+
+            <TextBox x:Name="TimeTextBox"
+                     Grid.Column="1"
+                     Style="{StaticResource EditorTextBoxStyle}"
+                     Text="0.000"
+                     TextChanged="TimeTextBox_TextChanged"
+                     PreviewKeyDown="TextBox_PreviewKeyDown"/>
+
+            <ComboBox x:Name="TimeFormatCombo"
+                      Grid.Column="2"
+                      Style="{StaticResource EditorComboBoxStyle}"
+                      Width="80"
+                      Margin="4,0,0,0"
+                      SelectedIndex="0"
+                      SelectionChanged="TimeFormatCombo_SelectionChanged"
+                      ToolTip="Time format">
+                <ComboBoxItem Content="Beats"/>
+                <ComboBoxItem Content="Bar:Beat"/>
+                <ComboBoxItem Content="Seconds"/>
+            </ComboBox>
+        </Grid>
+
+        <!-- Value Input -->
+        <Grid Grid.Row="2" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0"
+                       Text="Value:"
+                       Foreground="{StaticResource SecondaryForegroundBrush}"
+                       VerticalAlignment="Center"
+                       FontSize="11"/>
+
+            <TextBox x:Name="ValueTextBox"
+                     Grid.Column="1"
+                     Style="{StaticResource EditorTextBoxStyle}"
+                     Text="0.000"
+                     TextChanged="ValueTextBox_TextChanged"
+                     PreviewKeyDown="TextBox_PreviewKeyDown"/>
+
+            <TextBlock x:Name="UnitText"
+                       Grid.Column="2"
+                       Text=""
+                       Foreground="{StaticResource SecondaryForegroundBrush}"
+                       VerticalAlignment="Center"
+                       FontSize="11"
+                       Width="80"
+                       Margin="8,0,0,0"/>
+        </Grid>
+
+        <!-- Normalized Value Slider -->
+        <Grid Grid.Row="3" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0"
+                       Foreground="{StaticResource SecondaryForegroundBrush}"
+                       VerticalAlignment="Center"
+                       FontSize="11"/>
+
+            <Slider x:Name="ValueSlider"
+                    Grid.Column="1"
+                    Minimum="0"
+                    Maximum="1"
+                    Value="0.5"
+                    VerticalAlignment="Center"
+                    ValueChanged="ValueSlider_ValueChanged"/>
+
+            <TextBlock x:Name="PercentText"
+                       Grid.Column="2"
+                       Text="50%"
+                       Foreground="{StaticResource SecondaryForegroundBrush}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Right"
+                       FontSize="10"/>
+        </Grid>
+
+        <!-- Curve Type -->
+        <Grid Grid.Row="4" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0"
+                       Text="Curve:"
+                       Foreground="{StaticResource SecondaryForegroundBrush}"
+                       VerticalAlignment="Center"
+                       FontSize="11"/>
+
+            <ComboBox x:Name="CurveTypeCombo"
+                      Grid.Column="1"
+                      Style="{StaticResource EditorComboBoxStyle}"
+                      SelectedIndex="0"
+                      SelectionChanged="CurveTypeCombo_SelectionChanged">
+                <ComboBoxItem Content="Linear"/>
+                <ComboBoxItem Content="Bezier"/>
+                <ComboBoxItem Content="Step"/>
+                <ComboBoxItem Content="Exponential"/>
+                <ComboBoxItem Content="Logarithmic"/>
+                <ComboBoxItem Content="S-Curve"/>
+                <ComboBoxItem Content="Fast Attack"/>
+                <ComboBoxItem Content="Slow Attack"/>
+            </ComboBox>
+        </Grid>
+
+        <!-- Bezier Controls (shown only when Bezier is selected) -->
+        <StackPanel x:Name="BezierControls"
+                    Grid.Row="5"
+                    Visibility="Collapsed"
+                    Margin="0,4,0,0">
+            <TextBlock Text="Bezier Tension"
+                       Foreground="{StaticResource SecondaryForegroundBrush}"
+                       FontSize="10"
+                       Margin="60,0,0,4"/>
+
+            <Grid Margin="0,0,0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="40"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Text="Tension:"
+                           Foreground="{StaticResource SecondaryForegroundBrush}"
+                           VerticalAlignment="Center"
+                           FontSize="11"/>
+
+                <Slider x:Name="TensionSlider"
+                        Grid.Column="1"
+                        Minimum="-1"
+                        Maximum="1"
+                        Value="0"
+                        VerticalAlignment="Center"
+                        ValueChanged="TensionSlider_ValueChanged"/>
+
+                <TextBlock x:Name="TensionText"
+                           Grid.Column="2"
+                           Text="0.00"
+                           Foreground="{StaticResource SecondaryForegroundBrush}"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Right"
+                           FontSize="10"/>
+            </Grid>
+        </StackPanel>
+
+        <!-- Buttons -->
+        <Grid Grid.Row="6" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button x:Name="DeleteButton"
+                    Grid.Column="0"
+                    Style="{StaticResource DeleteButtonStyle}"
+                    Content="Delete"
+                    HorizontalAlignment="Left"
+                    Click="DeleteButton_Click"/>
+
+            <Button x:Name="CancelButton"
+                    Grid.Column="1"
+                    Style="{StaticResource EditorButtonStyle}"
+                    Content="Cancel"
+                    Background="#3C3F41"
+                    Margin="0,0,8,0"
+                    Click="CancelButton_Click"/>
+
+            <Button x:Name="ApplyButton"
+                    Grid.Column="2"
+                    Style="{StaticResource EditorButtonStyle}"
+                    Content="Apply"
+                    Click="ApplyButton_Click"/>
+        </Grid>
+    </Grid>
+</UserControl>

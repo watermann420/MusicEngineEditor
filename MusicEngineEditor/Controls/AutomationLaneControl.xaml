@@ -145,6 +145,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
@@ -169,17 +170,33 @@
                                MaxWidth="100"/>
                 </StackPanel>
 
+                <!-- Parameter Selector -->
+                <ComboBox x:Name="ParameterSelectorCombo"
+                          Grid.Row="1"
+                          Style="{StaticResource CurveTypeComboStyle}"
+                          Height="22"
+                          FontSize="10"
+                          Margin="0,0,0,4"
+                          SelectionChanged="ParameterSelectorCombo_SelectionChanged"
+                          ToolTip="Select parameter to automate">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayName}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
                 <!-- Target Info -->
                 <TextBlock x:Name="TargetInfoText"
-                           Grid.Row="1"
+                           Grid.Row="2"
                            Text="Target: None"
                            FontSize="10"
                            Foreground="{StaticResource SecondaryForegroundBrush}"
                            TextTrimming="CharacterEllipsis"
-                           Margin="0,0,0,6"/>
+                           Margin="0,0,0,4"/>
 
                 <!-- Mute/Solo/Arm Buttons -->
-                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,6">
+                <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,4">
                     <ToggleButton x:Name="MuteButton"
                                   Style="{StaticResource MuteToggleStyle}"
                                   Content="M"
@@ -197,10 +214,17 @@
                                   Content="R"
                                   ToolTip="Arm for Recording"
                                   Click="ArmButton_Click"/>
+                    <ToggleButton x:Name="ShowHideButton"
+                                  Style="{StaticResource ToggleButtonStyle}"
+                                  Content="V"
+                                  ToolTip="Show/Hide Lane"
+                                  IsChecked="True"
+                                  Click="ShowHideButton_Click"
+                                  Margin="4,0,0,0"/>
                 </StackPanel>
 
                 <!-- Value Display -->
-                <StackPanel Grid.Row="3" VerticalAlignment="Center">
+                <StackPanel Grid.Row="4" VerticalAlignment="Center">
                     <TextBlock x:Name="CurrentValueText"
                                Text="0.000"
                                FontSize="18"
@@ -217,7 +241,7 @@
 
                 <!-- Curve Type Selector -->
                 <ComboBox x:Name="CurveTypeCombo"
-                          Grid.Row="4"
+                          Grid.Row="5"
                           Style="{StaticResource CurveTypeComboStyle}"
                           SelectedIndex="0"
                           SelectionChanged="CurveTypeCombo_SelectionChanged"
