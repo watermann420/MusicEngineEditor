@@ -596,31 +596,57 @@ public partial class PianoRollView : UserControl
 
     private void OnPianoKeyPressed(object sender, NoteEventArgs e)
     {
-        _viewModel.RequestNotePreview(e.Note, 100);
+        if (_viewModel.NotePreviewEnabled)
+        {
+            // Use StartNote for piano keys so they sustain while held
+            NotePreviewService.Instance.StartNote(e.Note, 100);
+        }
     }
 
     private void OnPianoKeyReleased(object sender, NoteEventArgs e)
     {
-        _viewModel.RequestNotePreviewStop(e.Note);
+        // Always stop the note on release, regardless of preview enabled state
+        NotePreviewService.Instance.StopNote(e.Note);
     }
 
     /// <summary>
-    /// Plays a note preview sound.
+    /// Plays a note preview sound using the NotePreviewService.
     /// </summary>
     /// <param name="midiNote">The MIDI note number.</param>
     /// <param name="velocity">The velocity.</param>
     /// <param name="isNoteOff">Whether this is a note-off event.</param>
     private void PlayNotePreview(int midiNote, int velocity, bool isNoteOff)
     {
-        // TODO: Integrate with audio engine for actual sound playback
-        // For now, this is a placeholder that could be connected to:
-        // - NAudio MIDI output
-        // - Internal synthesizer
-        // - VST plugin
-        System.Diagnostics.Debug.WriteLine(
-            isNoteOff
-                ? $"Note Off: {PianoRollNote.GetNoteName(midiNote)}"
-                : $"Note On: {PianoRollNote.GetNoteName(midiNote)} @ velocity {velocity}");
+        try
+        {
+            var previewService = NotePreviewService.Instance;
+
+            if (isNoteOff)
+            {
+                // Stop the note
+                previewService.StopNote(midiNote);
+            }
+            else
+            {
+                // Play the note (StartNote for keys held down, PlayNote for clicks)
+                // For piano keyboard, use StartNote so release can trigger StopNote
+                // For drawing notes, use PlayNote with auto-off
+                if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+                {
+                    // Sustained note - will be stopped manually
+                    previewService.StartNote(midiNote, velocity);
+                }
+                else
+                {
+                    // Quick preview with auto-off
+                    previewService.PlayNote(midiNote, velocity);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[NotePreview] Error: {ex.Message}");
+        }
     }
 
     #endregion

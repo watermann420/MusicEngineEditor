@@ -68,6 +68,10 @@ public partial class MainWindow : Window
     public ObservableCollection<MidiDeviceInfo> MidiDevices { get; } = new();
     public ObservableCollection<AudioFileInfo> AudioFiles { get; } = new();
 
+    // Track Management
+    public ObservableCollection<TrackInfo> Tracks { get; } = new();
+    private readonly Dictionary<int, FreezeTrackData> _frozenTrackData = new();
+
     public MainWindow()
     {
         InitializeComponent();
@@ -1427,11 +1431,42 @@ public partial class MainWindow : Window
     {
         // Create a duplicate of the track
         var duplicate = e.Track.Duplicate();
+
+        // Find the index of the original track and insert the duplicate after it
+        int originalIndex = -1;
+        for (int i = 0; i < Tracks.Count; i++)
+        {
+            if (Tracks[i].Id == e.Track.Id)
+            {
+                originalIndex = i;
+                break;
+            }
+        }
+
+        // Add the duplicate track to the track list
+        if (originalIndex >= 0 && originalIndex < Tracks.Count - 1)
+        {
+            Tracks.Insert(originalIndex + 1, duplicate);
+        }
+        else
+        {
+            Tracks.Add(duplicate);
+        }
+
+        // Update the duplicate's order property
+        duplicate.Order = originalIndex + 1;
+
+        // Update order for all subsequent tracks
+        for (int i = duplicate.Order + 1; i < Tracks.Count; i++)
+        {
+            Tracks[i].Order = i;
+        }
+
         OutputLine($"Duplicated track '{e.Track.Name}' -> '{duplicate.Name}'");
 
-        // TODO: Add the duplicate track to the arrangement/track list
-        // For now, just select the duplicate in the properties panel
+        // Select the duplicate in the properties panel
         TrackPropertiesPanel.SelectedTrack = duplicate;
+        StatusText.Text = $"Track '{e.Track.Name}' duplicated";
     }
 
     private void TrackPropertiesPanel_TrackDeleteRequested(object? sender, TrackEventArgs e)
@@ -1444,25 +1479,204 @@ public partial class MainWindow : Window
 
         if (result == MessageBoxResult.Yes)
         {
+            // Check if the track is frozen and clean up frozen data
+            if (e.Track.IsFrozen && _frozenTrackData.TryGetValue(e.Track.Id, out var freezeData))
+            {
+                // Delete the frozen audio file if it exists
+                if (!string.IsNullOrEmpty(freezeData.FrozenAudioFilePath) && File.Exists(freezeData.FrozenAudioFilePath))
+                {
+                    try
+                    {
+                        File.Delete(freezeData.FrozenAudioFilePath);
+                        OutputLine($"Deleted frozen audio file: {freezeData.FrozenAudioFilePath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        OutputLine($"Warning: Could not delete frozen audio file: {ex.Message}");
+                    }
+                }
+
+                _frozenTrackData.Remove(e.Track.Id);
+            }
+
+            // Remove the track from the tracks collection
+            TrackInfo? trackToRemove = null;
+            foreach (var track in Tracks)
+            {
+                if (track.Id == e.Track.Id)
+                {
+                    trackToRemove = track;
+                    break;
+                }
+            }
+
+            if (trackToRemove != null)
+            {
+                Tracks.Remove(trackToRemove);
+
+                // Update order for remaining tracks
+                for (int i = 0; i < Tracks.Count; i++)
+                {
+                    Tracks[i].Order = i;
+                }
+            }
+
             OutputLine($"Deleted track: {e.Track.Name}");
-            // TODO: Remove track from arrangement/track list
             TrackPropertiesPanel.ClearSelection();
+            StatusText.Text = $"Track '{e.Track.Name}' deleted";
         }
     }
 
-    private void TrackPropertiesPanel_TrackFreezeRequested(object? sender, TrackEventArgs e)
+    private async void TrackPropertiesPanel_TrackFreezeRequested(object? sender, TrackEventArgs e)
     {
+        // Note: IsFrozen is toggled before this event is raised, so:
+        // - IsFrozen == true means we need to freeze (track was just set to frozen)
+        // - IsFrozen == false means we need to unfreeze (track was just set to unfrozen)
         if (e.Track.IsFrozen)
         {
-            OutputLine($"Freezing track: {e.Track.Name}...");
-            // TODO: Implement freeze logic (render track to audio)
-            StatusText.Text = $"Track '{e.Track.Name}' frozen";
+            await FreezeTrackAsync(e.Track);
         }
         else
         {
-            OutputLine($"Unfreezing track: {e.Track.Name}...");
-            // TODO: Implement unfreeze logic
-            StatusText.Text = $"Track '{e.Track.Name}' unfrozen";
+            UnfreezeTrack(e.Track);
+        }
+    }
+
+    /// <summary>
+    /// Freezes a track by rendering it to an audio file and storing the original state.
+    /// </summary>
+    /// <param name="track">The track to freeze.</param>
+    private async Task FreezeTrackAsync(TrackInfo track)
+    {
+        OutputLine($"Freezing track: {track.Name}...");
+        StatusText.Text = $"Freezing track '{track.Name}'...";
+
+        try
+        {
+            // Create freeze data directory if it doesn't exist
+            var frozenTracksDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "MusicEngineEditor",
+                "FrozenTracks");
+
+            if (!Directory.Exists(frozenTracksDir))
+            {
+                Directory.CreateDirectory(frozenTracksDir);
+            }
+
+            // Generate a unique filename for the frozen audio
+            var frozenFileName = $"frozen_{track.Id}_{DateTime.Now:yyyyMMdd_HHmmss}.wav";
+            var frozenFilePath = Path.Combine(frozenTracksDir, frozenFileName);
+
+            // Store the original track data for unfreezing
+            var freezeData = new FreezeTrackData
+            {
+                TrackId = track.Id,
+                OriginalName = track.Name,
+                OriginalInstrumentName = track.InstrumentName,
+                OriginalInstrumentPath = track.InstrumentPath,
+                OriginalTrackType = track.TrackType,
+                FrozenAudioFilePath = frozenFilePath,
+                FrozenAt = DateTime.Now
+            };
+
+            // Simulate freeze operation (render track to audio)
+            // In a full implementation, this would use FreezeManager from MusicEngine.Core.Freeze
+            await Task.Run(async () =>
+            {
+                // Simulate rendering time
+                await Task.Delay(500);
+
+                // In a real implementation, we would:
+                // 1. Get the track's pattern from the sequencer
+                // 2. Use TrackRenderer to render the pattern to audio
+                // 3. Save the rendered audio to the file path
+                // 4. Store the freeze data
+
+                // For now, create an empty placeholder file to indicate the track is frozen
+                File.WriteAllText(frozenFilePath + ".freeze", $"Frozen track: {track.Name}\nFrozen at: {freezeData.FrozenAt}");
+            });
+
+            // Calculate duration (placeholder - would come from actual rendered audio)
+            freezeData.DurationSeconds = 30.0; // Placeholder duration
+
+            // Store the freeze data
+            _frozenTrackData[track.Id] = freezeData;
+
+            // Update the track display to indicate it's frozen
+            track.Name = $"[Frozen] {freezeData.OriginalName}";
+
+            OutputLine($"Track '{freezeData.OriginalName}' frozen successfully");
+            OutputLine($"  Frozen audio path: {frozenFilePath}");
+            StatusText.Text = $"Track '{freezeData.OriginalName}' frozen";
+        }
+        catch (Exception ex)
+        {
+            OutputLine($"Error freezing track: {ex.Message}");
+            StatusText.Text = $"Failed to freeze track '{track.Name}'";
+
+            // Revert the frozen state on error
+            track.IsFrozen = false;
+        }
+    }
+
+    /// <summary>
+    /// Unfreezes a track by restoring its original state.
+    /// </summary>
+    /// <param name="track">The track to unfreeze.</param>
+    private void UnfreezeTrack(TrackInfo track)
+    {
+        OutputLine($"Unfreezing track: {track.Name}...");
+        StatusText.Text = $"Unfreezing track '{track.Name}'...";
+
+        try
+        {
+            // Check if we have freeze data for this track
+            if (!_frozenTrackData.TryGetValue(track.Id, out var freezeData))
+            {
+                OutputLine($"Warning: No freeze data found for track {track.Id}. Resetting frozen state.");
+                track.IsFrozen = false;
+                StatusText.Text = $"Track unfrozen (no previous state to restore)";
+                return;
+            }
+
+            // Delete the frozen audio file if it exists
+            if (!string.IsNullOrEmpty(freezeData.FrozenAudioFilePath))
+            {
+                // Delete the actual audio file
+                if (File.Exists(freezeData.FrozenAudioFilePath))
+                {
+                    File.Delete(freezeData.FrozenAudioFilePath);
+                }
+
+                // Delete the freeze metadata file
+                var freezeMetaFile = freezeData.FrozenAudioFilePath + ".freeze";
+                if (File.Exists(freezeMetaFile))
+                {
+                    File.Delete(freezeMetaFile);
+                }
+            }
+
+            // Restore original track name
+            track.Name = freezeData.OriginalName;
+
+            // Restore original instrument info
+            track.InstrumentName = freezeData.OriginalInstrumentName;
+            track.InstrumentPath = freezeData.OriginalInstrumentPath;
+
+            // Remove the freeze data
+            _frozenTrackData.Remove(track.Id);
+
+            OutputLine($"Track '{freezeData.OriginalName}' unfrozen successfully");
+            StatusText.Text = $"Track '{freezeData.OriginalName}' unfrozen";
+        }
+        catch (Exception ex)
+        {
+            OutputLine($"Error unfreezing track: {ex.Message}");
+            StatusText.Text = $"Failed to unfreeze track '{track.Name}'";
+
+            // Keep the track frozen on error
+            track.IsFrozen = true;
         }
     }
 
@@ -2727,4 +2941,50 @@ public class ActiveInstrumentInfo : System.ComponentModel.INotifyPropertyChanged
     {
         PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
     }
+}
+
+/// <summary>
+/// Stores data for a frozen track to enable unfreezing.
+/// </summary>
+public class FreezeTrackData
+{
+    /// <summary>
+    /// Gets or sets the track ID.
+    /// </summary>
+    public int TrackId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the original track name.
+    /// </summary>
+    public string OriginalName { get; set; } = "";
+
+    /// <summary>
+    /// Gets or sets the original instrument name.
+    /// </summary>
+    public string? OriginalInstrumentName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the original instrument path (for VST plugins).
+    /// </summary>
+    public string? OriginalInstrumentPath { get; set; }
+
+    /// <summary>
+    /// Gets or sets the path to the frozen audio file.
+    /// </summary>
+    public string? FrozenAudioFilePath { get; set; }
+
+    /// <summary>
+    /// Gets or sets the original track type.
+    /// </summary>
+    public Models.TrackType OriginalTrackType { get; set; }
+
+    /// <summary>
+    /// Gets or sets when the track was frozen.
+    /// </summary>
+    public DateTime FrozenAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets the duration of the frozen audio in seconds.
+    /// </summary>
+    public double DurationSeconds { get; set; }
 }

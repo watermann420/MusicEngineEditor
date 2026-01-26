@@ -6,12 +6,15 @@
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Win32;
 using MusicEngineEditor.Models;
+using MusicEngineEditor.Views.Dialogs;
 
 namespace MusicEngineEditor.ViewModels;
 
@@ -341,6 +344,326 @@ public partial class ProjectBrowserViewModel : ViewModelBase
     private async Task RefreshAsync()
     {
         await LoadProjectsAsync();
+    }
+
+    /// <summary>
+    /// Exports the selected project to a specified location.
+    /// </summary>
+    [RelayCommand]
+    private async Task ExportProjectAsync()
+    {
+        if (SelectedProject == null || !File.Exists(SelectedProject.FilePath))
+            return;
+
+        try
+        {
+            var saveDialog = new SaveFileDialog
+            {
+                Title = "Export Project",
+                FileName = Path.GetFileName(SelectedProject.FilePath),
+                Filter = "MusicEngine Project (*.mep)|*.mep|JSON Project (*.json)|*.json|ZIP Archive (*.zip)|*.zip|All Files (*.*)|*.*",
+                DefaultExt = Path.GetExtension(SelectedProject.FilePath),
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            };
+
+            if (saveDialog.ShowDialog() == true)
+            {
+                IsLoading = true;
+                StatusMessage = "Exporting project...";
+
+                await Task.Run(() =>
+                {
+                    if (saveDialog.FileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Export as ZIP archive
+                        var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+                        Directory.CreateDirectory(tempDir);
+
+                        try
+                        {
+                            // Copy the project file
+                            var destFile = Path.Combine(tempDir, Path.GetFileName(SelectedProject.FilePath));
+                            File.Copy(SelectedProject.FilePath, destFile);
+
+                            // Copy associated files (same directory, same base name)
+                            var sourceDir = Path.GetDirectoryName(SelectedProject.FilePath);
+                            var baseName = Path.GetFileNameWithoutExtension(SelectedProject.FilePath);
+                            if (sourceDir != null)
+                            {
+                                var associatedFiles = Directory.GetFiles(sourceDir)
+                                    .Where(f => Path.GetFileNameWithoutExtension(f).StartsWith(baseName, StringComparison.OrdinalIgnoreCase)
+                                             && f != SelectedProject.FilePath);
+
+                                foreach (var file in associatedFiles)
+                                {
+                                    File.Copy(file, Path.Combine(tempDir, Path.GetFileName(file)));
+                                }
+
+                                // Copy subdirectory if exists (e.g., audio files)
+                                var subDir = Path.Combine(sourceDir, baseName);
+                                if (Directory.Exists(subDir))
+                                {
+                                    CopyDirectory(subDir, Path.Combine(tempDir, baseName));
+                                }
+                            }
+
+                            // Create ZIP
+                            if (File.Exists(saveDialog.FileName))
+                                File.Delete(saveDialog.FileName);
+
+                            ZipFile.CreateFromDirectory(tempDir, saveDialog.FileName);
+                        }
+                        finally
+                        {
+                            // Cleanup temp directory
+                            if (Directory.Exists(tempDir))
+                                Directory.Delete(tempDir, true);
+                        }
+                    }
+                    else
+                    {
+                        // Export as copy
+                        File.Copy(SelectedProject.FilePath, saveDialog.FileName, overwrite: true);
+                    }
+                });
+
+                StatusMessage = "Project exported successfully";
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to export project: {ex.Message}", "Export Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+            StatusMessage = "Export failed";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Renames the selected project.
+    /// </summary>
+    [RelayCommand]
+    private async Task RenameProjectAsync()
+    {
+        if (SelectedProject == null || !File.Exists(SelectedProject.FilePath))
+            return;
+
+        // Show input dialog for new name
+        var newName = InputDialog.Show(
+            "Enter new project name:",
+            "Rename Project",
+            SelectedProject.Name,
+            Application.Current.MainWindow);
+
+        if (!string.IsNullOrWhiteSpace(newName))
+        {
+            newName = newName.Trim();
+
+            // Validate new name
+            if (newName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+            {
+                MessageBox.Show("The name contains invalid characters.", "Invalid Name",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                var dir = Path.GetDirectoryName(SelectedProject.FilePath) ?? _currentDirectory;
+                var ext = Path.GetExtension(SelectedProject.FilePath);
+                var newPath = Path.Combine(dir, newName + ext);
+
+                if (File.Exists(newPath))
+                {
+                    MessageBox.Show($"A project with the name '{newName}' already exists.", "Name Conflict",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                IsLoading = true;
+                StatusMessage = "Renaming project...";
+
+                await Task.Run(() =>
+                {
+                    // Rename the file
+                    File.Move(SelectedProject.FilePath, newPath);
+
+                    // Update the Name property in the JSON file if possible
+                    try
+                    {
+                        var json = File.ReadAllText(newPath);
+                        if (json.Contains("\"Name\""))
+                        {
+                            // Simple replacement - works for most JSON formats
+                            json = System.Text.RegularExpressions.Regex.Replace(
+                                json,
+                                @"""Name""\s*:\s*""[^""]*""",
+                                $"\"Name\": \"{newName}\"");
+                            File.WriteAllText(newPath, json);
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore errors updating the JSON content
+                    }
+                });
+
+                // Update the model
+                SelectedProject.Name = newName;
+                SelectedProject.FilePath = newPath;
+
+                // Refresh the list
+                await LoadProjectsAsync();
+                StatusMessage = "Project renamed successfully";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to rename project: {ex.Message}", "Rename Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                StatusMessage = "Rename failed";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Creates a ZIP archive of the selected project.
+    /// </summary>
+    [RelayCommand]
+    private async Task ArchiveProjectAsync()
+    {
+        if (SelectedProject == null || !File.Exists(SelectedProject.FilePath))
+            return;
+
+        try
+        {
+            var saveDialog = new SaveFileDialog
+            {
+                Title = "Archive Project",
+                FileName = $"{Path.GetFileNameWithoutExtension(SelectedProject.FilePath)}_archive.zip",
+                Filter = "ZIP Archive (*.zip)|*.zip",
+                DefaultExt = ".zip",
+                InitialDirectory = Path.GetDirectoryName(SelectedProject.FilePath) ?? _currentDirectory
+            };
+
+            if (saveDialog.ShowDialog() == true)
+            {
+                IsLoading = true;
+                StatusMessage = "Creating archive...";
+
+                await Task.Run(() =>
+                {
+                    var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+                    Directory.CreateDirectory(tempDir);
+
+                    try
+                    {
+                        var sourceDir = Path.GetDirectoryName(SelectedProject.FilePath);
+                        var baseName = Path.GetFileNameWithoutExtension(SelectedProject.FilePath);
+
+                        // Copy the main project file
+                        File.Copy(SelectedProject.FilePath, Path.Combine(tempDir, Path.GetFileName(SelectedProject.FilePath)));
+
+                        // Copy all associated files with the same base name
+                        if (sourceDir != null)
+                        {
+                            var associatedFiles = Directory.GetFiles(sourceDir)
+                                .Where(f => Path.GetFileNameWithoutExtension(f)
+                                    .StartsWith(baseName, StringComparison.OrdinalIgnoreCase)
+                                    && f != SelectedProject.FilePath);
+
+                            foreach (var file in associatedFiles)
+                            {
+                                File.Copy(file, Path.Combine(tempDir, Path.GetFileName(file)));
+                            }
+
+                            // Copy project subdirectory if exists (audio samples, etc.)
+                            var projectSubDir = Path.Combine(sourceDir, baseName);
+                            if (Directory.Exists(projectSubDir))
+                            {
+                                CopyDirectory(projectSubDir, Path.Combine(tempDir, baseName));
+                            }
+
+                            // Also check for common subdirectories
+                            string[] commonSubDirs = { "Audio", "Samples", "Presets", "Renders" };
+                            foreach (var subDir in commonSubDirs)
+                            {
+                                var fullSubDir = Path.Combine(sourceDir, subDir);
+                                if (Directory.Exists(fullSubDir))
+                                {
+                                    CopyDirectory(fullSubDir, Path.Combine(tempDir, subDir));
+                                }
+                            }
+                        }
+
+                        // Create the archive
+                        if (File.Exists(saveDialog.FileName))
+                            File.Delete(saveDialog.FileName);
+
+                        ZipFile.CreateFromDirectory(tempDir, saveDialog.FileName, CompressionLevel.Optimal, false);
+                    }
+                    finally
+                    {
+                        // Cleanup
+                        if (Directory.Exists(tempDir))
+                            Directory.Delete(tempDir, true);
+                    }
+                });
+
+                StatusMessage = "Archive created successfully";
+
+                // Ask if user wants to open the archive location
+                var result = MessageBox.Show(
+                    $"Archive created successfully.\n\nDo you want to open the folder containing the archive?",
+                    "Archive Complete",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Information);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "explorer.exe",
+                        Arguments = $"/select,\"{saveDialog.FileName}\"",
+                        UseShellExecute = true
+                    });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to create archive: {ex.Message}", "Archive Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+            StatusMessage = "Archive failed";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Recursively copies a directory.
+    /// </summary>
+    private static void CopyDirectory(string sourceDir, string destDir)
+    {
+        Directory.CreateDirectory(destDir);
+
+        foreach (var file in Directory.GetFiles(sourceDir))
+        {
+            File.Copy(file, Path.Combine(destDir, Path.GetFileName(file)));
+        }
+
+        foreach (var dir in Directory.GetDirectories(sourceDir))
+        {
+            CopyDirectory(dir, Path.Combine(destDir, Path.GetFileName(dir)));
+        }
     }
 
     /// <summary>

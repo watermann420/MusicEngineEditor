@@ -4,6 +4,8 @@
 // Description: ViewModel for transport controls.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -29,6 +31,14 @@ public partial class TransportViewModel : ViewModelBase, IDisposable
     private EventBus.SubscriptionToken? _playbackStoppedSubscription;
     private EventBus.SubscriptionToken? _bpmChangedSubscription;
     private bool _disposed;
+
+    // Tap tempo tracking
+    private readonly List<DateTime> _tapTimestamps = new();
+    private const int TapTempoMinTaps = 2;
+    private const int TapTempoMaxTaps = 8;
+    private const double TapTempoTimeoutSeconds = 2.0;
+    private const double TapTempoMinBpm = 30.0;
+    private const double TapTempoMaxBpm = 300.0;
 
     #endregion
 
@@ -485,13 +495,68 @@ public partial class TransportViewModel : ViewModelBase, IDisposable
     }
 
     /// <summary>
-    /// Taps tempo (would require timing logic).
+    /// Taps tempo to calculate BPM from consecutive taps.
+    /// Requires at least 2 taps within 2 seconds of each other.
+    /// Uses up to 8 recent taps for averaging.
     /// </summary>
     [RelayCommand]
     private void TapTempo()
     {
-        // TODO: Implement tap tempo calculation
-        StatusMessage = "Tap tempo not yet implemented";
+        var now = DateTime.UtcNow;
+
+        // Reset if too much time has passed since the last tap
+        if (_tapTimestamps.Count > 0)
+        {
+            var lastTap = _tapTimestamps[^1];
+            var timeSinceLastTap = (now - lastTap).TotalSeconds;
+
+            if (timeSinceLastTap > TapTempoTimeoutSeconds)
+            {
+                _tapTimestamps.Clear();
+                StatusMessage = "Tap tempo reset - tap again";
+            }
+        }
+
+        // Add current tap
+        _tapTimestamps.Add(now);
+
+        // Keep only the most recent taps for averaging
+        while (_tapTimestamps.Count > TapTempoMaxTaps)
+        {
+            _tapTimestamps.RemoveAt(0);
+        }
+
+        // Need at least 2 taps to calculate BPM
+        if (_tapTimestamps.Count < TapTempoMinTaps)
+        {
+            StatusMessage = $"Tap tempo: {_tapTimestamps.Count} tap(s) - keep tapping...";
+            return;
+        }
+
+        // Calculate average interval between taps
+        var intervals = new List<double>();
+        for (var i = 1; i < _tapTimestamps.Count; i++)
+        {
+            var interval = (_tapTimestamps[i] - _tapTimestamps[i - 1]).TotalSeconds;
+            intervals.Add(interval);
+        }
+
+        var averageInterval = intervals.Average();
+
+        // Convert interval to BPM (beats per minute)
+        // interval in seconds -> 60 / interval = BPM
+        var calculatedBpm = 60.0 / averageInterval;
+
+        // Clamp to reasonable BPM range
+        calculatedBpm = Math.Clamp(calculatedBpm, TapTempoMinBpm, TapTempoMaxBpm);
+
+        // Round to one decimal place for cleaner display
+        calculatedBpm = Math.Round(calculatedBpm, 1);
+
+        // Set the BPM
+        SetBpm(calculatedBpm);
+
+        StatusMessage = $"Tap tempo: {calculatedBpm:F1} BPM ({_tapTimestamps.Count} taps)";
     }
 
     /// <summary>
