@@ -77,20 +77,6 @@ seq.Play();
 
 ---
 
-## Inline Sliders (Strudel-style)
-
-Numbers in your code are interactive:
-
-```csharp
-seq.Bpm = 120;              // <- Drag to change BPM!
-synth.FilterCutoff = 0.5f;  // <- Drag to adjust filter!
-```
-
-- **Drag left/right** on any number to change its value
-- **Shift+Drag** for fine control
-- **Ctrl+Drag** for coarse control
-
----
 
 ## VCV Rack-style Modulation
 
