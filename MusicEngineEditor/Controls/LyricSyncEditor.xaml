@@ -1,0 +1,315 @@
+<UserControl x:Class="MusicEngineEditor.Controls.LyricSyncEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="400" d:DesignWidth="600"
+             Background="{DynamicResource BackgroundBrush}">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+
+        <!-- Lyric Line Style -->
+        <Style x:Key="LyricLineStyle" TargetType="Border">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2A2D30"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Active Word Style -->
+        <Style x:Key="ActiveWordStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="150"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource PanelBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="12,8">
+            <DockPanel>
+                <!-- Left Section -->
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <Button x:Name="ImportButton"
+                            Content="Import"
+                            Padding="12,6"
+                            Margin="0,0,8,0"
+                            ToolTip="Import lyrics (TXT, LRC, SRT)"
+                            Click="OnImportClick"/>
+                    <Button x:Name="ExportButton"
+                            Content="Export"
+                            Padding="12,6"
+                            Margin="0,0,8,0"
+                            ToolTip="Export lyrics"
+                            Click="OnExportClick"/>
+
+                    <Separator Width="1" Background="{DynamicResource BorderBrush}" Margin="8,4"/>
+
+                    <ToggleButton x:Name="TapSyncButton"
+                                  Content="Tap Sync"
+                                  Padding="12,6"
+                                  Margin="0,0,8,0"
+                                  ToolTip="Enable tap-to-sync mode"
+                                  Click="OnTapSyncToggle"/>
+
+                    <Button x:Name="AutoSyncButton"
+                            Content="Auto Sync"
+                            Padding="12,6"
+                            ToolTip="Automatically sync to markers"
+                            Click="OnAutoSyncClick"/>
+                </StackPanel>
+
+                <!-- Right Section -->
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                    <TextBlock Text="Mode:"
+                               Foreground="{DynamicResource SecondaryForegroundBrush}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0"/>
+                    <ComboBox x:Name="SyncModeComboBox"
+                              MinWidth="100"
+                              SelectionChanged="OnSyncModeChanged">
+                        <ComboBoxItem Content="Line" IsSelected="True"/>
+                        <ComboBoxItem Content="Word"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <Border/>
+            </DockPanel>
+        </Border>
+
+        <!-- Lyrics Editor -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Lyrics List -->
+            <ScrollViewer x:Name="LyricsScrollViewer"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl x:Name="LyricsItemsControl">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource LyricLineStyle}"
+                                    MouseLeftButtonDown="OnLyricLineClick"
+                                    Tag="{Binding}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Timestamp -->
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding TimeDisplay}"
+                                               FontFamily="Consolas"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource SecondaryForegroundBrush}"
+                                               VerticalAlignment="Center"/>
+
+                                    <!-- Lyric Text -->
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding Text}"
+                                               TextWrapping="Wrap"
+                                               VerticalAlignment="Center"/>
+
+                                    <!-- Edit Button -->
+                                    <Button Grid.Column="2"
+                                            Content="Edit"
+                                            Padding="8,4"
+                                            Margin="8,0,0,0"
+                                            Click="OnEditLineClick"
+                                            Tag="{Binding}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- Side Panel -->
+            <Border Grid.Column="1"
+                    Width="200"
+                    Background="{DynamicResource PanelBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1,0,0,0"
+                    Padding="12">
+                <StackPanel>
+                    <TextBlock Text="Line Editor"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource BrightForegroundBrush}"
+                               Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Time:"
+                               FontSize="11"
+                               Foreground="{DynamicResource SecondaryForegroundBrush}"
+                               Margin="0,0,0,4"/>
+                    <TextBox x:Name="TimeEditTextBox"
+                             Padding="8,6"
+                             Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Duration:"
+                               FontSize="11"
+                               Foreground="{DynamicResource SecondaryForegroundBrush}"
+                               Margin="0,0,0,4"/>
+                    <TextBox x:Name="DurationEditTextBox"
+                             Padding="8,6"
+                             Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Text:"
+                               FontSize="11"
+                               Foreground="{DynamicResource SecondaryForegroundBrush}"
+                               Margin="0,0,0,4"/>
+                    <TextBox x:Name="TextEditTextBox"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             Height="60"
+                             Padding="8,6"
+                             Margin="0,0,0,12"/>
+
+                    <Button x:Name="ApplyEditButton"
+                            Content="Apply"
+                            Padding="12,8"
+                            HorizontalAlignment="Stretch"
+                            Click="OnApplyEditClick"/>
+
+                    <Separator Background="{DynamicResource BorderBrush}" Margin="0,16"/>
+
+                    <Button Content="Add Line"
+                            Padding="12,8"
+                            Margin="0,0,0,8"
+                            HorizontalAlignment="Stretch"
+                            Click="OnAddLineClick"/>
+                    <Button Content="Delete Line"
+                            Padding="12,8"
+                            HorizontalAlignment="Stretch"
+                            Click="OnDeleteLineClick"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Splitter -->
+        <GridSplitter Grid.Row="2"
+                      Height="5"
+                      HorizontalAlignment="Stretch"
+                      Background="{DynamicResource BorderBrush}"/>
+
+        <!-- Karaoke Preview -->
+        <Border Grid.Row="3"
+                Background="#1A1A1A">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Preview Header -->
+                <Border Grid.Row="0"
+                        Background="{DynamicResource PanelBackgroundBrush}"
+                        Padding="12,6">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Karaoke Preview"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource BrightForegroundBrush}"
+                                   VerticalAlignment="Center"/>
+                        <ToggleButton x:Name="PreviewPlayButton"
+                                      Content="Preview"
+                                      Padding="12,4"
+                                      Margin="16,0,0,0"
+                                      Click="OnPreviewPlayClick"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Preview Display -->
+                <Canvas x:Name="PreviewCanvas" Grid.Row="1" ClipToBounds="True">
+                    <!-- Previous line (faded) -->
+                    <TextBlock x:Name="PreviousLineText"
+                               FontSize="16"
+                               Foreground="#606060"
+                               Canvas.Left="20"/>
+
+                    <!-- Current line (highlighted) -->
+                    <TextBlock x:Name="CurrentLineText"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource ForegroundBrush}"
+                               Canvas.Left="20"/>
+
+                    <!-- Word highlight overlay -->
+                    <Border x:Name="WordHighlight"
+                            Background="{DynamicResource AccentBrush}"
+                            Opacity="0.3"
+                            CornerRadius="4"
+                            Visibility="Collapsed"/>
+
+                    <!-- Next line (faded) -->
+                    <TextBlock x:Name="NextLineText"
+                               FontSize="16"
+                               Foreground="#606060"
+                               Canvas.Left="20"/>
+                </Canvas>
+            </Grid>
+        </Border>
+
+        <!-- Tap Sync Overlay -->
+        <Border x:Name="TapSyncOverlay"
+                Grid.Row="0" Grid.RowSpan="4"
+                Background="#E0000000"
+                Visibility="Collapsed"
+                MouseLeftButtonDown="OnTapSyncTap"
+                KeyDown="OnTapSyncKeyDown"
+                Focusable="True">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock x:Name="TapSyncCurrentLine"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           Foreground="White"
+                           HorizontalAlignment="Center"
+                           TextWrapping="Wrap"
+                           MaxWidth="500"
+                           TextAlignment="Center"
+                           Margin="0,0,0,24"/>
+                <TextBlock Text="Tap or press SPACE to sync"
+                           FontSize="16"
+                           Foreground="#AAAAAA"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,8"/>
+                <TextBlock Text="Press ESC to cancel"
+                           FontSize="12"
+                           Foreground="#666666"
+                           HorizontalAlignment="Center"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,24,0,0">
+                    <TextBlock Text="Line: "
+                               Foreground="#888888"
+                               FontSize="14"/>
+                    <TextBlock x:Name="TapSyncProgress"
+                               Text="1 / 10"
+                               Foreground="{DynamicResource AccentBrush}"
+                               FontSize="14"
+                               FontWeight="SemiBold"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

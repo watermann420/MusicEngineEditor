@@ -68,6 +68,12 @@ public partial class MixerViewModel : ViewModelBase, IDisposable
     private bool _hasSoloedChannel;
 
     /// <summary>
+    /// Gets or sets whether any channel is currently muted.
+    /// </summary>
+    [ObservableProperty]
+    private bool _hasMutedChannel;
+
+    /// <summary>
     /// Gets or sets whether any bus is currently soloed.
     /// </summary>
     [ObservableProperty]
@@ -360,6 +366,7 @@ public partial class MixerViewModel : ViewModelBase, IDisposable
     public void UpdateEffectiveMuteStates()
     {
         HasSoloedChannel = Channels.Any(c => c.IsSoloed);
+        HasMutedChannel = Channels.Any(c => c.IsMuted);
 
         foreach (var channel in Channels)
         {

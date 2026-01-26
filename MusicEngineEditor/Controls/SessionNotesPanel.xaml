@@ -1,0 +1,417 @@
+<UserControl x:Class="MusicEngineEditor.Controls.SessionNotesPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="400" d:DesignWidth="350"
+             Background="{DynamicResource PanelBackgroundBrush}">
+
+    <UserControl.Resources>
+        <!-- Note Category Colors -->
+        <SolidColorBrush x:Key="CategoryIdea" Color="#4CAF50"/>
+        <SolidColorBrush x:Key="CategoryTodo" Color="#FF9800"/>
+        <SolidColorBrush x:Key="CategoryIssue" Color="#F44336"/>
+        <SolidColorBrush x:Key="CategoryMix" Color="#2196F3"/>
+        <SolidColorBrush x:Key="CategoryGeneral" Color="#9E9E9E"/>
+
+        <!-- Note Item Style -->
+        <Style x:Key="NoteItemStyle" TargetType="Border">
+            <Setter Property="Background" Value="#252526"/>
+            <Setter Property="BorderBrush" Value="#3F3F46"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#3C3F41"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Category Tag Style -->
+        <Style x:Key="CategoryTagStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+        </Style>
+
+        <!-- Toolbar Button Style -->
+        <Style x:Key="NotesToolbarButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryForegroundBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3C3F41"/>
+                                <Setter Property="Foreground" Value="{DynamicResource BrightForegroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#4B6EAF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Add Note Button Style -->
+        <Style x:Key="AddNoteButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#4CAF50"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#5DBF61"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#388E3C"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Border BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="6">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="12,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="Session Notes"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource BrightForegroundBrush}"
+                               VerticalAlignment="Center"/>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button x:Name="ExportButton"
+                                Style="{StaticResource NotesToolbarButtonStyle}"
+                                ToolTip="Export Notes"
+                                Click="ExportButton_Click">
+                            <Path Data="M 6,0 L 6,8 L 3,5 M 6,8 L 9,5 M 0,10 L 12,10"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  StrokeThickness="1.5"
+                                  Width="12" Height="12"/>
+                        </Button>
+                        <Button x:Name="ClearAllButton"
+                                Style="{StaticResource NotesToolbarButtonStyle}"
+                                ToolTip="Clear All Notes"
+                                Click="ClearAllButton_Click">
+                            <Path Data="M 2,2 L 10,10 M 10,2 L 2,10"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  StrokeThickness="1.5"
+                                  Width="12" Height="12"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Search Box -->
+            <Border Grid.Row="1"
+                    Background="{DynamicResource BackgroundBrush}"
+                    Padding="12,8">
+                <TextBox x:Name="SearchTextBox"
+                         Background="{DynamicResource EditorBackgroundBrush}"
+                         Foreground="{DynamicResource ForegroundBrush}"
+                         BorderBrush="{DynamicResource BorderBrush}"
+                         Padding="8,6"
+                         TextChanged="SearchTextBox_TextChanged">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TextBox">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="4">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Path Grid.Column="0"
+                                                      Data="M 6,0 A 6,6 0 1 1 5.99,0 M 10,10 L 14,14"
+                                                      Stroke="{DynamicResource SecondaryForegroundBrush}"
+                                                      StrokeThickness="1.5"
+                                                      Width="16" Height="16"
+                                                      Margin="8,0,4,0"
+                                                      VerticalAlignment="Center"/>
+                                                <ScrollViewer x:Name="PART_ContentHost"
+                                                              Grid.Column="1"
+                                                              Padding="{TemplateBinding Padding}"
+                                                              VerticalAlignment="Center"/>
+                                                <TextBlock x:Name="Placeholder"
+                                                           Grid.Column="1"
+                                                           Text="Search notes..."
+                                                           Foreground="{DynamicResource SecondaryForegroundBrush}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="8,0,0,0"
+                                                           IsHitTestVisible="False"
+                                                           Visibility="Collapsed"/>
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="Text" Value="">
+                                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                                            </Trigger>
+                                            <Trigger Property="Text" Value="{x:Null}">
+                                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+            </Border>
+
+            <!-- Category Filter -->
+            <Border Grid.Row="2"
+                    Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="12,6">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Filter:"
+                               Foreground="{DynamicResource SecondaryForegroundBrush}"
+                               FontSize="11"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0"/>
+                    <ComboBox x:Name="CategoryFilterCombo"
+                              Width="120"
+                              SelectedIndex="0"
+                              SelectionChanged="CategoryFilterCombo_SelectionChanged">
+                        <ComboBoxItem Content="All Categories"/>
+                        <ComboBoxItem Content="Ideas" Tag="Idea"/>
+                        <ComboBoxItem Content="To-Do" Tag="Todo"/>
+                        <ComboBoxItem Content="Issues" Tag="Issue"/>
+                        <ComboBoxItem Content="Mix Notes" Tag="Mix"/>
+                        <ComboBoxItem Content="General" Tag="General"/>
+                    </ComboBox>
+                </StackPanel>
+            </Border>
+
+            <!-- Notes List -->
+            <ScrollViewer Grid.Row="3"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl x:Name="NotesItemsControl">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource NoteItemStyle}"
+                                    MouseLeftButtonDown="NoteItem_MouseLeftButtonDown"
+                                    MouseLeftButtonUp="NoteItem_MouseLeftButtonUp">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Header: Timestamp and Category -->
+                                    <Grid Grid.Row="0" Margin="0,0,0,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Timestamp (clickable to jump) -->
+                                        <Border Grid.Column="0"
+                                                Background="#333337"
+                                                CornerRadius="3"
+                                                Padding="6,2"
+                                                Cursor="Hand"
+                                                ToolTip="Click to jump to this position">
+                                            <TextBlock Text="{Binding TimestampDisplay}"
+                                                       FontFamily="Consolas"
+                                                       FontSize="11"
+                                                       Foreground="#4A9EFF"/>
+                                        </Border>
+
+                                        <!-- Category Tag -->
+                                        <Border Grid.Column="2"
+                                                Style="{StaticResource CategoryTagStyle}"
+                                                Background="{Binding CategoryBrush}">
+                                            <TextBlock Text="{Binding Category}"
+                                                       FontSize="10"
+                                                       Foreground="White"/>
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- Note Content -->
+                                    <TextBlock Grid.Row="1"
+                                               Text="{Binding Content}"
+                                               Foreground="{DynamicResource ForegroundBrush}"
+                                               FontSize="12"
+                                               TextWrapping="Wrap"
+                                               MaxHeight="60"
+                                               TextTrimming="CharacterEllipsis"/>
+
+                                    <!-- Tags -->
+                                    <ItemsControl Grid.Row="2"
+                                                  ItemsSource="{Binding Tags}"
+                                                  Margin="0,6,0,0"
+                                                  Visibility="{Binding HasTags, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#333337"
+                                                        CornerRadius="2"
+                                                        Padding="4,1"
+                                                        Margin="0,0,4,2">
+                                                    <TextBlock Text="{Binding}"
+                                                               FontSize="10"
+                                                               Foreground="{DynamicResource SecondaryForegroundBrush}"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Grid>
+
+                                <!-- Context Menu -->
+                                <Border.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Jump to Position" Click="JumpToPositionMenuItem_Click"/>
+                                        <Separator/>
+                                        <MenuItem Header="Edit Note" Click="EditNoteMenuItem_Click"/>
+                                        <MenuItem Header="Delete Note" Click="DeleteNoteMenuItem_Click"/>
+                                        <Separator/>
+                                        <MenuItem Header="Copy Content" Click="CopyContentMenuItem_Click"/>
+                                    </ContextMenu>
+                                </Border.ContextMenu>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- Empty State -->
+            <TextBlock x:Name="EmptyStateText"
+                       Grid.Row="3"
+                       Text="No notes yet. Add a note to capture your ideas!"
+                       Foreground="{DynamicResource SecondaryForegroundBrush}"
+                       FontSize="12"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap"
+                       Margin="20"
+                       Visibility="Visible"/>
+
+            <!-- Add Note Panel -->
+            <Border Grid.Row="4"
+                    Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,1,0,0"
+                    Padding="12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Category and Tags -->
+                    <Grid Grid.Row="0" Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <ComboBox x:Name="NewNoteCategoryCombo"
+                                  Grid.Column="0"
+                                  Width="120"
+                                  HorizontalAlignment="Left"
+                                  SelectedIndex="0">
+                            <ComboBoxItem Content="Idea" Tag="Idea"/>
+                            <ComboBoxItem Content="To-Do" Tag="Todo"/>
+                            <ComboBoxItem Content="Issue" Tag="Issue"/>
+                            <ComboBoxItem Content="Mix Note" Tag="Mix"/>
+                            <ComboBoxItem Content="General" Tag="General"/>
+                        </ComboBox>
+
+                        <TextBox x:Name="TagsTextBox"
+                                 Grid.Column="1"
+                                 Width="100"
+                                 Background="{DynamicResource EditorBackgroundBrush}"
+                                 Foreground="{DynamicResource ForegroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"
+                                 Padding="6,4"
+                                 ToolTip="Tags (comma-separated)"/>
+                    </Grid>
+
+                    <!-- Note Input -->
+                    <TextBox x:Name="NewNoteTextBox"
+                             Grid.Row="1"
+                             Background="{DynamicResource EditorBackgroundBrush}"
+                             Foreground="{DynamicResource ForegroundBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"
+                             Padding="8,6"
+                             Height="60"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"
+                             KeyDown="NewNoteTextBox_KeyDown"/>
+
+                    <!-- Add Button -->
+                    <Button Grid.Row="2"
+                            Content="Add Note at Current Position"
+                            Style="{StaticResource AddNoteButtonStyle}"
+                            Margin="0,8,0,0"
+                            Click="AddNoteButton_Click"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

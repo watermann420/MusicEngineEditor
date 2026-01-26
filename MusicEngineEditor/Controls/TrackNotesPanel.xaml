@@ -1,0 +1,409 @@
+<UserControl x:Class="MusicEngineEditor.Controls.TrackNotesPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="400" d:DesignWidth="300"
+             Background="{DynamicResource PanelBackgroundBrush}">
+
+    <UserControl.Resources>
+        <!-- Expander Toggle Style -->
+        <Style x:Key="TrackNotesExpanderToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border Background="{TemplateBinding Background}" Padding="4">
+                            <Path x:Name="Arrow"
+                                  Data="M 0 0 L 6 4 L 0 8 Z"
+                                  Fill="{DynamicResource SecondaryForegroundBrush}"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  RenderTransformOrigin="0.5,0.5">
+                                <Path.RenderTransform>
+                                    <RotateTransform Angle="0"/>
+                                </Path.RenderTransform>
+                            </Path>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Arrow" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <RotateTransform Angle="90"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Arrow" Property="Fill" Value="{DynamicResource ForegroundBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Formatting Button Style -->
+        <Style x:Key="TrackNotesFormatButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryForegroundBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="3"
+                                Padding="2">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3C3F41"/>
+                                <Setter Property="Foreground" Value="{DynamicResource BrightForegroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#214283"/>
+                                <Setter Property="Foreground" Value="#4B9EFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Action Button Style -->
+        <Style x:Key="TrackNotesActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryForegroundBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3C3F41"/>
+                                <Setter Property="Foreground" Value="{DynamicResource BrightForegroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#4B6EAF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Timestamp Button Style -->
+        <Style x:Key="TimestampButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#1A4B6EAF"/>
+            <Setter Property="Foreground" Value="{DynamicResource LinkBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="4,1"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="2"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#334B6EAF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Track Note Item Template -->
+        <DataTemplate x:Key="TrackNoteItemTemplate">
+            <Border Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Margin="0,0,0,8"
+                    Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Track Header -->
+                    <Border Grid.Row="0"
+                            Background="#252628"
+                            CornerRadius="4,4,0,0"
+                            Padding="8,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Expand/Collapse Toggle -->
+                            <ToggleButton Grid.Column="0"
+                                          Style="{StaticResource TrackNotesExpanderToggleStyle}"
+                                          IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                          Width="16" Height="16"/>
+
+                            <!-- Track Color Indicator -->
+                            <Border Grid.Column="1"
+                                    Width="4"
+                                    CornerRadius="2"
+                                    Margin="4,0,8,0">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding TrackColor}"/>
+                                </Border.Background>
+                            </Border>
+
+                            <!-- Track Name -->
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding TrackName}"
+                                       FontWeight="SemiBold"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource BrightForegroundBrush}"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"/>
+
+                            <!-- Note Count Badge -->
+                            <Border Grid.Column="3"
+                                    Background="{DynamicResource AccentBrush}"
+                                    CornerRadius="8"
+                                    Padding="5,1"
+                                    Visibility="{Binding HasNotes, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <TextBlock Text="{Binding NoteCount}"
+                                           FontSize="9"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           HorizontalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Notes Content (Collapsible) -->
+                    <Border Grid.Row="1"
+                            Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Padding="8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Timestamps List -->
+                            <ItemsControl Grid.Row="0"
+                                          ItemsSource="{Binding Timestamps}"
+                                          Margin="0,0,0,6"
+                                          Visibility="{Binding HasTimestamps, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Style="{StaticResource TimestampButtonStyle}"
+                                                Content="{Binding DisplayText}"
+                                                ToolTip="{Binding Label}"
+                                                Command="{Binding DataContext.JumpToTimestampCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Rich Text Editor -->
+                            <RichTextBox Grid.Row="1"
+                                         x:Name="NoteTextBox"
+                                         Background="{DynamicResource EditorBackgroundBrush}"
+                                         Foreground="{DynamicResource ForegroundBrush}"
+                                         BorderThickness="1"
+                                         BorderBrush="{DynamicResource SubtleBorderBrush}"
+                                         Padding="6,4"
+                                         MinHeight="60"
+                                         MaxHeight="200"
+                                         AcceptsReturn="True"
+                                         VerticalScrollBarVisibility="Auto">
+                                <RichTextBox.Resources>
+                                    <Style TargetType="Paragraph">
+                                        <Setter Property="Margin" Value="0,0,0,4"/>
+                                    </Style>
+                                </RichTextBox.Resources>
+                            </RichTextBox>
+
+                            <!-- Actions -->
+                            <StackPanel Grid.Row="2"
+                                        Orientation="Horizontal"
+                                        Margin="0,6,0,0">
+                                <Button Style="{StaticResource TrackNotesActionButtonStyle}"
+                                        ToolTip="Add Timestamp Marker"
+                                        Command="{Binding DataContext.AddTimestampCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="+" FontWeight="Bold" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Timestamp" FontSize="10"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Border BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="6">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="12,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Track Notes"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource BrightForegroundBrush}"
+                                   VerticalAlignment="Center"/>
+                        <Border Background="{DynamicResource AccentBrush}"
+                                CornerRadius="8"
+                                Padding="6,2"
+                                Margin="8,0,0,0"
+                                Visibility="{Binding HasAnyNotes, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <TextBlock Text="{Binding TotalNoteCount}"
+                                       FontSize="10"
+                                       FontWeight="Bold"
+                                       Foreground="White"/>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <!-- Expand All -->
+                        <Button x:Name="ExpandAllButton"
+                                Style="{StaticResource TrackNotesActionButtonStyle}"
+                                Click="ExpandAllButton_Click"
+                                ToolTip="Expand All">
+                            <TextBlock Text="&#x25BC;" FontSize="10"/>
+                        </Button>
+                        <!-- Collapse All -->
+                        <Button x:Name="CollapseAllButton"
+                                Style="{StaticResource TrackNotesActionButtonStyle}"
+                                Click="CollapseAllButton_Click"
+                                ToolTip="Collapse All">
+                            <TextBlock Text="&#x25B6;" FontSize="10"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Formatting Toolbar -->
+            <Border Grid.Row="1"
+                    Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="8,4">
+                <StackPanel Orientation="Horizontal">
+                    <!-- Bold -->
+                    <ToggleButton x:Name="BoldButton"
+                                  Style="{StaticResource TrackNotesFormatButtonStyle}"
+                                  Click="BoldButton_Click"
+                                  ToolTip="Bold (Ctrl+B)">
+                        <TextBlock Text="B" FontWeight="Bold" FontSize="11"/>
+                    </ToggleButton>
+
+                    <!-- Italic -->
+                    <ToggleButton x:Name="ItalicButton"
+                                  Style="{StaticResource TrackNotesFormatButtonStyle}"
+                                  Click="ItalicButton_Click"
+                                  ToolTip="Italic (Ctrl+I)">
+                        <TextBlock Text="I" FontStyle="Italic" FontSize="11"/>
+                    </ToggleButton>
+
+                    <!-- Separator -->
+                    <Border Width="1"
+                            Background="{DynamicResource BorderBrush}"
+                            Margin="4,4"/>
+
+                    <!-- Add Timestamp at Playhead -->
+                    <Button x:Name="AddCurrentTimestampButton"
+                            Style="{StaticResource TrackNotesActionButtonStyle}"
+                            Click="AddCurrentTimestampButton_Click"
+                            ToolTip="Add Timestamp at Current Playhead Position">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="+" FontWeight="Bold" FontSize="10" Margin="0,0,2,0"/>
+                            <TextBlock Text="00:00" FontSize="10"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <!-- Track Notes List -->
+            <ScrollViewer Grid.Row="2"
+                          VerticalScrollBarVisibility="Auto"
+                          Padding="8">
+                <ItemsControl x:Name="TrackNotesListControl"
+                              ItemsSource="{Binding TrackNotes}"
+                              ItemTemplate="{StaticResource TrackNoteItemTemplate}"/>
+            </ScrollViewer>
+
+            <!-- Status Bar -->
+            <Border Grid.Row="3"
+                    Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,1,0,0"
+                    Padding="12,4">
+                <Grid>
+                    <TextBlock x:Name="StatusText"
+                               Text="Auto-save enabled"
+                               FontSize="10"
+                               Foreground="{DynamicResource SecondaryForegroundBrush}"
+                               HorizontalAlignment="Left"/>
+
+                    <TextBlock x:Name="LastSavedText"
+                               FontSize="10"
+                               Foreground="{DynamicResource SecondaryForegroundBrush}"
+                               HorizontalAlignment="Right"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

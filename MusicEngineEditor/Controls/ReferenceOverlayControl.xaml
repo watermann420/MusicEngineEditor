@@ -1,0 +1,390 @@
+<UserControl x:Class="MusicEngineEditor.Controls.ReferenceOverlayControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="250" d:DesignWidth="500"
+             Background="#1E1F22"
+             MinHeight="120"
+             MinWidth="250">
+
+    <UserControl.Resources>
+        <!-- Dark theme colors -->
+        <Color x:Key="BackgroundColor">#1E1F22</Color>
+        <Color x:Key="GridColor">#2B2D30</Color>
+        <Color x:Key="BorderColor">#393B40</Color>
+        <Color x:Key="TextColor">#6F737A</Color>
+        <Color x:Key="MixCurveColor">#00CED1</Color>
+        <Color x:Key="ReferenceCurveColor">#FF9800</Color>
+        <Color x:Key="DifferencePositiveColor">#4CAF50</Color>
+        <Color x:Key="DifferenceNegativeColor">#F44336</Color>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+        <SolidColorBrush x:Key="GridBrush" Color="{StaticResource GridColor}"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+        <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}"/>
+        <SolidColorBrush x:Key="MixCurveBrush" Color="{StaticResource MixCurveColor}"/>
+        <SolidColorBrush x:Key="ReferenceCurveBrush" Color="{StaticResource ReferenceCurveColor}"/>
+        <SolidColorBrush x:Key="DifferencePositiveBrush" Color="{StaticResource DifferencePositiveColor}"/>
+        <SolidColorBrush x:Key="DifferenceNegativeBrush" Color="{StaticResource DifferenceNegativeColor}"/>
+
+        <!-- Difference fill gradient -->
+        <LinearGradientBrush x:Key="DifferenceGradientBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#404CAF50" Offset="0.0"/>
+            <GradientStop Color="#20000000" Offset="0.5"/>
+            <GradientStop Color="#40F44336" Offset="1.0"/>
+        </LinearGradientBrush>
+
+        <!-- Button Style -->
+        <Style x:Key="ControlButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#3A3A3A"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="BorderBrush" Value="#5A5A5A"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#4A4A4A"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#2A2A2A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- A/B Toggle Style -->
+        <Style x:Key="ABToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Width" Value="50"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="#2A2A2A"
+                                BorderBrush="#4A4A4A"
+                                BorderThickness="1"
+                                CornerRadius="4">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="AIndicator" Grid.Column="0"
+                                        Background="{StaticResource MixCurveBrush}"
+                                        CornerRadius="3,0,0,3" Margin="2">
+                                    <TextBlock Text="A" Foreground="White"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               FontWeight="Bold" FontSize="10"/>
+                                </Border>
+                                <Border x:Name="BIndicator" Grid.Column="1"
+                                        Background="#3A3A3A" CornerRadius="0,3,3,0" Margin="2">
+                                    <TextBlock Text="B" Foreground="#888888"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               FontWeight="Bold" FontSize="10"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="AIndicator" Property="Background" Value="#3A3A3A"/>
+                                <Setter TargetName="BIndicator" Property="Background" Value="{StaticResource ReferenceCurveBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Toggle Switch Style -->
+        <Style x:Key="ToggleSwitchStyle" TargetType="ToggleButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="track" Background="#3A3A3A" CornerRadius="9" BorderThickness="1" BorderBrush="#5A5A5A">
+                            <Ellipse x:Name="thumb" Width="14" Height="14" Fill="#888888" Margin="1,0,0,0" HorizontalAlignment="Left"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="track" Property="Background" Value="#4B6EAF"/>
+                                <Setter TargetName="thumb" Property="Fill" Value="White"/>
+                                <Setter TargetName="thumb" Property="HorizontalAlignment" Value="Right"/>
+                                <Setter TargetName="thumb" Property="Margin" Value="0,0,1,0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Border BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="4"
+            Background="{StaticResource BackgroundBrush}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    Background="#2B2D30"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="10,6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="Reference Overlay"
+                               FontWeight="SemiBold"
+                               FontSize="12"
+                               Foreground="{DynamicResource BrightForegroundBrush}"
+                               VerticalAlignment="Center"/>
+
+                    <!-- Controls -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <ToggleButton x:Name="ABToggle"
+                                      Style="{StaticResource ABToggleStyle}"
+                                      Checked="ABToggle_Changed"
+                                      Unchecked="ABToggle_Changed"
+                                      ToolTip="Switch between mix (A) and reference (B)"
+                                      Margin="0,0,8,0"/>
+
+                        <ToggleButton x:Name="LevelMatchToggle"
+                                      Style="{StaticResource ToggleSwitchStyle}"
+                                      IsChecked="True"
+                                      Checked="LevelMatchToggle_Changed"
+                                      Unchecked="LevelMatchToggle_Changed"
+                                      ToolTip="Auto-match levels"/>
+                        <TextBlock Text="Level Match"
+                                   FontSize="10"
+                                   Foreground="{StaticResource TextBrush}"
+                                   VerticalAlignment="Center"
+                                   Margin="4,0,8,0"/>
+
+                        <ToggleButton x:Name="ShowDifferenceToggle"
+                                      Style="{StaticResource ToggleSwitchStyle}"
+                                      IsChecked="True"
+                                      Checked="ShowDifferenceToggle_Changed"
+                                      Unchecked="ShowDifferenceToggle_Changed"
+                                      ToolTip="Highlight differences"/>
+                        <TextBlock Text="Diff"
+                                   FontSize="10"
+                                   Foreground="{StaticResource TextBrush}"
+                                   VerticalAlignment="Center"
+                                   Margin="4,0,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Spectrum overlay display -->
+            <Grid Grid.Row="1" Margin="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- dB scale labels -->
+                <Canvas x:Name="DbScaleCanvas"
+                        Grid.Column="0"
+                        Width="35"
+                        Background="Transparent"/>
+
+                <!-- Main display area -->
+                <Border Grid.Column="1"
+                        Background="#1A1A1A"
+                        CornerRadius="3"
+                        BorderBrush="#3A3A3A"
+                        BorderThickness="1">
+                    <Grid ClipToBounds="True">
+                        <!-- Grid lines -->
+                        <Canvas x:Name="GridCanvas"
+                                ClipToBounds="True"
+                                IsHitTestVisible="False"/>
+
+                        <!-- Difference fill -->
+                        <Canvas x:Name="DifferenceCanvas"
+                                ClipToBounds="True"
+                                IsHitTestVisible="False"/>
+
+                        <!-- Mix spectrum -->
+                        <Canvas x:Name="MixSpectrumCanvas"
+                                ClipToBounds="True"
+                                IsHitTestVisible="False"/>
+
+                        <!-- Reference spectrum -->
+                        <Canvas x:Name="ReferenceSpectrumCanvas"
+                                ClipToBounds="True"
+                                IsHitTestVisible="False"/>
+
+                        <!-- No reference overlay -->
+                        <TextBlock x:Name="NoReferenceText"
+                                   Text="Load a reference track"
+                                   FontSize="11"
+                                   Foreground="#505050"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Frequency bands comparison -->
+            <Border Grid.Row="2"
+                    Margin="43,0,8,8"
+                    Background="#1A1A1A"
+                    CornerRadius="3"
+                    Padding="8,6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Band indicators -->
+                    <StackPanel x:Name="Band1Panel" Grid.Column="0" HorizontalAlignment="Center">
+                        <Border x:Name="Band1Indicator"
+                                Width="24" Height="8"
+                                Background="{StaticResource DifferencePositiveBrush}"
+                                CornerRadius="2"/>
+                        <TextBlock Text="Sub" FontSize="8" Foreground="{StaticResource TextBrush}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="Band2Panel" Grid.Column="1" HorizontalAlignment="Center">
+                        <Border x:Name="Band2Indicator"
+                                Width="24" Height="8"
+                                Background="{StaticResource DifferenceNegativeBrush}"
+                                CornerRadius="2"/>
+                        <TextBlock Text="Bass" FontSize="8" Foreground="{StaticResource TextBrush}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="Band3Panel" Grid.Column="2" HorizontalAlignment="Center">
+                        <Border x:Name="Band3Indicator"
+                                Width="24" Height="8"
+                                Background="#555555"
+                                CornerRadius="2"/>
+                        <TextBlock Text="Low" FontSize="8" Foreground="{StaticResource TextBrush}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="Band4Panel" Grid.Column="3" HorizontalAlignment="Center">
+                        <Border x:Name="Band4Indicator"
+                                Width="24" Height="8"
+                                Background="#555555"
+                                CornerRadius="2"/>
+                        <TextBlock Text="LMid" FontSize="8" Foreground="{StaticResource TextBrush}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="Band5Panel" Grid.Column="4" HorizontalAlignment="Center">
+                        <Border x:Name="Band5Indicator"
+                                Width="24" Height="8"
+                                Background="{StaticResource DifferencePositiveBrush}"
+                                CornerRadius="2"/>
+                        <TextBlock Text="Mid" FontSize="8" Foreground="{StaticResource TextBrush}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="Band6Panel" Grid.Column="5" HorizontalAlignment="Center">
+                        <Border x:Name="Band6Indicator"
+                                Width="24" Height="8"
+                                Background="#555555"
+                                CornerRadius="2"/>
+                        <TextBlock Text="HMid" FontSize="8" Foreground="{StaticResource TextBrush}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="Band7Panel" Grid.Column="6" HorizontalAlignment="Center">
+                        <Border x:Name="Band7Indicator"
+                                Width="24" Height="8"
+                                Background="{StaticResource DifferenceNegativeBrush}"
+                                CornerRadius="2"/>
+                        <TextBlock Text="Pres" FontSize="8" Foreground="{StaticResource TextBrush}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="Band8Panel" Grid.Column="7" HorizontalAlignment="Center">
+                        <Border x:Name="Band8Indicator"
+                                Width="24" Height="8"
+                                Background="#555555"
+                                CornerRadius="2"/>
+                        <TextBlock Text="Air" FontSize="8" Foreground="{StaticResource TextBrush}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Frequency axis and legend -->
+            <Grid Grid.Row="3" Margin="43,0,8,8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Frequency labels -->
+                <Canvas x:Name="FrequencyLabelsCanvas"
+                        Grid.Row="0"
+                        Height="16"
+                        Background="Transparent"/>
+
+                <!-- Legend -->
+                <StackPanel Grid.Row="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            Margin="0,4,0,0">
+                    <Border Background="{StaticResource MixCurveBrush}"
+                            Width="20"
+                            Height="3"
+                            CornerRadius="1"
+                            VerticalAlignment="Center"/>
+                    <TextBlock Text="Mix"
+                               FontSize="9"
+                               Foreground="{StaticResource TextBrush}"
+                               VerticalAlignment="Center"
+                               Margin="4,0,12,0"/>
+
+                    <Border Background="{StaticResource ReferenceCurveBrush}"
+                            Width="20"
+                            Height="3"
+                            CornerRadius="1"
+                            VerticalAlignment="Center"/>
+                    <TextBlock Text="Reference"
+                               FontSize="9"
+                               Foreground="{StaticResource TextBrush}"
+                               VerticalAlignment="Center"
+                               Margin="4,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

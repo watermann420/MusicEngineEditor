@@ -1,0 +1,365 @@
+<Window x:Class="MusicEngineEditor.Views.Dialogs.TrackImportDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Import Tracks from Project"
+        Width="700" Height="550"
+        MinWidth="600" MinHeight="450"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        Background="{DynamicResource BackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}">
+
+    <Window.Resources>
+        <!-- Track Item Style -->
+        <Style x:Key="TrackItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Margin" Value="0,1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Border"
+                                Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="4">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#3C3F41"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#4B6EAF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Section Header Style -->
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrightForegroundBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="Import Tracks from Project"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource BrightForegroundBrush}"/>
+            <TextBlock Text="Select a project file and choose which tracks to import."
+                       Foreground="{DynamicResource SecondaryForegroundBrush}"
+                       FontSize="12"
+                       Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Project File Selection -->
+        <Border Grid.Row="1"
+                Background="{DynamicResource PanelBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="12"
+                Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Text="Project File:"
+                           Foreground="{DynamicResource ForegroundBrush}"
+                           VerticalAlignment="Center"
+                           Margin="0,0,12,0"/>
+
+                <TextBox x:Name="ProjectPathTextBox"
+                         Grid.Column="1"
+                         IsReadOnly="True"
+                         Background="{DynamicResource EditorBackgroundBrush}"
+                         Foreground="{DynamicResource ForegroundBrush}"
+                         BorderBrush="{DynamicResource BorderBrush}"
+                         Padding="8,6"
+                         VerticalAlignment="Center"/>
+
+                <Button x:Name="BrowseButton"
+                        Grid.Column="2"
+                        Content="Browse..."
+                        Padding="12,6"
+                        Margin="8,0,0,0"
+                        Click="BrowseButton_Click"/>
+            </Grid>
+        </Border>
+
+        <!-- Track Selection Area -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="200"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Available Tracks List -->
+            <Border Grid.Column="0"
+                    Background="{DynamicResource PanelBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- List Header -->
+                    <Border Grid.Row="0"
+                            Background="{DynamicResource BackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="0,0,0,1"
+                            Padding="12,8">
+                        <Grid>
+                            <TextBlock Text="Available Tracks"
+                                       Style="{StaticResource SectionHeaderStyle}"
+                                       Margin="0"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button x:Name="SelectAllButton"
+                                        Content="Select All"
+                                        FontSize="11"
+                                        Padding="8,4"
+                                        Margin="0,0,4,0"
+                                        Click="SelectAllButton_Click"/>
+                                <Button x:Name="SelectNoneButton"
+                                        Content="Select None"
+                                        FontSize="11"
+                                        Padding="8,4"
+                                        Click="SelectNoneButton_Click"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Track List -->
+                    <ListBox x:Name="TrackListBox"
+                             Grid.Row="1"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             SelectionMode="Extended"
+                             ItemContainerStyle="{StaticResource TrackItemStyle}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <CheckBox Grid.Column="0"
+                                              IsChecked="{Binding IsSelected}"
+                                              VerticalAlignment="Center"
+                                              Margin="0,0,12,0"/>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource ForegroundBrush}"/>
+                                        <TextBlock Text="{Binding TypeDescription}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource SecondaryForegroundBrush}"/>
+                                    </StackPanel>
+
+                                    <Border Grid.Column="2"
+                                            Width="12" Height="12"
+                                            CornerRadius="2"
+                                            Background="{Binding ColorBrush}"
+                                            VerticalAlignment="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Empty State -->
+                    <TextBlock x:Name="EmptyStateText"
+                               Grid.Row="1"
+                               Text="No tracks found. Select a project file to view available tracks."
+                               Foreground="{DynamicResource SecondaryForegroundBrush}"
+                               FontSize="12"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               TextWrapping="Wrap"
+                               Margin="20"/>
+
+                    <!-- List Footer / Summary -->
+                    <Border Grid.Row="2"
+                            Background="{DynamicResource BackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="0,1,0,0"
+                            Padding="12,8">
+                        <TextBlock x:Name="SelectionSummaryText"
+                                   Text="0 of 0 tracks selected"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource SecondaryForegroundBrush}"/>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Import Options Panel -->
+            <Border Grid.Column="2"
+                    Background="{DynamicResource PanelBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="12">
+                <StackPanel>
+                    <TextBlock Text="Import Options"
+                               Style="{StaticResource SectionHeaderStyle}"/>
+
+                    <!-- Include Effects -->
+                    <CheckBox x:Name="IncludeEffectsCheckBox"
+                              Content="Include Effects"
+                              IsChecked="True"
+                              Margin="0,0,0,8"/>
+
+                    <!-- Include Automation -->
+                    <CheckBox x:Name="IncludeAutomationCheckBox"
+                              Content="Include Automation"
+                              IsChecked="True"
+                              Margin="0,0,0,8"/>
+
+                    <!-- Include Sends -->
+                    <CheckBox x:Name="IncludeSendsCheckBox"
+                              Content="Include Sends"
+                              IsChecked="True"
+                              Margin="0,0,0,8"/>
+
+                    <!-- Include MIDI Data -->
+                    <CheckBox x:Name="IncludeMidiCheckBox"
+                              Content="Include MIDI Data"
+                              IsChecked="True"
+                              Margin="0,0,0,16"/>
+
+                    <Separator Background="{DynamicResource BorderBrush}" Margin="0,0,0,16"/>
+
+                    <!-- Position Options -->
+                    <TextBlock Text="Position"
+                               Style="{StaticResource SectionHeaderStyle}"/>
+
+                    <RadioButton x:Name="PositionStartRadio"
+                                 Content="At Project Start"
+                                 IsChecked="True"
+                                 GroupName="Position"
+                                 Margin="0,0,0,8"/>
+
+                    <RadioButton x:Name="PositionCursorRadio"
+                                 Content="At Cursor Position"
+                                 GroupName="Position"
+                                 Margin="0,0,0,8"/>
+
+                    <RadioButton x:Name="PositionOriginalRadio"
+                                 Content="Original Position"
+                                 GroupName="Position"
+                                 Margin="0,0,0,16"/>
+
+                    <Separator Background="{DynamicResource BorderBrush}" Margin="0,0,0,16"/>
+
+                    <!-- Track Naming -->
+                    <TextBlock Text="Track Naming"
+                               Style="{StaticResource SectionHeaderStyle}"/>
+
+                    <RadioButton x:Name="NamingOriginalRadio"
+                                 Content="Keep Original Names"
+                                 IsChecked="True"
+                                 GroupName="Naming"
+                                 Margin="0,0,0,8"/>
+
+                    <RadioButton x:Name="NamingPrefixRadio"
+                                 Content="Add Prefix:"
+                                 GroupName="Naming"
+                                 Margin="0,0,0,4"/>
+
+                    <TextBox x:Name="PrefixTextBox"
+                             Text="Imported - "
+                             Background="{DynamicResource EditorBackgroundBrush}"
+                             Foreground="{DynamicResource ForegroundBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"
+                             Padding="6,4"
+                             Margin="20,0,0,0"
+                             IsEnabled="{Binding IsChecked, ElementName=NamingPrefixRadio}"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Import Preview -->
+        <Border Grid.Row="3"
+                Background="{DynamicResource PanelBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="12"
+                Margin="0,16,0,0"
+                Visibility="Collapsed"
+                x:Name="PreviewBorder">
+            <StackPanel>
+                <TextBlock Text="Import Preview"
+                           Style="{StaticResource SectionHeaderStyle}"/>
+                <TextBlock x:Name="PreviewText"
+                           Text="Will import 0 tracks with effects, automation, and sends."
+                           Foreground="{DynamicResource SecondaryForegroundBrush}"
+                           FontSize="11"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Dialog Buttons -->
+        <Border Grid.Row="4"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Margin="0,16,0,0"
+                Padding="0,16,0,0">
+            <Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button x:Name="RefreshButton"
+                            Content="Refresh"
+                            Padding="16,8"
+                            Click="RefreshButton_Click"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="ImportButton"
+                            Content="Import"
+                            IsDefault="True"
+                            Padding="20,8"
+                            Margin="0,0,8,0"
+                            Background="{DynamicResource AccentBrush}"
+                            Foreground="White"
+                            Click="ImportButton_Click"
+                            IsEnabled="False"/>
+                    <Button x:Name="CancelButton"
+                            Content="Cancel"
+                            IsCancel="True"
+                            Padding="20,8"
+                            Click="CancelButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

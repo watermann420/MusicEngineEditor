@@ -1,0 +1,237 @@
+<UserControl x:Class="MusicEngineEditor.Controls.TrackSearchPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:MusicEngineEditor.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="40" d:DesignWidth="300"
+             Focusable="True"
+             KeyDown="UserControl_KeyDown">
+
+    <UserControl.Resources>
+        <!-- Colors -->
+        <Color x:Key="SearchBackgroundColor">#1E1F22</Color>
+        <Color x:Key="SearchBorderColor">#393B40</Color>
+        <Color x:Key="SearchFocusBorderColor">#4B6EAF</Color>
+        <Color x:Key="DropdownBackgroundColor">#2B2D30</Color>
+        <Color x:Key="ItemHoverColor">#3C3F41</Color>
+        <Color x:Key="ItemSelectedColor">#4B6EAF</Color>
+        <Color x:Key="TextPrimaryColor">#BCBEC4</Color>
+        <Color x:Key="TextSecondaryColor">#6F737A</Color>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="SearchBackgroundBrush" Color="{StaticResource SearchBackgroundColor}"/>
+        <SolidColorBrush x:Key="SearchBorderBrush" Color="{StaticResource SearchBorderColor}"/>
+        <SolidColorBrush x:Key="SearchFocusBorderBrush" Color="{StaticResource SearchFocusBorderColor}"/>
+        <SolidColorBrush x:Key="DropdownBackgroundBrush" Color="{StaticResource DropdownBackgroundColor}"/>
+        <SolidColorBrush x:Key="ItemHoverBrush" Color="{StaticResource ItemHoverColor}"/>
+        <SolidColorBrush x:Key="ItemSelectedBrush" Color="{StaticResource ItemSelectedColor}"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
+
+        <!-- Track Item Template -->
+        <DataTemplate x:Key="TrackItemTemplate">
+            <Border x:Name="ItemBorder"
+                    Background="Transparent"
+                    Padding="8,6"
+                    Cursor="Hand">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Track Color Indicator -->
+                    <Border Grid.Column="0"
+                            Width="4"
+                            CornerRadius="2"
+                            Margin="0,0,8,0"
+                            Background="{Binding Color}"/>
+
+                    <!-- Track Info -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Name}"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontSize="12"
+                                   FontWeight="Medium"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding TypeDisplay}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10"/>
+                    </StackPanel>
+
+                    <!-- Track Index -->
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding Index, StringFormat='#{0}'}"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               FontSize="10"
+                               VerticalAlignment="Center"
+                               Margin="8,0,0,0"/>
+                </Grid>
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource ItemSelectedBrush}"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- Search Box with Dropdown -->
+        <Border x:Name="SearchBorder"
+                Background="{StaticResource SearchBackgroundBrush}"
+                BorderBrush="{StaticResource SearchBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Search Icon -->
+                <TextBlock Grid.Column="0"
+                           Text="&#x1F50D;"
+                           FontSize="12"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           VerticalAlignment="Center"
+                           Margin="10,0,6,0"/>
+
+                <!-- Search Input -->
+                <TextBox x:Name="SearchInput"
+                         Grid.Column="1"
+                         Background="Transparent"
+                         Foreground="{StaticResource TextPrimaryBrush}"
+                         BorderThickness="0"
+                         Padding="0,8"
+                         FontSize="12"
+                         CaretBrush="{StaticResource TextPrimaryBrush}"
+                         TextChanged="SearchInput_TextChanged"
+                         GotFocus="SearchInput_GotFocus"
+                         LostFocus="SearchInput_LostFocus"
+                         PreviewKeyDown="SearchInput_PreviewKeyDown"/>
+
+                <!-- Placeholder -->
+                <TextBlock x:Name="PlaceholderText"
+                           Grid.Column="1"
+                           Text="Search tracks..."
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           VerticalAlignment="Center"
+                           IsHitTestVisible="False"
+                           Margin="0,0,0,0"/>
+
+                <!-- Clear Button -->
+                <Button x:Name="ClearButton"
+                        Grid.Column="2"
+                        Content="X"
+                        Background="Transparent"
+                        Foreground="{StaticResource TextSecondaryBrush}"
+                        BorderThickness="0"
+                        Padding="8,0"
+                        FontSize="10"
+                        Cursor="Hand"
+                        Visibility="Collapsed"
+                        Click="ClearButton_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Dropdown Popup -->
+        <Popup x:Name="ResultsPopup"
+               PlacementTarget="{Binding ElementName=SearchBorder}"
+               Placement="Bottom"
+               AllowsTransparency="True"
+               StaysOpen="False"
+               PopupAnimation="Slide">
+            <Border Background="{StaticResource DropdownBackgroundBrush}"
+                    BorderBrush="{StaticResource SearchBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Margin="0,4,0,0"
+                    MinWidth="{Binding ActualWidth, ElementName=SearchBorder}"
+                    MaxHeight="300">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="3" Opacity="0.4"/>
+                </Border.Effect>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Results Header -->
+                    <Border Grid.Row="0"
+                            Background="#252628"
+                            Padding="8,6"
+                            BorderBrush="{StaticResource SearchBorderBrush}"
+                            BorderThickness="0,0,0,1">
+                        <TextBlock x:Name="ResultsHeader"
+                                   Text="0 tracks found"
+                                   FontSize="10"
+                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                    </Border>
+
+                    <!-- Results List -->
+                    <ListBox x:Name="ResultsList"
+                             Grid.Row="1"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             ItemTemplate="{StaticResource TrackItemTemplate}"
+                             SelectionChanged="ResultsList_SelectionChanged"
+                             MouseDoubleClick="ResultsList_MouseDoubleClick"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="Bd"
+                                                    Background="Transparent"
+                                                    Padding="0">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="{StaticResource ItemHoverBrush}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="{StaticResource ItemSelectedBrush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+
+                    <!-- Empty State -->
+                    <TextBlock x:Name="EmptyState"
+                               Grid.Row="1"
+                               Text="No matching tracks"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Margin="20"
+                               Visibility="Collapsed"/>
+                </Grid>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>

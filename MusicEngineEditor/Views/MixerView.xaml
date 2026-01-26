@@ -10,6 +10,11 @@
              d:DataContext="{d:DesignInstance Type=vm:MixerViewModel}"
              Background="#1E1F22">
 
+    <UserControl.InputBindings>
+        <KeyBinding Key="S" Modifiers="Alt" Command="{Binding ClearSolosCommand}"/>
+        <KeyBinding Key="M" Modifiers="Alt" Command="{Binding ClearMutesCommand}"/>
+    </UserControl.InputBindings>
+
     <UserControl.Resources>
         <!-- Colors -->
         <Color x:Key="MixerBackgroundColor">#1E1F22</Color>
@@ -21,6 +26,12 @@
         <Color x:Key="ButtonPressedColor">#4B6EAF</Color>
         <Color x:Key="MasterChannelColor">#2D2F33</Color>
         <Color x:Key="SeparatorColor">#43454A</Color>
+        <Color x:Key="SoloActiveColor">#E8B339</Color>
+        <Color x:Key="MuteActiveColor">#F75464</Color>
+
+        <!-- Solo/Mute Indicator Brushes -->
+        <SolidColorBrush x:Key="SoloActiveBrush" Color="{StaticResource SoloActiveColor}"/>
+        <SolidColorBrush x:Key="MuteActiveBrush" Color="{StaticResource MuteActiveColor}"/>
 
         <!-- Brushes -->
         <SolidColorBrush x:Key="MixerBackgroundBrush" Color="{StaticResource MixerBackgroundColor}"/>
@@ -238,10 +249,78 @@
                                Fill="{StaticResource SeparatorBrush}"
                                Margin="12,4"/>
 
-                    <Button Content="Clear Solo"
-                            Style="{StaticResource MixerToolbarButtonStyle}"
-                            Command="{Binding ClearSoloCommand}"
-                            ToolTip="Clear all solo states"/>
+                    <!-- Clear Solos Button with Indicator -->
+                    <Button x:Name="ClearSolosButton"
+                            Command="{Binding ClearSolosCommand}"
+                            ToolTip="Clear all solos (Alt+S)">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource MixerToolbarButtonStyle}">
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Ellipse x:Name="SoloIndicator"
+                                                     Width="8" Height="8"
+                                                     Fill="{StaticResource SoloActiveBrush}"
+                                                     Margin="0,0,6,0"
+                                                     Visibility="Collapsed"/>
+                                            <TextBlock Text="Clear Solos"/>
+                                        </StackPanel>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasSoloedChannel}" Value="True">
+                                        <Setter Property="Content">
+                                            <Setter.Value>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Ellipse Width="8" Height="8"
+                                                             Fill="{StaticResource SoloActiveBrush}"
+                                                             Margin="0,0,6,0"/>
+                                                    <TextBlock Text="Clear Solos"/>
+                                                </StackPanel>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="BorderBrush" Value="{StaticResource SoloActiveBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- Clear Mutes Button with Indicator -->
+                    <Button x:Name="ClearMutesButton"
+                            Command="{Binding ClearMutesCommand}"
+                            ToolTip="Clear all mutes (Alt+M)">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource MixerToolbarButtonStyle}">
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Clear Mutes"/>
+                                        </StackPanel>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasMutedChannel}" Value="True">
+                                        <Setter Property="Content">
+                                            <Setter.Value>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Ellipse Width="8" Height="8"
+                                                             Fill="{StaticResource MuteActiveBrush}"
+                                                             Margin="0,0,6,0"/>
+                                                    <TextBlock Text="Clear Mutes"/>
+                                                </StackPanel>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="BorderBrush" Value="{StaticResource MuteActiveBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Rectangle Width="1"
+                               Fill="{StaticResource SeparatorBrush}"
+                               Margin="12,4"/>
 
                     <Button Content="Reset All"
                             Style="{StaticResource MixerToolbarButtonStyle}"

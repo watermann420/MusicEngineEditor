@@ -1,0 +1,434 @@
+<UserControl x:Class="MusicEngineEditor.Views.CompTakesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="400" d:DesignWidth="800"
+             Background="{DynamicResource BackgroundBrush}"
+             Focusable="True"
+             KeyDown="CompTakesView_KeyDown">
+
+    <UserControl.Resources>
+        <!-- Colors -->
+        <Color x:Key="TakeHeaderColor">#2D2D30</Color>
+        <Color x:Key="TakeBackgroundColor">#1E1E1E</Color>
+        <Color x:Key="CompRegionColor">#FFEB3B</Color>
+        <Color x:Key="CompHighlightColor">#80FFEB3B</Color>
+        <Color x:Key="CrossfadeHandleColor">#00BCD4</Color>
+        <Color x:Key="ActiveTakeColor">#4CAF50</Color>
+
+        <SolidColorBrush x:Key="TakeHeaderBrush" Color="{StaticResource TakeHeaderColor}"/>
+        <SolidColorBrush x:Key="TakeBackgroundBrush" Color="{StaticResource TakeBackgroundColor}"/>
+        <SolidColorBrush x:Key="CompRegionBrush" Color="{StaticResource CompRegionColor}"/>
+        <SolidColorBrush x:Key="CompHighlightBrush" Color="{StaticResource CompHighlightColor}"/>
+        <SolidColorBrush x:Key="CrossfadeHandleBrush" Color="{StaticResource CrossfadeHandleColor}"/>
+        <SolidColorBrush x:Key="ActiveTakeBrush" Color="{StaticResource ActiveTakeColor}"/>
+
+        <!-- Star Rating Style -->
+        <Style x:Key="CompStarButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Width" Value="14"/>
+            <Setter Property="Height" Value="14"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid>
+                            <Path x:Name="StarPath"
+                                  Data="M 7,0 L 9,5 14,5 10,8 11,14 7,11 3,14 4,8 0,5 5,5 Z"
+                                  Fill="#404040"
+                                  Stroke="#606060"
+                                  StrokeThickness="0.5"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="StarPath" Property="Fill" Value="#FFD700"/>
+                                <Setter TargetName="StarPath" Property="Stroke" Value="#FFA500"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="StarPath" Property="Fill" Value="#80FFD700"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Toolbar Button Style -->
+        <Style x:Key="CompToolbarButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#3E3E42"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#505050"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#606060"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Flatten Button Style (Primary Action) -->
+        <Style x:Key="FlattenButtonStyle" TargetType="Button" BasedOn="{StaticResource CompToolbarButtonStyle}">
+            <Setter Property="Background" Value="#4B6EAF"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#5A7FC4"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Take Lane Header Style -->
+        <Style x:Key="TakeLaneHeaderStyle" TargetType="Border">
+            <Setter Property="Background" Value="#252526"/>
+            <Setter Property="BorderBrush" Value="#3F3F46"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="Padding" Value="8,4"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header Toolbar -->
+        <Border Grid.Row="0"
+                Background="{StaticResource TakeHeaderBrush}"
+                Padding="12,8"
+                BorderBrush="#3F3F46"
+                BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Title and Take Count -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="TitleText"
+                               Text="Comp Takes"
+                               FontWeight="SemiBold"
+                               FontSize="14"
+                               Foreground="White"
+                               VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TakeCountText"
+                               Text=" (0 takes)"
+                               Foreground="#808080"
+                               FontSize="12"
+                               VerticalAlignment="Center"
+                               Margin="4,0,0,0"/>
+                </StackPanel>
+
+                <!-- Keyboard Shortcuts Hint -->
+                <TextBlock Grid.Column="1"
+                           Text="1-9: Select take | C: Clear region | F: Flatten"
+                           Foreground="#606060"
+                           FontSize="10"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+
+                <!-- Action Buttons -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button x:Name="AutoCompButton"
+                            Content="Auto Comp"
+                            Style="{StaticResource CompToolbarButtonStyle}"
+                            ToolTip="Select best-rated regions automatically"
+                            Click="AutoCompButton_Click"
+                            Margin="0,0,8,0"/>
+                    <Button x:Name="ClearCompButton"
+                            Content="Clear"
+                            Style="{StaticResource CompToolbarButtonStyle}"
+                            ToolTip="Clear all comp selections"
+                            Click="ClearCompButton_Click"
+                            Margin="0,0,8,0"/>
+                    <Button x:Name="FlattenButton"
+                            Content="Flatten"
+                            Style="{StaticResource FlattenButtonStyle}"
+                            ToolTip="Render comp to single audio clip (F)"
+                            Click="FlattenButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Comp Result Preview -->
+        <Border Grid.Row="1"
+                Background="#252526"
+                BorderBrush="#3F3F46"
+                BorderThickness="0,0,0,1"
+                Padding="8,4"
+                Visibility="{Binding HasCompRegions, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Text="Comp Preview:"
+                           Foreground="#808080"
+                           FontSize="11"
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0"/>
+
+                <!-- Mini Comp Preview Canvas -->
+                <Canvas x:Name="CompPreviewCanvas"
+                        Grid.Column="1"
+                        Height="24"
+                        Background="#1E1E1E"
+                        ClipToBounds="True"/>
+            </Grid>
+        </Border>
+
+        <!-- Main Content: Stacked Take Lanes -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="160" MinWidth="120"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Take List Sidebar -->
+            <Border Grid.Column="0"
+                    Background="#252526"
+                    BorderBrush="#3F3F46"
+                    BorderThickness="0,0,1,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Sidebar Header -->
+                    <Border Grid.Row="0" Style="{StaticResource TakeLaneHeaderStyle}">
+                        <TextBlock Text="Takes" FontSize="11" Foreground="#AAAAAA"/>
+                    </Border>
+
+                    <!-- Take List -->
+                    <ScrollViewer Grid.Row="1"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl x:Name="TakeHeadersControl">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border x:Name="TakeHeader"
+                                            Height="60"
+                                            Background="#252526"
+                                            BorderBrush="#3F3F46"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="8,4"
+                                            MouseLeftButtonDown="TakeHeader_MouseLeftButtonDown">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Take Name and Number -->
+                                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                                <Border Width="20" Height="20"
+                                                        Background="{Binding ColorBrush}"
+                                                        CornerRadius="3"
+                                                        Margin="0,0,6,0">
+                                                    <TextBlock Text="{Binding Index}"
+                                                               Foreground="White"
+                                                               FontWeight="Bold"
+                                                               FontSize="11"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                </Border>
+                                                <TextBlock Text="{Binding Name}"
+                                                           Foreground="White"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold"
+                                                           VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+
+                                            <!-- Star Rating -->
+                                            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,4,0,0">
+                                                <ToggleButton Style="{StaticResource CompStarButtonStyle}"
+                                                              IsChecked="{Binding Star1}" Tag="1"
+                                                              Click="StarButton_Click"/>
+                                                <ToggleButton Style="{StaticResource CompStarButtonStyle}"
+                                                              IsChecked="{Binding Star2}" Tag="2"
+                                                              Click="StarButton_Click"/>
+                                                <ToggleButton Style="{StaticResource CompStarButtonStyle}"
+                                                              IsChecked="{Binding Star3}" Tag="3"
+                                                              Click="StarButton_Click"/>
+                                                <ToggleButton Style="{StaticResource CompStarButtonStyle}"
+                                                              IsChecked="{Binding Star4}" Tag="4"
+                                                              Click="StarButton_Click"/>
+                                                <ToggleButton Style="{StaticResource CompStarButtonStyle}"
+                                                              IsChecked="{Binding Star5}" Tag="5"
+                                                              Click="StarButton_Click"/>
+                                            </StackPanel>
+
+                                            <!-- Duration -->
+                                            <TextBlock Grid.Row="2"
+                                                       Text="{Binding DurationText}"
+                                                       Foreground="#606060"
+                                                       FontSize="10"
+                                                       VerticalAlignment="Bottom"/>
+                                        </Grid>
+                                    </Border>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                            <Setter TargetName="TakeHeader" Property="Background" Value="#3C5F8A"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- Splitter -->
+            <GridSplitter Grid.Column="1"
+                          Width="4"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch"
+                          Background="#3F3F46"
+                          Cursor="SizeWE"/>
+
+            <!-- Take Lanes Waveform Area -->
+            <Grid Grid.Column="2" Background="{StaticResource TakeBackgroundBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="24"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Timeline Ruler -->
+                <Canvas x:Name="TimelineRuler"
+                        Grid.Row="0"
+                        Background="#2D2D30"
+                        ClipToBounds="True"/>
+
+                <!-- Scrollable Take Lanes -->
+                <ScrollViewer x:Name="TakeLanesScrollViewer"
+                              Grid.Row="1"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Auto">
+                    <Grid>
+                        <!-- Take Lanes Canvas -->
+                        <Canvas x:Name="TakeLanesCanvas"
+                                Background="Transparent"
+                                ClipToBounds="True"/>
+
+                        <!-- Comp Selection Overlay -->
+                        <Canvas x:Name="CompSelectionCanvas"
+                                Background="Transparent"
+                                ClipToBounds="True"
+                                IsHitTestVisible="True"
+                                MouseLeftButtonDown="CompSelectionCanvas_MouseLeftButtonDown"
+                                MouseLeftButtonUp="CompSelectionCanvas_MouseLeftButtonUp"
+                                MouseMove="CompSelectionCanvas_MouseMove"/>
+
+                        <!-- Crossfade Handles Overlay -->
+                        <Canvas x:Name="CrossfadeHandlesCanvas"
+                                Background="Transparent"
+                                ClipToBounds="True"
+                                IsHitTestVisible="True"
+                                MouseLeftButtonDown="CrossfadeHandlesCanvas_MouseLeftButtonDown"
+                                MouseMove="CrossfadeHandlesCanvas_MouseMove"
+                                MouseLeftButtonUp="CrossfadeHandlesCanvas_MouseLeftButtonUp"/>
+                    </Grid>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="3"
+                Background="#2D2D30"
+                BorderBrush="#3F3F46"
+                BorderThickness="0,1,0,0"
+                Padding="12,6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Comp Status -->
+                <TextBlock x:Name="CompStatusText"
+                           Grid.Column="0"
+                           Text="No comp regions selected"
+                           Foreground="#808080"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+
+                <!-- Crossfade Info -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0">
+                    <TextBlock Text="Crossfade: "
+                               Foreground="#808080"
+                               FontSize="11"
+                               VerticalAlignment="Center"/>
+                    <TextBlock x:Name="CrossfadeText"
+                               Text="10ms"
+                               Foreground="#CCCCCC"
+                               FontSize="11"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Zoom Controls -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <TextBlock Text="Zoom:"
+                               Foreground="#808080"
+                               FontSize="11"
+                               VerticalAlignment="Center"
+                               Margin="0,0,6,0"/>
+                    <Slider x:Name="ZoomSlider"
+                            Width="100"
+                            Minimum="0.5"
+                            Maximum="4"
+                            Value="1"
+                            VerticalAlignment="Center"
+                            ValueChanged="ZoomSlider_ValueChanged"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Context Menu -->
+        <Grid.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Use This Take for Region" Click="UseForRegionMenuItem_Click"/>
+                <Separator/>
+                <MenuItem Header="Clear Region" Click="ClearRegionMenuItem_Click"/>
+                <MenuItem Header="Clear All Regions" Click="ClearAllRegionsMenuItem_Click"/>
+                <Separator/>
+                <MenuItem Header="Set Crossfade..." Click="SetCrossfadeMenuItem_Click"/>
+                <Separator/>
+                <MenuItem Header="Auto Comp" Click="AutoCompMenuItem_Click"/>
+                <MenuItem Header="Flatten Comp" Click="FlattenMenuItem_Click"/>
+            </ContextMenu>
+        </Grid.ContextMenu>
+    </Grid>
+</UserControl>

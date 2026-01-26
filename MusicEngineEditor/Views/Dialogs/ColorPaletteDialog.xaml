@@ -1,0 +1,338 @@
+<Window x:Class="MusicEngineEditor.Views.Dialogs.ColorPaletteDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Color Palette Manager"
+        Width="650" Height="550"
+        MinWidth="550" MinHeight="450"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        Background="{DynamicResource BackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+
+        <!-- Palette Item Style -->
+        <Style x:Key="PaletteListItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="Transparent"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="8">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#3C3F41"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#214283"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Color Swatch Template -->
+        <DataTemplate x:Key="ColorSwatchTemplate">
+            <Border Width="24" Height="24"
+                    CornerRadius="4"
+                    Margin="2"
+                    BorderBrush="{DynamicResource SubtleBorderBrush}"
+                    BorderThickness="1"
+                    ToolTip="{Binding}">
+                <Border.Background>
+                    <SolidColorBrush Color="{Binding Converter={StaticResource StringToColorConverter}}"/>
+                </Border.Background>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Palette List -->
+            <Border Grid.Column="0"
+                    Background="{DynamicResource PanelBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Margin="0,0,12,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- List Header -->
+                    <Border Grid.Row="0"
+                            Background="{DynamicResource BackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="0,0,0,1"
+                            Padding="10,8">
+                        <TextBlock Text="Palettes"
+                                   FontWeight="SemiBold"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource BrightForegroundBrush}"/>
+                    </Border>
+
+                    <!-- Palette List -->
+                    <ListBox x:Name="PaletteList"
+                             Grid.Row="1"
+                             ItemContainerStyle="{StaticResource PaletteListItemStyle}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Padding="6"
+                             SelectionChanged="PaletteList_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource BrightForegroundBrush}"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="(Built-in)"
+                                                   FontSize="9"
+                                                   Foreground="{DynamicResource SecondaryForegroundBrush}"
+                                                   Margin="4,0,0,0"
+                                                   Visibility="{Binding IsBuiltIn, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    </Grid>
+                                    <!-- Color Preview -->
+                                    <ItemsControl ItemsSource="{Binding Colors}"
+                                                  Margin="0,4,0,0">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Width="14" Height="14"
+                                                        CornerRadius="2"
+                                                        Margin="0,0,2,0">
+                                                    <Border.Background>
+                                                        <SolidColorBrush Color="{Binding Converter={StaticResource StringToColorConverter}}"/>
+                                                    </Border.Background>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- List Actions -->
+                    <Border Grid.Row="2"
+                            Background="{DynamicResource BackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="0,1,0,0"
+                            Padding="6">
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="NewPaletteButton"
+                                    Content="New"
+                                    Click="NewPaletteButton_Click"
+                                    Padding="8,4"
+                                    Margin="0,0,4,0"/>
+                            <Button x:Name="DuplicateButton"
+                                    Content="Duplicate"
+                                    Click="DuplicateButton_Click"
+                                    Padding="8,4"
+                                    Margin="0,0,4,0"/>
+                            <Button x:Name="DeleteButton"
+                                    Content="Delete"
+                                    Click="DeleteButton_Click"
+                                    Padding="8,4"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Palette Editor -->
+            <Border Grid.Column="1"
+                    Background="{DynamicResource PanelBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Editor Header -->
+                    <Border Grid.Row="0"
+                            Background="{DynamicResource BackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="0,0,0,1"
+                            Padding="12,8">
+                        <TextBlock Text="Edit Palette"
+                                   FontWeight="SemiBold"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource BrightForegroundBrush}"/>
+                    </Border>
+
+                    <!-- Editor Content -->
+                    <ScrollViewer Grid.Row="1"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Padding="12">
+                        <StackPanel x:Name="EditorPanel" IsEnabled="False">
+                            <!-- Palette Name -->
+                            <TextBlock Text="Name"
+                                       FontWeight="SemiBold"
+                                       FontSize="11"
+                                       Margin="0,0,0,6"/>
+                            <TextBox x:Name="PaletteNameBox"
+                                     Background="{DynamicResource EditorBackgroundBrush}"
+                                     Foreground="{DynamicResource ForegroundBrush}"
+                                     BorderBrush="{DynamicResource BorderBrush}"
+                                     Padding="8,6"
+                                     Margin="0,0,0,16"
+                                     TextChanged="PaletteNameBox_TextChanged"/>
+
+                            <!-- Description -->
+                            <TextBlock Text="Description"
+                                       FontWeight="SemiBold"
+                                       FontSize="11"
+                                       Margin="0,0,0,6"/>
+                            <TextBox x:Name="PaletteDescriptionBox"
+                                     Background="{DynamicResource EditorBackgroundBrush}"
+                                     Foreground="{DynamicResource ForegroundBrush}"
+                                     BorderBrush="{DynamicResource BorderBrush}"
+                                     Padding="8,6"
+                                     Margin="0,0,0,16"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     MinHeight="60"
+                                     TextChanged="PaletteDescriptionBox_TextChanged"/>
+
+                            <!-- Colors -->
+                            <Grid Margin="0,0,0,8">
+                                <TextBlock Text="Colors"
+                                           FontWeight="SemiBold"
+                                           FontSize="11"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button x:Name="AddColorButton"
+                                            Content="Add Color"
+                                            Click="AddColorButton_Click"
+                                            Padding="8,2"
+                                            FontSize="10"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Colors List -->
+                            <Border Background="{DynamicResource EditorBackgroundBrush}"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="8"
+                                    MinHeight="120">
+                                <ItemsControl x:Name="ColorsListControl">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Width="40" Height="40"
+                                                    CornerRadius="4"
+                                                    Margin="4"
+                                                    BorderBrush="{DynamicResource SubtleBorderBrush}"
+                                                    BorderThickness="1"
+                                                    Cursor="Hand"
+                                                    MouseLeftButtonUp="ColorSwatch_Click"
+                                                    ToolTip="{Binding}">
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{Binding Converter={StaticResource StringToColorConverter}}"/>
+                                                </Border.Background>
+                                                <Border.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="Edit Color" Click="EditColor_Click"/>
+                                                        <MenuItem Header="Remove Color" Click="RemoveColor_Click"/>
+                                                    </ContextMenu>
+                                                </Border.ContextMenu>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Border>
+
+                            <!-- Import/Export -->
+                            <Separator Margin="0,16"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button x:Name="ImportButton"
+                                        Content="Import Palette..."
+                                        Click="ImportButton_Click"
+                                        Padding="12,6"
+                                        Margin="0,0,8,0"/>
+                                <Button x:Name="ExportButton"
+                                        Content="Export Palette..."
+                                        Click="ExportButton_Click"
+                                        Padding="12,6"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Bottom Button Panel -->
+        <Border Grid.Row="1"
+                Background="{DynamicResource PanelBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="16,12">
+            <Grid>
+                <Button x:Name="ApplyToAllButton"
+                        Content="Apply to All Tracks"
+                        Click="ApplyToAllButton_Click"
+                        HorizontalAlignment="Left"
+                        Padding="12,6"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="ApplyButton"
+                            Content="Apply"
+                            Click="ApplyButton_Click"
+                            Padding="16,6"
+                            Margin="0,0,8,0"
+                            Background="{DynamicResource AccentBrush}"
+                            Foreground="White"/>
+                    <Button Content="Close"
+                            IsCancel="True"
+                            Padding="16,6"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

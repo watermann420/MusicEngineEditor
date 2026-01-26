@@ -1,0 +1,412 @@
+<Window x:Class="MusicEngineEditor.Views.Dialogs.ProjectStatisticsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Project Statistics"
+        Width="550" Height="620"
+        MinWidth="450" MinHeight="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        Background="{DynamicResource BackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}">
+
+    <Window.Resources>
+        <!-- Stat Row Style -->
+        <Style x:Key="StatLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryForegroundBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+        </Style>
+
+        <Style x:Key="StatValueStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource BrightForegroundBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+        </Style>
+
+        <Style x:Key="StatUnitStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryForegroundBrush}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="4,0,0,0"/>
+            <Setter Property="MinWidth" Value="40"/>
+        </Style>
+
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrightForegroundBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+
+        <Style x:Key="StatRowStyle" TargetType="Border">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="0,6"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource PanelBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="20,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Project Statistics"
+                               FontWeight="Bold"
+                               FontSize="16"
+                               Foreground="{DynamicResource BrightForegroundBrush}"
+                               Margin="0,0,0,4"/>
+                    <TextBlock x:Name="ProjectNameText"
+                               Text="Untitled Project"
+                               FontSize="11"
+                               Foreground="{DynamicResource SecondaryForegroundBrush}"/>
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        x:Name="RefreshButton"
+                        Content="Refresh"
+                        Click="RefreshButton_Click"
+                        Padding="15,6"/>
+            </Grid>
+        </Border>
+
+        <!-- Statistics Content -->
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      Padding="20">
+            <StackPanel>
+                <!-- Track Counts Section -->
+                <TextBlock Text="Tracks" Style="{StaticResource SectionHeaderStyle}"/>
+                <Border Background="{DynamicResource PanelBackgroundBrush}"
+                        CornerRadius="6"
+                        Padding="16"
+                        Margin="0,0,0,20">
+                    <StackPanel>
+                        <Border Style="{StaticResource StatRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Total Tracks" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="TotalTracksValue" Grid.Column="1" Text="0" Style="{StaticResource StatValueStyle}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource StatRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Audio Tracks" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="AudioTracksValue" Grid.Column="1" Text="0" Style="{StaticResource StatValueStyle}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource StatRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="MIDI Tracks" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="MidiTracksValue" Grid.Column="1" Text="0" Style="{StaticResource StatValueStyle}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource StatRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Bus Tracks" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="BusTracksValue" Grid.Column="1" Text="0" Style="{StaticResource StatValueStyle}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource StatRowStyle}" BorderThickness="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Frozen Tracks" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="FrozenTracksValue" Grid.Column="1" Text="0" Style="{StaticResource StatValueStyle}"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Plugins Section -->
+                <TextBlock Text="Plugins" Style="{StaticResource SectionHeaderStyle}"/>
+                <Border Background="{DynamicResource PanelBackgroundBrush}"
+                        CornerRadius="6"
+                        Padding="16"
+                        Margin="0,0,0,20">
+                    <StackPanel>
+                        <Border Style="{StaticResource StatRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Total Plugin Instances" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="TotalPluginsValue" Grid.Column="1" Text="0" Style="{StaticResource StatValueStyle}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource StatRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="VST Plugins" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="VstPluginsValue" Grid.Column="1" Text="0" Style="{StaticResource StatValueStyle}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource StatRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Built-in Effects" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="BuiltinEffectsValue" Grid.Column="1" Text="0" Style="{StaticResource StatValueStyle}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource StatRowStyle}" BorderThickness="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Instruments" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="InstrumentsValue" Grid.Column="1" Text="0" Style="{StaticResource StatValueStyle}"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Plugin Usage List -->
+                <TextBlock Text="Plugin Usage" Style="{StaticResource SectionHeaderStyle}"/>
+                <Border Background="{DynamicResource PanelBackgroundBrush}"
+                        CornerRadius="6"
+                        Padding="16"
+                        MaxHeight="150"
+                        Margin="0,0,0,20">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="PluginUsageList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource StatRowStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Name}" Style="{StaticResource StatLabelStyle}"/>
+                                            <TextBlock Text="{Binding Count}" Grid.Column="1" Style="{StaticResource StatValueStyle}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- Performance Section -->
+                <TextBlock Text="Performance" Style="{StaticResource SectionHeaderStyle}"/>
+                <Border Background="{DynamicResource PanelBackgroundBrush}"
+                        CornerRadius="6"
+                        Padding="16"
+                        Margin="0,0,0,20">
+                    <StackPanel>
+                        <Border Style="{StaticResource StatRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="CPU Usage (Average)" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="CpuAverageValue" Grid.Column="1" Text="0.0" Style="{StaticResource StatValueStyle}"/>
+                                <TextBlock Grid.Column="2" Text="%" Style="{StaticResource StatUnitStyle}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource StatRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="CPU Usage (Peak)" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="CpuPeakValue" Grid.Column="1" Text="0.0" Style="{StaticResource StatValueStyle}"/>
+                                <TextBlock Grid.Column="2" Text="%" Style="{StaticResource StatUnitStyle}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource StatRowStyle}" BorderThickness="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Memory Usage" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="MemoryUsageValue" Grid.Column="1" Text="0.0" Style="{StaticResource StatValueStyle}"/>
+                                <TextBlock Grid.Column="2" Text="MB" Style="{StaticResource StatUnitStyle}"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Project Details Section -->
+                <TextBlock Text="Project Details" Style="{StaticResource SectionHeaderStyle}"/>
+                <Border Background="{DynamicResource PanelBackgroundBrush}"
+                        CornerRadius="6"
+                        Padding="16"
+                        Margin="0,0,0,20">
+                    <StackPanel>
+                        <Border Style="{StaticResource StatRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Project Duration" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="DurationValue" Grid.Column="1" Text="0:00" Style="{StaticResource StatValueStyle}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource StatRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Sample Rate" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="SampleRateValue" Grid.Column="1" Text="44100" Style="{StaticResource StatValueStyle}"/>
+                                <TextBlock Grid.Column="2" Text="Hz" Style="{StaticResource StatUnitStyle}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource StatRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Tempo" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="TempoValue" Grid.Column="1" Text="120" Style="{StaticResource StatValueStyle}"/>
+                                <TextBlock Grid.Column="2" Text="BPM" Style="{StaticResource StatUnitStyle}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource StatRowStyle}" BorderThickness="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Time Signature" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="TimeSignatureValue" Grid.Column="1" Text="4/4" Style="{StaticResource StatValueStyle}"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- File Sizes Section -->
+                <TextBlock Text="File Sizes" Style="{StaticResource SectionHeaderStyle}"/>
+                <Border Background="{DynamicResource PanelBackgroundBrush}"
+                        CornerRadius="6"
+                        Padding="16">
+                    <StackPanel>
+                        <Border Style="{StaticResource StatRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Project File Size" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="ProjectSizeValue" Grid.Column="1" Text="0 KB" Style="{StaticResource StatValueStyle}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource StatRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Audio Files Total" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="AudioFilesSizeValue" Grid.Column="1" Text="0 MB" Style="{StaticResource StatValueStyle}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource StatRowStyle}" BorderThickness="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Total Project Folder" Style="{StaticResource StatLabelStyle}"/>
+                                <TextBlock x:Name="TotalSizeValue" Grid.Column="1" Text="0 MB" Style="{StaticResource StatValueStyle}"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Bottom Button Panel -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource PanelBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="20,15">
+            <Grid>
+                <Button x:Name="ExportButton"
+                        Content="Export Report..."
+                        Click="ExportButton_Click"
+                        HorizontalAlignment="Left"
+                        Padding="15,6"/>
+
+                <Button Content="Close"
+                        IsCancel="True"
+                        Click="CloseButton_Click"
+                        HorizontalAlignment="Right"
+                        Padding="20,8"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
