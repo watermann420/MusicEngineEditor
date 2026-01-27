@@ -8,7 +8,11 @@
       "Bash(dir \"C:\\\\Users\\\\water\\\\RiderProjects\\\\MusicEditor\\\\MusicEngineEditor\\\\Resources\\\\Icons\")",
       "Bash(dir /s /b \"C:\\\\Users\\\\water\\\\RiderProjects\\\\MusicEditor\")",
       "Bash(findstr:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(dir \"C:\\\\Users\\\\water\\\\RiderProjects\\\\MusicEditor\")",
+      "Bash(dir \"C:\\\\Users\\\\water\\\\RiderProjects\\\\MusicEditor\\\\dev-docs\")",
+      "Bash(dir \"C:\\\\Users\\\\water\\\\RiderProjects\\\\MusicEditor\\\\MusicEngineEditor\")",
+      "Bash(dir \"C:\\\\Users\\\\water\\\\RiderProjects\\\\MusicEditor\" /s /b)"
     ]
   }
 }
