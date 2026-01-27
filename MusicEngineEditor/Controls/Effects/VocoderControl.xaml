@@ -1,0 +1,544 @@
+<UserControl x:Class="MusicEngineEditor.Controls.Effects.VocoderControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:MusicEngineEditor.Controls.Effects"
+             mc:Ignorable="d"
+             d:DesignHeight="520" d:DesignWidth="400"
+             Background="{DynamicResource PanelBackgroundBrush}">
+
+    <UserControl.Resources>
+        <!-- Converters -->
+        <local:VocoderBandCountToIntConverter x:Key="VocoderBandCountConverter"/>
+        <local:VocoderFormantShiftConverter x:Key="VocoderFormantShiftConverter"/>
+        <local:VocoderPercentConverter x:Key="VocoderPercentConverter"/>
+        <local:VocoderFrequencyConverter x:Key="VocoderFrequencyConverter"/>
+        <local:VocoderTimeConverter x:Key="VocoderTimeConverter"/>
+
+        <!-- Local Colors -->
+        <Color x:Key="VocoderBackgroundColor">#0D0D0D</Color>
+        <Color x:Key="VocoderPanelColor">#181818</Color>
+        <Color x:Key="VocoderAccentColor">#00D9FF</Color>
+        <Color x:Key="VocoderSuccessColor">#00FF88</Color>
+        <Color x:Key="VocoderTextColor">#E0E0E0</Color>
+        <Color x:Key="VocoderSecondaryTextColor">#808080</Color>
+        <Color x:Key="VocoderBorderColor">#2A2A2A</Color>
+        <Color x:Key="VocoderBandActiveColor">#00D9FF</Color>
+        <Color x:Key="VocoderBandInactiveColor">#1A1A1A</Color>
+
+        <!-- Local Brushes -->
+        <SolidColorBrush x:Key="VocoderBackgroundBrush" Color="{StaticResource VocoderBackgroundColor}"/>
+        <SolidColorBrush x:Key="VocoderPanelBrush" Color="{StaticResource VocoderPanelColor}"/>
+        <SolidColorBrush x:Key="VocoderAccentBrush" Color="{StaticResource VocoderAccentColor}"/>
+        <SolidColorBrush x:Key="VocoderSuccessBrush" Color="{StaticResource VocoderSuccessColor}"/>
+        <SolidColorBrush x:Key="VocoderTextBrush" Color="{StaticResource VocoderTextColor}"/>
+        <SolidColorBrush x:Key="VocoderSecondaryTextBrush" Color="{StaticResource VocoderSecondaryTextColor}"/>
+        <SolidColorBrush x:Key="VocoderBorderBrush" Color="{StaticResource VocoderBorderColor}"/>
+        <SolidColorBrush x:Key="VocoderBandActiveBrush" Color="{StaticResource VocoderBandActiveColor}"/>
+        <SolidColorBrush x:Key="VocoderBandInactiveBrush" Color="{StaticResource VocoderBandInactiveColor}"/>
+
+        <!-- Band Gradient (bottom to top) -->
+        <LinearGradientBrush x:Key="VocoderBandGradientBrush" StartPoint="0,1" EndPoint="0,0">
+            <GradientStop Color="#004D66" Offset="0.0"/>
+            <GradientStop Color="#007A99" Offset="0.3"/>
+            <GradientStop Color="#00A8CC" Offset="0.6"/>
+            <GradientStop Color="#00D9FF" Offset="0.85"/>
+            <GradientStop Color="#7FFFFF" Offset="1.0"/>
+        </LinearGradientBrush>
+
+        <!-- LED Indicator Active Gradient -->
+        <RadialGradientBrush x:Key="VocoderLedActiveBrush" GradientOrigin="0.3,0.3">
+            <GradientStop Color="#00FFCC" Offset="0.0"/>
+            <GradientStop Color="#00D9FF" Offset="0.5"/>
+            <GradientStop Color="#007A99" Offset="1.0"/>
+        </RadialGradientBrush>
+
+        <!-- LED Indicator Inactive -->
+        <SolidColorBrush x:Key="VocoderLedInactiveBrush" Color="#1A2A2A"/>
+
+        <!-- Parameter Slider Style -->
+        <Style x:Key="VocoderParameterSliderStyle" TargetType="Slider" BasedOn="{StaticResource {x:Type Slider}}">
+            <Setter Property="Minimum" Value="0"/>
+            <Setter Property="Maximum" Value="100"/>
+            <Setter Property="TickFrequency" Value="1"/>
+            <Setter Property="IsSnapToTickEnabled" Value="True"/>
+        </Style>
+
+        <!-- Parameter Label Style -->
+        <Style x:Key="VocoderParameterLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryForegroundBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+
+        <!-- Parameter Value Style -->
+        <Style x:Key="VocoderParameterValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="MinWidth" Value="50"/>
+            <Setter Property="TextAlignment" Value="Right"/>
+        </Style>
+
+        <!-- Section Header Style -->
+        <Style x:Key="VocoderSectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrightForegroundBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Border BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="6"
+            Padding="16">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row="0" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="Enhanced Vocoder"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource BrightForegroundBrush}"
+                               VerticalAlignment="Center"/>
+                    <Ellipse x:Name="ActiveIndicator"
+                             Width="8" Height="8"
+                             Fill="{StaticResource VocoderSuccessBrush}"
+                             Margin="8,0,0,0"
+                             VerticalAlignment="Center"
+                             ToolTip="Effect Active"/>
+                </StackPanel>
+
+                <ToggleButton Grid.Column="1"
+                              x:Name="BypassToggle"
+                              Content="Bypass"
+                              Padding="8,4"
+                              Click="BypassToggle_Click">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="{DynamicResource SecondaryForegroundBrush}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                            <Setter Property="BorderThickness" Value="1"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="border"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="3"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="{DynamicResource WarningBrush}"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+            </Grid>
+
+            <!-- Band Visualization Section -->
+            <Border Grid.Row="1"
+                    Background="{StaticResource VocoderBackgroundBrush}"
+                    BorderBrush="{StaticResource VocoderBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="8"
+                    Margin="0,0,0,12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="100"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Section Header -->
+                    <TextBlock Grid.Row="0"
+                               Text="Band Levels"
+                               Style="{StaticResource VocoderSectionHeaderStyle}"/>
+
+                    <!-- Band Bars Canvas -->
+                    <Border Grid.Row="1"
+                            Background="{StaticResource VocoderBackgroundBrush}"
+                            BorderBrush="{StaticResource VocoderBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="2">
+                        <Canvas x:Name="BandCanvas" ClipToBounds="True"/>
+                    </Border>
+
+                    <!-- Band Activity LEDs -->
+                    <StackPanel Grid.Row="2" Margin="0,8,0,0">
+                        <TextBlock Text="Band Activity"
+                                   FontSize="10"
+                                   Foreground="{StaticResource VocoderSecondaryTextBrush}"
+                                   Margin="0,0,0,4"/>
+                        <ItemsControl x:Name="BandLedDisplay">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Rows="1"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Ellipse Width="8" Height="8"
+                                             Margin="1,0"
+                                             Fill="{Binding IsActive, Converter={StaticResource VocoderBandCountConverter}}"
+                                             ToolTip="{Binding Frequency}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Carrier Source Section -->
+            <Border Grid.Row="2"
+                    Background="{DynamicResource BackgroundBrush}"
+                    CornerRadius="4"
+                    Padding="12"
+                    Margin="0,0,0,12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="Carrier Source"
+                               Style="{StaticResource VocoderSectionHeaderStyle}"/>
+
+                    <!-- Carrier Type Selection -->
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+                        <RadioButton x:Name="CarrierSawtooth"
+                                     Content="Sawtooth"
+                                     GroupName="CarrierType"
+                                     IsChecked="True"
+                                     Checked="CarrierType_Changed"
+                                     Margin="0,0,12,0"/>
+                        <RadioButton x:Name="CarrierSquare"
+                                     Content="Square"
+                                     GroupName="CarrierType"
+                                     Checked="CarrierType_Changed"
+                                     Margin="0,0,12,0"/>
+                        <RadioButton x:Name="CarrierNoise"
+                                     Content="Noise"
+                                     GroupName="CarrierType"
+                                     Checked="CarrierType_Changed"
+                                     Margin="0,0,12,0"/>
+                        <RadioButton x:Name="CarrierMixed"
+                                     Content="Mixed"
+                                     GroupName="CarrierType"
+                                     Checked="CarrierType_Changed"
+                                     Margin="0,0,12,0"/>
+                        <RadioButton x:Name="CarrierExternal"
+                                     Content="External"
+                                     GroupName="CarrierType"
+                                     Checked="CarrierType_Changed"/>
+                    </StackPanel>
+
+                    <!-- Carrier Frequency (for internal synth) -->
+                    <StackPanel Grid.Row="2" x:Name="CarrierFrequencyPanel">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="Carrier Frequency"
+                                       Style="{StaticResource VocoderParameterLabelStyle}"/>
+                            <TextBlock Grid.Column="1"
+                                       x:Name="CarrierFrequencyValue"
+                                       Text="110 Hz"
+                                       Style="{StaticResource VocoderParameterValueStyle}"/>
+                        </Grid>
+                        <Slider x:Name="CarrierFrequencySlider"
+                                Minimum="20"
+                                Maximum="2000"
+                                Value="110"
+                                TickFrequency="10"
+                                ValueChanged="CarrierFrequencySlider_ValueChanged"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Formant Shift Section -->
+            <StackPanel Grid.Row="3" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="Formant Shift"
+                               Style="{StaticResource VocoderParameterLabelStyle}"/>
+                    <TextBlock Grid.Column="1"
+                               x:Name="FormantShiftValue"
+                               Text="0 st"
+                               Style="{StaticResource VocoderParameterValueStyle}"/>
+                </Grid>
+                <Slider x:Name="FormantShiftSlider"
+                        Minimum="-12"
+                        Maximum="12"
+                        Value="0"
+                        TickFrequency="1"
+                        IsSnapToTickEnabled="True"
+                        ValueChanged="FormantShiftSlider_ValueChanged"/>
+            </StackPanel>
+
+            <!-- Band Count Section -->
+            <StackPanel Grid.Row="4" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="Band Count"
+                               Style="{StaticResource VocoderParameterLabelStyle}"/>
+                    <TextBlock Grid.Column="1"
+                               x:Name="BandCountValue"
+                               Text="16 bands"
+                               Style="{StaticResource VocoderParameterValueStyle}"/>
+                </Grid>
+                <ComboBox x:Name="BandCountComboBox"
+                          SelectionChanged="BandCountComboBox_SelectionChanged"
+                          Margin="0,4,0,0">
+                    <ComboBoxItem Content="8 bands" Tag="8"/>
+                    <ComboBoxItem Content="16 bands" Tag="16" IsSelected="True"/>
+                    <ComboBoxItem Content="32 bands" Tag="32"/>
+                    <ComboBoxItem Content="64 bands" Tag="64"/>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Modulator Input Level -->
+            <Border Grid.Row="5"
+                    Background="{DynamicResource BackgroundBrush}"
+                    CornerRadius="4"
+                    Padding="12"
+                    Margin="0,0,0,12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Modulator Input"
+                                   Style="{StaticResource VocoderSectionHeaderStyle}"
+                                   Margin="0"/>
+                        <TextBlock Grid.Column="1"
+                                   x:Name="ModulatorLevelText"
+                                   Text="-inf dB"
+                                   FontSize="11"
+                                   Foreground="{StaticResource VocoderAccentBrush}"
+                                   FontWeight="SemiBold"/>
+                    </Grid>
+
+                    <!-- Level Meter -->
+                    <Grid Grid.Row="1" Height="12">
+                        <Border Background="{StaticResource VocoderBandInactiveBrush}"
+                                CornerRadius="2"/>
+                        <Border x:Name="ModulatorLevelBar"
+                                Background="{StaticResource VocoderBandGradientBrush}"
+                                CornerRadius="2"
+                                HorizontalAlignment="Left"
+                                Width="0"/>
+                        <!-- Peak Indicator -->
+                        <Border x:Name="ModulatorPeakIndicator"
+                                Width="2"
+                                Background="White"
+                                HorizontalAlignment="Left"
+                                Margin="0"
+                                Visibility="Collapsed"/>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Sibilance / Unvoiced Detector Section -->
+            <StackPanel Grid.Row="6" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="Sibilance Preservation"
+                               Style="{StaticResource VocoderParameterLabelStyle}"/>
+                    <TextBlock Grid.Column="1"
+                               x:Name="SibilanceValue"
+                               Text="50%"
+                               Style="{StaticResource VocoderParameterValueStyle}"/>
+                </Grid>
+                <Slider x:Name="SibilanceSlider"
+                        Style="{StaticResource VocoderParameterSliderStyle}"
+                        Value="50"
+                        ValueChanged="SibilanceSlider_ValueChanged"/>
+            </StackPanel>
+
+            <!-- Additional Parameters -->
+            <Border Grid.Row="7"
+                    Background="{DynamicResource BackgroundBrush}"
+                    CornerRadius="4"
+                    Padding="12"
+                    VerticalAlignment="Top">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="Envelope"
+                               Style="{StaticResource VocoderSectionHeaderStyle}"/>
+
+                    <!-- Attack -->
+                    <StackPanel Grid.Row="1" Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="Attack"
+                                       Style="{StaticResource VocoderParameterLabelStyle}"/>
+                            <TextBlock Grid.Column="1"
+                                       x:Name="AttackValue"
+                                       Text="10 ms"
+                                       Style="{StaticResource VocoderParameterValueStyle}"/>
+                        </Grid>
+                        <Slider x:Name="AttackSlider"
+                                Minimum="1"
+                                Maximum="1000"
+                                Value="10"
+                                TickFrequency="1"
+                                ValueChanged="AttackSlider_ValueChanged"/>
+                    </StackPanel>
+
+                    <!-- Release -->
+                    <StackPanel Grid.Row="2" Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="Release"
+                                       Style="{StaticResource VocoderParameterLabelStyle}"/>
+                            <TextBlock Grid.Column="1"
+                                       x:Name="ReleaseValue"
+                                       Text="100 ms"
+                                       Style="{StaticResource VocoderParameterValueStyle}"/>
+                        </Grid>
+                        <Slider x:Name="ReleaseSlider"
+                                Minimum="1"
+                                Maximum="2000"
+                                Value="100"
+                                TickFrequency="1"
+                                ValueChanged="ReleaseSlider_ValueChanged"/>
+                    </StackPanel>
+
+                    <!-- Output Gain / Mix -->
+                    <Grid Grid.Row="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Output Gain -->
+                        <StackPanel Grid.Column="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="Output Gain"
+                                           Style="{StaticResource VocoderParameterLabelStyle}"/>
+                                <TextBlock Grid.Column="1"
+                                           x:Name="OutputGainValue"
+                                           Text="100%"
+                                           Style="{StaticResource VocoderParameterValueStyle}"/>
+                            </Grid>
+                            <Slider x:Name="OutputGainSlider"
+                                    Minimum="0"
+                                    Maximum="200"
+                                    Value="100"
+                                    TickFrequency="1"
+                                    ValueChanged="OutputGainSlider_ValueChanged"/>
+                        </StackPanel>
+
+                        <!-- Mix -->
+                        <StackPanel Grid.Column="2">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="Mix"
+                                           Style="{StaticResource VocoderParameterLabelStyle}"/>
+                                <TextBlock Grid.Column="1"
+                                           x:Name="MixValue"
+                                           Text="100%"
+                                           Style="{StaticResource VocoderParameterValueStyle}"/>
+                            </Grid>
+                            <Slider x:Name="MixSlider"
+                                    Minimum="0"
+                                    Maximum="100"
+                                    Value="100"
+                                    TickFrequency="1"
+                                    ValueChanged="MixSlider_ValueChanged"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

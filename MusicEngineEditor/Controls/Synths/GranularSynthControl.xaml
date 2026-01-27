@@ -1,0 +1,642 @@
+<UserControl x:Class="MusicEngineEditor.Controls.Synths.GranularSynthControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:synths="clr-namespace:MusicEngineEditor.ViewModels.Synths"
+             xmlns:local="clr-namespace:MusicEngineEditor.Controls.Synths"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance synths:GranularSynthViewModel}"
+             Background="#0D0D0D">
+
+    <UserControl.Resources>
+        <!-- Converters -->
+        <local:GranularInverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+
+        <!-- Colors -->
+        <Color x:Key="BackgroundColor">#0D0D0D</Color>
+        <Color x:Key="PanelColor">#181818</Color>
+        <Color x:Key="AccentColor">#00D9FF</Color>
+        <Color x:Key="GrainColor">#00FF88</Color>
+        <Color x:Key="TextColor">#E0E0E0</Color>
+        <Color x:Key="TextDimColor">#808080</Color>
+        <Color x:Key="BorderColor">#2A2A2A</Color>
+        <Color x:Key="SliderTrackColor">#333333</Color>
+        <Color x:Key="PositionRangeColor">#40FF5722</Color>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+        <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+        <SolidColorBrush x:Key="GrainBrush" Color="{StaticResource GrainColor}"/>
+        <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}"/>
+        <SolidColorBrush x:Key="TextDimBrush" Color="{StaticResource TextDimColor}"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+        <SolidColorBrush x:Key="SliderTrackBrush" Color="{StaticResource SliderTrackColor}"/>
+
+        <!-- Waveform Brush -->
+        <LinearGradientBrush x:Key="WaveformBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#00D9FF" Offset="0"/>
+            <GradientStop Color="#006680" Offset="0.5"/>
+            <GradientStop Color="#00D9FF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Position Indicator Brush -->
+        <SolidColorBrush x:Key="PositionIndicatorBrush" Color="#FF5722"/>
+
+        <!-- Slider Style -->
+        <Style x:Key="GranularSliderStyle" TargetType="Slider">
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Background" Value="{StaticResource SliderTrackBrush}"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Margin" Value="0,2"/>
+        </Style>
+
+        <!-- Label Style -->
+        <Style x:Key="ParameterLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Value Label Style -->
+        <Style x:Key="ValueLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="MinWidth" Value="50"/>
+        </Style>
+
+        <!-- Section Header Style -->
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,8,0,4"/>
+        </Style>
+
+        <!-- Button Style -->
+        <Style x:Key="GranularButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="border" Property="Background" Value="#252525"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#303030"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Accent Button Style -->
+        <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource GranularButtonStyle}">
+            <Setter Property="Background" Value="#004455"/>
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+        </Style>
+
+        <!-- Preset Button Style -->
+        <Style x:Key="PresetButtonStyle" TargetType="Button" BasedOn="{StaticResource GranularButtonStyle}">
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="MinWidth" Value="60"/>
+        </Style>
+
+        <!-- ComboBox Style -->
+        <Style x:Key="GranularComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+        </Style>
+
+        <!-- CheckBox Style -->
+        <Style x:Key="GranularCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="12,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Title and File Info -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="GRANULAR SYNTH"
+                               FontSize="14"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="|" Foreground="{StaticResource TextDimBrush}" Margin="12,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding LoadedFileName, FallbackValue='No sample loaded'}"
+                               Foreground="{StaticResource TextDimBrush}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Transport Controls -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Load Sample"
+                            Command="{Binding LoadSampleCommand}"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Margin="0,0,8,0"/>
+                    <Button x:Name="PlayButton"
+                            Command="{Binding TogglePlayCommand}"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Width="80">
+                        <Button.Content>
+                            <TextBlock>
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Play"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                                <Setter Property="Text" Value="Stop"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="280"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Waveform and Grain Visualization Area -->
+            <Border Grid.Column="0" Background="{StaticResource PanelBrush}" Margin="8" CornerRadius="4">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Waveform Display with Grain Scatter -->
+                    <Border Grid.Row="0" Background="#0A0A0A" CornerRadius="4" Margin="8">
+                        <Grid x:Name="WaveformContainer" ClipToBounds="True"
+                              MouseLeftButtonDown="WaveformContainer_MouseLeftButtonDown"
+                              MouseMove="WaveformContainer_MouseMove"
+                              MouseLeftButtonUp="WaveformContainer_MouseLeftButtonUp"
+                              SizeChanged="WaveformContainer_SizeChanged"
+                              Cursor="Hand">
+                            <!-- Waveform Canvas -->
+                            <Canvas x:Name="WaveformCanvas" Background="Transparent"/>
+
+                            <!-- Position Randomness Range Display -->
+                            <Canvas x:Name="PositionRangeCanvas" Background="Transparent" IsHitTestVisible="False">
+                                <Rectangle x:Name="PositionRangeIndicator"
+                                           Fill="#40FF5722"
+                                           Canvas.Top="0"
+                                           Opacity="0.4"/>
+                            </Canvas>
+
+                            <!-- Grain Position Indicator (draggable) -->
+                            <Canvas x:Name="PositionIndicatorCanvas" Background="Transparent" IsHitTestVisible="False">
+                                <Rectangle x:Name="PositionIndicator"
+                                           Width="3"
+                                           Fill="{StaticResource PositionIndicatorBrush}"
+                                           Canvas.Top="0"/>
+                            </Canvas>
+
+                            <!-- Grain Scatter Visualization -->
+                            <ItemsControl x:Name="GrainScatterDisplay"
+                                          ItemsSource="{Binding GrainVisualizations}"
+                                          IsHitTestVisible="False">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Canvas Background="Transparent"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                        <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Ellipse Width="{Binding Size}"
+                                                 Height="{Binding Size}"
+                                                 Opacity="{Binding Opacity}">
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Fill" Value="{StaticResource GrainBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsReverse}" Value="True">
+                                                            <Setter Property="Fill" Value="#FF6B6B"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Center Line -->
+                            <Line x:Name="CenterLine"
+                                  Stroke="#333333"
+                                  StrokeThickness="1"
+                                  X1="0"
+                                  X2="{Binding ActualWidth, ElementName=WaveformCanvas}"
+                                  StrokeDashArray="4,2"/>
+
+                            <!-- No Sample Overlay -->
+                            <Border Background="#80000000"
+                                    Visibility="{Binding HasLoadedSample, Converter={StaticResource InverseBoolToVisibilityConverter}, FallbackValue=Visible}">
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock Text="No Sample Loaded"
+                                               Foreground="{StaticResource TextDimBrush}"
+                                               FontSize="14"
+                                               HorizontalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
+                                        <Button Content="Load File"
+                                                Command="{Binding LoadSampleCommand}"
+                                                Style="{StaticResource GranularButtonStyle}"
+                                                Margin="0,0,8,0"/>
+                                        <Button Content="Generate"
+                                                Style="{StaticResource GranularButtonStyle}">
+                                            <Button.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Sine" Command="{Binding GenerateWaveformCommand}" CommandParameter="Sine"/>
+                                                    <MenuItem Header="Square" Command="{Binding GenerateWaveformCommand}" CommandParameter="Square"/>
+                                                    <MenuItem Header="Sawtooth" Command="{Binding GenerateWaveformCommand}" CommandParameter="Sawtooth"/>
+                                                    <MenuItem Header="Triangle" Command="{Binding GenerateWaveformCommand}" CommandParameter="Triangle"/>
+                                                    <MenuItem Header="Noise" Command="{Binding GenerateWaveformCommand}" CommandParameter="Noise"/>
+                                                </ContextMenu>
+                                            </Button.ContextMenu>
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Position Slider -->
+                    <Grid Grid.Row="1" Margin="8,0,8,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="50"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Position" Style="{StaticResource ParameterLabelStyle}"/>
+                        <Slider Grid.Column="1"
+                                Value="{Binding Position}"
+                                Minimum="0" Maximum="1"
+                                Style="{StaticResource GranularSliderStyle}"/>
+                        <TextBlock Grid.Column="2"
+                                   Text="{Binding Position, StringFormat='{}{0:P0}'}"
+                                   Style="{StaticResource ValueLabelStyle}"/>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Parameter Panel -->
+            <Border Grid.Column="1" Background="{StaticResource PanelBrush}" Margin="0,8,8,8" CornerRadius="4">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="12">
+                    <StackPanel>
+
+                        <!-- Presets Section -->
+                        <TextBlock Text="PRESETS" Style="{StaticResource SectionHeaderStyle}"/>
+                        <WrapPanel Margin="0,0,0,8">
+                            <Button Content="Pad" Command="{Binding ApplyPresetCommand}" CommandParameter="Pad" Style="{StaticResource PresetButtonStyle}" Margin="0,0,4,4"/>
+                            <Button Content="Texture" Command="{Binding ApplyPresetCommand}" CommandParameter="Texture" Style="{StaticResource PresetButtonStyle}" Margin="0,0,4,4"/>
+                            <Button Content="Freeze" Command="{Binding ApplyPresetCommand}" CommandParameter="Freeze" Style="{StaticResource PresetButtonStyle}" Margin="0,0,4,4"/>
+                            <Button Content="Reset" Command="{Binding ResetParametersCommand}" Style="{StaticResource PresetButtonStyle}" Margin="0,0,4,4"/>
+                        </WrapPanel>
+
+                        <Separator Background="{StaticResource BorderBrush}" Margin="0,4"/>
+
+                        <!-- Grain Parameters -->
+                        <TextBlock Text="GRAIN PARAMETERS" Style="{StaticResource SectionHeaderStyle}"/>
+
+                        <!-- Grain Size -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Grain Size" Style="{StaticResource ParameterLabelStyle}"/>
+                            <Slider Grid.Column="1"
+                                    Value="{Binding GrainSizeMs}"
+                                    Minimum="1" Maximum="500"
+                                    Style="{StaticResource GranularSliderStyle}"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding GrainSizeMs, StringFormat='{}{0:F0}ms'}"
+                                       Style="{StaticResource ValueLabelStyle}"/>
+                        </Grid>
+
+                        <!-- Grain Size Random -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Size Random" Style="{StaticResource ParameterLabelStyle}"/>
+                            <Slider Grid.Column="1"
+                                    Value="{Binding GrainSizeRandom}"
+                                    Minimum="0" Maximum="1"
+                                    Style="{StaticResource GranularSliderStyle}"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding GrainSizeRandom, StringFormat='{}{0:P0}'}"
+                                       Style="{StaticResource ValueLabelStyle}"/>
+                        </Grid>
+
+                        <!-- Density -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Density" Style="{StaticResource ParameterLabelStyle}"/>
+                            <Slider Grid.Column="1"
+                                    Value="{Binding Density}"
+                                    Minimum="1" Maximum="100"
+                                    Style="{StaticResource GranularSliderStyle}"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding Density, StringFormat='{}{0:F0}/s'}"
+                                       Style="{StaticResource ValueLabelStyle}"/>
+                        </Grid>
+
+                        <!-- Density Random -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Density Random" Style="{StaticResource ParameterLabelStyle}"/>
+                            <Slider Grid.Column="1"
+                                    Value="{Binding DensityRandom}"
+                                    Minimum="0" Maximum="1"
+                                    Style="{StaticResource GranularSliderStyle}"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding DensityRandom, StringFormat='{}{0:P0}'}"
+                                       Style="{StaticResource ValueLabelStyle}"/>
+                        </Grid>
+
+                        <!-- Position Random -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Pos Random" Style="{StaticResource ParameterLabelStyle}"/>
+                            <Slider Grid.Column="1"
+                                    Value="{Binding PositionRandom}"
+                                    Minimum="0" Maximum="1"
+                                    Style="{StaticResource GranularSliderStyle}"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding PositionRandom, StringFormat='{}{0:P0}'}"
+                                       Style="{StaticResource ValueLabelStyle}"/>
+                        </Grid>
+
+                        <Separator Background="{StaticResource BorderBrush}" Margin="0,8"/>
+
+                        <!-- Pitch Parameters -->
+                        <TextBlock Text="PITCH" Style="{StaticResource SectionHeaderStyle}"/>
+
+                        <!-- Pitch Shift -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Pitch Shift" Style="{StaticResource ParameterLabelStyle}"/>
+                            <Slider Grid.Column="1"
+                                    Value="{Binding PitchShift}"
+                                    Minimum="-24" Maximum="24"
+                                    Style="{StaticResource GranularSliderStyle}"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding PitchShift, StringFormat='{}{0:+0;-0;0}st'}"
+                                       Style="{StaticResource ValueLabelStyle}"/>
+                        </Grid>
+
+                        <!-- Pitch Random -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Pitch Random" Style="{StaticResource ParameterLabelStyle}"/>
+                            <Slider Grid.Column="1"
+                                    Value="{Binding PitchRandom}"
+                                    Minimum="0" Maximum="12"
+                                    Style="{StaticResource GranularSliderStyle}"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding PitchRandom, StringFormat='{}{0:F1}st'}"
+                                       Style="{StaticResource ValueLabelStyle}"/>
+                        </Grid>
+
+                        <!-- Pitch Tracking -->
+                        <CheckBox Content="Pitch Tracking (MIDI)"
+                                  IsChecked="{Binding PitchTracking}"
+                                  Style="{StaticResource GranularCheckBoxStyle}"
+                                  Margin="0,8,0,0"/>
+
+                        <Separator Background="{StaticResource BorderBrush}" Margin="0,8"/>
+
+                        <!-- Stereo Parameters -->
+                        <TextBlock Text="STEREO" Style="{StaticResource SectionHeaderStyle}"/>
+
+                        <!-- Pan Spread -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Pan Spread" Style="{StaticResource ParameterLabelStyle}"/>
+                            <Slider Grid.Column="1"
+                                    Value="{Binding PanSpread}"
+                                    Minimum="0" Maximum="1"
+                                    Style="{StaticResource GranularSliderStyle}"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding PanSpread, StringFormat='{}{0:P0}'}"
+                                       Style="{StaticResource ValueLabelStyle}"/>
+                        </Grid>
+
+                        <Separator Background="{StaticResource BorderBrush}" Margin="0,8"/>
+
+                        <!-- Envelope & Playback -->
+                        <TextBlock Text="ENVELOPE &amp; PLAYBACK" Style="{StaticResource SectionHeaderStyle}"/>
+
+                        <!-- Envelope Shape -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Envelope" Style="{StaticResource ParameterLabelStyle}"/>
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding AvailableEnvelopes}"
+                                      SelectedItem="{Binding SelectedEnvelope}"
+                                      Style="{StaticResource GranularComboBoxStyle}"/>
+                        </Grid>
+
+                        <!-- Envelope Shape Preview -->
+                        <Border Background="#0A0A0A" CornerRadius="3" Height="40" Margin="0,8">
+                            <Canvas x:Name="EnvelopePreviewCanvas" ClipToBounds="True"/>
+                        </Border>
+
+                        <!-- Play Mode -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Play Mode" Style="{StaticResource ParameterLabelStyle}"/>
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding AvailablePlayModes}"
+                                      SelectedItem="{Binding SelectedPlayMode}"
+                                      Style="{StaticResource GranularComboBoxStyle}"/>
+                        </Grid>
+
+                        <!-- Reverse Probability (visible only for Random mode) -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedPlayMode}" Value="Random">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <TextBlock Grid.Column="0" Text="Reverse Prob" Style="{StaticResource ParameterLabelStyle}"/>
+                            <Slider Grid.Column="1"
+                                    Value="{Binding ReverseProbability}"
+                                    Minimum="0" Maximum="1"
+                                    Style="{StaticResource GranularSliderStyle}"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding ReverseProbability, StringFormat='{}{0:P0}'}"
+                                       Style="{StaticResource ValueLabelStyle}"/>
+                        </Grid>
+
+                        <Separator Background="{StaticResource BorderBrush}" Margin="0,8"/>
+
+                        <!-- Output -->
+                        <TextBlock Text="OUTPUT" Style="{StaticResource SectionHeaderStyle}"/>
+
+                        <!-- Volume -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Volume" Style="{StaticResource ParameterLabelStyle}"/>
+                            <Slider Grid.Column="1"
+                                    Value="{Binding Volume}"
+                                    Minimum="0" Maximum="1"
+                                    Style="{StaticResource GranularSliderStyle}"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding Volume, StringFormat='{}{0:P0}'}"
+                                       Style="{StaticResource ValueLabelStyle}"/>
+                        </Grid>
+
+                        <!-- Max Grains -->
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Max Grains" Style="{StaticResource ParameterLabelStyle}"/>
+                            <Slider Grid.Column="1"
+                                    Value="{Binding MaxGrains}"
+                                    Minimum="1" Maximum="128"
+                                    Style="{StaticResource GranularSliderStyle}"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding MaxGrains}"
+                                       Style="{StaticResource ValueLabelStyle}"/>
+                        </Grid>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0" Padding="12,6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Text="{Binding StatusMessage, FallbackValue='Ready'}"
+                           Foreground="{StaticResource TextDimBrush}"
+                           FontSize="11"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="Active Grains: "
+                               Foreground="{StaticResource TextDimBrush}"
+                               FontSize="11"/>
+                    <TextBlock Text="{Binding ActiveGrainCount}"
+                               Foreground="{StaticResource GrainBrush}"
+                               FontSize="11"
+                               FontWeight="SemiBold"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

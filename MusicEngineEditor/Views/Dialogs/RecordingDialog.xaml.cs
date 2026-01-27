@@ -139,7 +139,7 @@ public class BoolToColorConverter : IValueConverter
 /// <summary>
 /// Inverts a boolean value.
 /// </summary>
-public class InverseBooleanConverter : IValueConverter
+public class RecordingInverseBooleanConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

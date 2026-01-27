@@ -1,0 +1,719 @@
+<UserControl x:Class="MusicEngineEditor.Controls.Synths.FMSynthControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:MusicEngineEditor.Controls.Synths"
+             xmlns:vm="clr-namespace:MusicEngineEditor.ViewModels.Synths"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1200"
+             d:DataContext="{d:DesignInstance Type=vm:FMSynthViewModel}"
+             Background="#0D0D0D">
+
+    <UserControl.Resources>
+        <!-- Dark Theme Colors -->
+        <Color x:Key="BackgroundColor">#0D0D0D</Color>
+        <Color x:Key="PanelColor">#181818</Color>
+        <Color x:Key="PanelLightColor">#1E1E1E</Color>
+        <Color x:Key="BorderColor">#2A2A2A</Color>
+        <Color x:Key="AccentColor">#00D9FF</Color>
+        <Color x:Key="TextColor">#E0E0E0</Color>
+        <Color x:Key="TextDimColor">#808080</Color>
+        <Color x:Key="CarrierColor">#00FF88</Color>
+        <Color x:Key="ModulatorColor">#FF6B6B</Color>
+
+        <!-- Operator Colors -->
+        <Color x:Key="Op1Color">#FF6B6B</Color>
+        <Color x:Key="Op2Color">#FFA500</Color>
+        <Color x:Key="Op3Color">#FFD93D</Color>
+        <Color x:Key="Op4Color">#6BFF6B</Color>
+        <Color x:Key="Op5Color">#00D9FF</Color>
+        <Color x:Key="Op6Color">#BB6BFF</Color>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+        <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}"/>
+        <SolidColorBrush x:Key="PanelLightBrush" Color="{StaticResource PanelLightColor}"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+        <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}"/>
+        <SolidColorBrush x:Key="TextDimBrush" Color="{StaticResource TextDimColor}"/>
+        <SolidColorBrush x:Key="CarrierBrush" Color="{StaticResource CarrierColor}"/>
+        <SolidColorBrush x:Key="ModulatorBrush" Color="{StaticResource ModulatorColor}"/>
+
+        <SolidColorBrush x:Key="Op1Brush" Color="{StaticResource Op1Color}"/>
+        <SolidColorBrush x:Key="Op2Brush" Color="{StaticResource Op2Color}"/>
+        <SolidColorBrush x:Key="Op3Brush" Color="{StaticResource Op3Color}"/>
+        <SolidColorBrush x:Key="Op4Brush" Color="{StaticResource Op4Color}"/>
+        <SolidColorBrush x:Key="Op5Brush" Color="{StaticResource Op5Color}"/>
+        <SolidColorBrush x:Key="Op6Brush" Color="{StaticResource Op6Color}"/>
+
+        <!-- Slider Style -->
+        <Style x:Key="DarkSliderStyle" TargetType="Slider">
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Margin" Value="0,2"/>
+        </Style>
+
+        <!-- Vertical Slider Style -->
+        <Style x:Key="VerticalSliderStyle" TargetType="Slider">
+            <Setter Property="Orientation" Value="Vertical"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="80"/>
+            <Setter Property="Margin" Value="2"/>
+        </Style>
+
+        <!-- Label Style -->
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextDimBrush}"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Value Label Style -->
+        <Style x:Key="ValueStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="MinWidth" Value="40"/>
+        </Style>
+
+        <!-- Header Style -->
+        <Style x:Key="HeaderStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <!-- Button Style -->
+        <Style x:Key="DarkButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource PanelLightBrush}"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource BackgroundBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ComboBox Style -->
+        <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+        </Style>
+
+        <!-- Operator Button Style -->
+        <Style x:Key="OperatorButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="50"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Ellipse x:Name="OpCircle"
+                                     Fill="{StaticResource PanelBrush}"
+                                     Stroke="{TemplateBinding BorderBrush}"
+                                     StrokeThickness="2"/>
+                            <TextBlock Text="{TemplateBinding Content}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       FontWeight="Bold"
+                                       FontSize="14"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="OpCircle" Property="Fill" Value="{StaticResource PanelLightBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Panel Border Style -->
+        <Style x:Key="PanelStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="Margin" Value="4"/>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header Bar -->
+        <Border Grid.Row="0" Style="{StaticResource PanelStyle}" Margin="4,4,4,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Preset Name and Controls -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="FM SYNTH" Style="{StaticResource HeaderStyle}"
+                               Foreground="{StaticResource AccentBrush}" FontSize="16" Margin="0,0,20,0"/>
+                    <TextBlock Text="{Binding PresetName}" Style="{StaticResource ValueStyle}"
+                               FontSize="14" Margin="0,0,20,0"/>
+                    <Button Content="Init" Style="{StaticResource DarkButtonStyle}"
+                            Command="{Binding InitPatchCommand}" Margin="0,0,8,0"/>
+                    <Button Content="Random" Style="{StaticResource DarkButtonStyle}"
+                            Command="{Binding RandomizePatchCommand}"/>
+                </StackPanel>
+
+                <!-- Algorithm Selector -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="Algorithm:" Style="{StaticResource LabelStyle}"
+                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox ItemsSource="{Binding AvailableAlgorithms}"
+                              SelectedItem="{Binding SelectedAlgorithm}"
+                              Style="{StaticResource DarkComboBoxStyle}"
+                              Width="180"/>
+                </StackPanel>
+
+                <!-- Master Controls -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Volume:" Style="{StaticResource LabelStyle}" Margin="0,0,8,0"/>
+                    <Slider Value="{Binding MasterVolume}" Minimum="0" Maximum="1" Width="100"
+                            Style="{StaticResource DarkSliderStyle}"/>
+                    <TextBlock Text="{Binding MasterVolume, StringFormat='{}{0:F2}'}"
+                               Style="{StaticResource ValueStyle}" Width="40" Margin="8,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="280"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Panel: Algorithm Diagram -->
+            <Border Grid.Column="0" Style="{StaticResource PanelStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="ALGORITHM DIAGRAM" Style="{StaticResource HeaderStyle}"/>
+
+                    <!-- Algorithm Visual -->
+                    <Canvas x:Name="AlgorithmCanvas" Grid.Row="1"
+                            Background="Transparent" ClipToBounds="True"
+                            SizeChanged="AlgorithmCanvas_SizeChanged">
+                        <!-- Operators and connections drawn programmatically -->
+                    </Canvas>
+
+                    <!-- Algorithm Description -->
+                    <Border Grid.Row="2" Background="{StaticResource PanelLightBrush}"
+                            CornerRadius="3" Padding="8" Margin="0,8,0,0">
+                        <TextBlock Text="{Binding SelectedAlgorithm, Converter={x:Static local:FMSynthControl.AlgorithmDescriptionConverter}}"
+                                   Style="{StaticResource LabelStyle}"
+                                   TextWrapping="Wrap"
+                                   FontSize="11"/>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Center Panel: 6 Operators -->
+            <Border Grid.Column="1" Style="{StaticResource PanelStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="OPERATORS" Style="{StaticResource HeaderStyle}"/>
+
+                    <!-- 6 Operator Grid (2 rows x 3 columns) -->
+                    <ItemsControl Grid.Row="1" ItemsSource="{Binding Operators}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Rows="2" Columns="3"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:FMOperatorViewModel}">
+                                <Border Background="{StaticResource PanelLightBrush}"
+                                        BorderBrush="{Binding OperatorColor, Converter={x:Static local:FMSynthControl.ColorToBrushConverter}}"
+                                        BorderThickness="2"
+                                        CornerRadius="4"
+                                        Margin="4"
+                                        Padding="8"
+                                        Cursor="Hand"
+                                        MouseLeftButtonDown="Operator_MouseLeftButtonDown">
+
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Operator Header -->
+                                        <Grid Grid.Row="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Enable/Disable Toggle -->
+                                            <CheckBox Grid.Column="0"
+                                                      IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                                                      VerticalAlignment="Center"
+                                                      Margin="0,0,8,0"
+                                                      ToolTip="Enable/Disable Operator">
+                                                <CheckBox.Style>
+                                                    <Style TargetType="CheckBox">
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="CheckBox">
+                                                                    <Border x:Name="CheckBorder"
+                                                                            Width="18" Height="18"
+                                                                            Background="{StaticResource PanelBrush}"
+                                                                            BorderBrush="{StaticResource BorderBrush}"
+                                                                            BorderThickness="1"
+                                                                            CornerRadius="3"
+                                                                            Cursor="Hand">
+                                                                        <Path x:Name="CheckMark"
+                                                                              Data="M2,6 L6,10 L14,2"
+                                                                              Stroke="{StaticResource AccentBrush}"
+                                                                              StrokeThickness="2"
+                                                                              Visibility="Collapsed"
+                                                                              Margin="1"/>
+                                                                    </Border>
+                                                                    <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsChecked" Value="True">
+                                                                            <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                                                            <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                                                        </Trigger>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter TargetName="CheckBorder" Property="Background" Value="{StaticResource PanelLightBrush}"/>
+                                                                        </Trigger>
+                                                                    </ControlTemplate.Triggers>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </CheckBox.Style>
+                                            </CheckBox>
+
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                <TextBlock Text="{Binding DisplayName}"
+                                                           Foreground="{Binding OperatorColor, Converter={x:Static local:FMSynthControl.ColorToBrushConverter}}"
+                                                           FontWeight="Bold" FontSize="14"/>
+                                                <TextBlock Text="{Binding IsCarrier, Converter={x:Static local:FMSynthControl.CarrierTextConverter}}"
+                                                           Foreground="{StaticResource CarrierBrush}"
+                                                           FontSize="10" Margin="8,0,0,0"
+                                                           VerticalAlignment="Center"/>
+                                            </StackPanel>
+
+                                            <ComboBox Grid.Column="2"
+                                                      ItemsSource="{Binding AvailableWaveforms}"
+                                                      SelectedItem="{Binding Waveform}"
+                                                      Style="{StaticResource DarkComboBoxStyle}"
+                                                      Width="80" FontSize="10"/>
+                                        </Grid>
+
+                                        <!-- Ratio and Level -->
+                                        <Grid Grid.Row="1" Margin="0,8,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                                <TextBlock Text="Ratio" Style="{StaticResource LabelStyle}"/>
+                                                <Slider Value="{Binding Ratio}" Minimum="0.5" Maximum="16"
+                                                        Style="{StaticResource DarkSliderStyle}"/>
+                                                <TextBlock Text="{Binding Ratio, StringFormat='{}{0:F2}'}"
+                                                           Style="{StaticResource ValueStyle}"
+                                                           HorizontalAlignment="Center"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="1" Margin="4,0,0,0">
+                                                <TextBlock Text="Level" Style="{StaticResource LabelStyle}"/>
+                                                <Slider Value="{Binding Level}" Minimum="0" Maximum="1"
+                                                        Style="{StaticResource DarkSliderStyle}"/>
+                                                <TextBlock Text="{Binding Level, StringFormat='{}{0:F2}'}"
+                                                           Style="{StaticResource ValueStyle}"
+                                                           HorizontalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Detune and Feedback -->
+                                        <Grid Grid.Row="2" Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                                <TextBlock Text="Detune" Style="{StaticResource LabelStyle}"/>
+                                                <Slider Value="{Binding Detune}" Minimum="-100" Maximum="100"
+                                                        Style="{StaticResource DarkSliderStyle}"/>
+                                                <TextBlock Text="{Binding Detune, StringFormat='{}{0:F0}c'}"
+                                                           Style="{StaticResource ValueStyle}"
+                                                           HorizontalAlignment="Center"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="1" Margin="4,0,0,0">
+                                                <TextBlock Text="Feedback" Style="{StaticResource LabelStyle}"/>
+                                                <Slider Value="{Binding Feedback}" Minimum="0" Maximum="1"
+                                                        Style="{StaticResource DarkSliderStyle}"/>
+                                                <TextBlock Text="{Binding Feedback, StringFormat='{}{0:F2}'}"
+                                                           Style="{StaticResource ValueStyle}"
+                                                           HorizontalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- ADSR Envelope -->
+                                        <Grid Grid.Row="3" Margin="0,8,0,0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Text="ENVELOPE"
+                                                       Style="{StaticResource LabelStyle}"
+                                                       FontWeight="SemiBold"/>
+
+                                            <Grid Grid.Row="1" Margin="0,4,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Attack -->
+                                                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                                    <Slider Value="{Binding Attack}" Minimum="0.001" Maximum="2"
+                                                            Style="{StaticResource VerticalSliderStyle}"/>
+                                                    <TextBlock Text="A" Style="{StaticResource LabelStyle}"
+                                                               HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Attack, StringFormat='{}{0:F2}'}"
+                                                               Style="{StaticResource ValueStyle}"
+                                                               HorizontalAlignment="Center" FontSize="9"/>
+                                                </StackPanel>
+
+                                                <!-- Decay -->
+                                                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                                    <Slider Value="{Binding Decay}" Minimum="0.001" Maximum="2"
+                                                            Style="{StaticResource VerticalSliderStyle}"/>
+                                                    <TextBlock Text="D" Style="{StaticResource LabelStyle}"
+                                                               HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Decay, StringFormat='{}{0:F2}'}"
+                                                               Style="{StaticResource ValueStyle}"
+                                                               HorizontalAlignment="Center" FontSize="9"/>
+                                                </StackPanel>
+
+                                                <!-- Sustain -->
+                                                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                                    <Slider Value="{Binding Sustain}" Minimum="0" Maximum="1"
+                                                            Style="{StaticResource VerticalSliderStyle}"/>
+                                                    <TextBlock Text="S" Style="{StaticResource LabelStyle}"
+                                                               HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Sustain, StringFormat='{}{0:F2}'}"
+                                                               Style="{StaticResource ValueStyle}"
+                                                               HorizontalAlignment="Center" FontSize="9"/>
+                                                </StackPanel>
+
+                                                <!-- Release -->
+                                                <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                                                    <Slider Value="{Binding Release}" Minimum="0.001" Maximum="4"
+                                                            Style="{StaticResource VerticalSliderStyle}"/>
+                                                    <TextBlock Text="R" Style="{StaticResource LabelStyle}"
+                                                               HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Release, StringFormat='{}{0:F2}'}"
+                                                               Style="{StaticResource ValueStyle}"
+                                                               HorizontalAlignment="Center" FontSize="9"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Border>
+
+            <!-- Right Panel: Selected Operator Details & Global Settings -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Selected Operator Details -->
+                <Border Grid.Row="0" Style="{StaticResource PanelStyle}">
+                    <Grid DataContext="{Binding SelectedOperator}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Orientation="Horizontal">
+                            <TextBlock Text="SELECTED: " Style="{StaticResource HeaderStyle}"/>
+                            <TextBlock Text="{Binding DisplayName}"
+                                       Foreground="{Binding OperatorColor, Converter={x:Static local:FMSynthControl.ColorToBrushConverter}}"
+                                       FontWeight="Bold" FontSize="12"/>
+                        </StackPanel>
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Visibility="{Binding Converter={x:Static local:FMSynthControl.NullToVisibilityConverter}}">
+
+                                <!-- Velocity Sensitivity -->
+                                <StackPanel Margin="0,0,0,12">
+                                    <Grid>
+                                        <TextBlock Text="Velocity Sensitivity" Style="{StaticResource LabelStyle}"/>
+                                        <TextBlock Text="{Binding VelocitySensitivity, StringFormat='{}{0:F2}'}"
+                                                   Style="{StaticResource ValueStyle}"/>
+                                    </Grid>
+                                    <Slider Value="{Binding VelocitySensitivity}" Minimum="0" Maximum="1"
+                                            Style="{StaticResource DarkSliderStyle}"/>
+                                </StackPanel>
+
+                                <!-- Key Scaling -->
+                                <StackPanel Margin="0,0,0,12">
+                                    <Grid>
+                                        <TextBlock Text="Key Scaling" Style="{StaticResource LabelStyle}"/>
+                                        <TextBlock Text="{Binding KeyScaling, StringFormat='{}{0:F2}'}"
+                                                   Style="{StaticResource ValueStyle}"/>
+                                    </Grid>
+                                    <Slider Value="{Binding KeyScaling}" Minimum="-1" Maximum="1"
+                                            Style="{StaticResource DarkSliderStyle}"/>
+                                </StackPanel>
+
+                                <!-- Ratio Presets -->
+                                <TextBlock Text="Ratio Presets" Style="{StaticResource LabelStyle}" Margin="0,0,0,4"/>
+                                <WrapPanel>
+                                    <Button Content="0.5" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding SetRatioPresetCommand}" CommandParameter="0.5" Margin="2"/>
+                                    <Button Content="1" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding SetRatioPresetCommand}" CommandParameter="1" Margin="2"/>
+                                    <Button Content="2" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding SetRatioPresetCommand}" CommandParameter="2" Margin="2"/>
+                                    <Button Content="3" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding SetRatioPresetCommand}" CommandParameter="3" Margin="2"/>
+                                    <Button Content="4" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding SetRatioPresetCommand}" CommandParameter="4" Margin="2"/>
+                                    <Button Content="5" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding SetRatioPresetCommand}" CommandParameter="5" Margin="2"/>
+                                    <Button Content="7" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding SetRatioPresetCommand}" CommandParameter="7" Margin="2"/>
+                                    <Button Content="11" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding SetRatioPresetCommand}" CommandParameter="11" Margin="2"/>
+                                    <Button Content="14" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding SetRatioPresetCommand}" CommandParameter="14" Margin="2"/>
+                                </WrapPanel>
+
+                                <!-- Modulation Depth -->
+                                <StackPanel Margin="0,12,0,0">
+                                    <Grid>
+                                        <TextBlock Text="Mod Index" Style="{StaticResource LabelStyle}"/>
+                                        <TextBlock Text="{Binding ModulationIndex, StringFormat='{}{0:F2}'}"
+                                                   Style="{StaticResource ValueStyle}"/>
+                                    </Grid>
+                                    <Slider Value="{Binding ModulationIndex}" Minimum="0" Maximum="10"
+                                            Style="{StaticResource DarkSliderStyle}"/>
+                                </StackPanel>
+
+                                <!-- Reset Buttons -->
+                                <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                                    <Button Content="Reset Envelope" Style="{StaticResource DarkButtonStyle}"
+                                            Command="{Binding ResetEnvelopeCommand}" Margin="0,0,8,0"/>
+                                    <Button Content="Reset All" Style="{StaticResource DarkButtonStyle}"
+                                            Command="{Binding ResetOperatorCommand}"/>
+                                </StackPanel>
+
+                                <!-- Copy From Other Operator -->
+                                <TextBlock Text="Copy From" Style="{StaticResource LabelStyle}" Margin="0,16,0,4"/>
+                                <WrapPanel>
+                                    <Button Content="OP1" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding DataContext.CopyOperatorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="0" Margin="2"/>
+                                    <Button Content="OP2" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding DataContext.CopyOperatorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="1" Margin="2"/>
+                                    <Button Content="OP3" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding DataContext.CopyOperatorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="2" Margin="2"/>
+                                    <Button Content="OP4" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding DataContext.CopyOperatorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="3" Margin="2"/>
+                                    <Button Content="OP5" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding DataContext.CopyOperatorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="4" Margin="2"/>
+                                    <Button Content="OP6" Style="{StaticResource DarkButtonStyle}" Padding="6,3"
+                                            Command="{Binding DataContext.CopyOperatorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="5" Margin="2"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <!-- Global Settings -->
+                <Border Grid.Row="1" Style="{StaticResource PanelStyle}">
+                    <StackPanel>
+                        <TextBlock Text="GLOBAL SETTINGS" Style="{StaticResource HeaderStyle}"/>
+
+                        <!-- Global Feedback -->
+                        <StackPanel Margin="0,0,0,8">
+                            <Grid>
+                                <TextBlock Text="Global Feedback" Style="{StaticResource LabelStyle}"/>
+                                <TextBlock Text="{Binding GlobalFeedback, StringFormat='{}{0:F2}'}"
+                                           Style="{StaticResource ValueStyle}"/>
+                            </Grid>
+                            <Slider Value="{Binding GlobalFeedback}" Minimum="0" Maximum="2"
+                                    Style="{StaticResource DarkSliderStyle}"/>
+                        </StackPanel>
+
+                        <!-- Pitch Bend Range -->
+                        <StackPanel Margin="0,0,0,8">
+                            <Grid>
+                                <TextBlock Text="Pitch Bend Range" Style="{StaticResource LabelStyle}"/>
+                                <TextBlock Text="{Binding PitchBendRange, StringFormat='{}{0:F0} st'}"
+                                           Style="{StaticResource ValueStyle}"/>
+                            </Grid>
+                            <Slider Value="{Binding PitchBendRange}" Minimum="1" Maximum="24"
+                                    Style="{StaticResource DarkSliderStyle}"/>
+                        </StackPanel>
+
+                        <!-- Vibrato Depth -->
+                        <StackPanel Margin="0,0,0,8">
+                            <Grid>
+                                <TextBlock Text="Vibrato Depth" Style="{StaticResource LabelStyle}"/>
+                                <TextBlock Text="{Binding VibratoDepth, StringFormat='{}{0:F2}'}"
+                                           Style="{StaticResource ValueStyle}"/>
+                            </Grid>
+                            <Slider Value="{Binding VibratoDepth}" Minimum="0" Maximum="1"
+                                    Style="{StaticResource DarkSliderStyle}"/>
+                        </StackPanel>
+
+                        <!-- Master Detune -->
+                        <StackPanel Margin="0,0,0,8">
+                            <Grid>
+                                <TextBlock Text="Master Detune" Style="{StaticResource LabelStyle}"/>
+                                <TextBlock Text="{Binding MasterDetune, StringFormat='{}{0:F0}c'}"
+                                           Style="{StaticResource ValueStyle}"/>
+                            </Grid>
+                            <Slider Value="{Binding MasterDetune}" Minimum="-100" Maximum="100"
+                                    Style="{StaticResource DarkSliderStyle}"/>
+                        </StackPanel>
+
+                        <!-- Preset Buttons -->
+                        <TextBlock Text="Presets" Style="{StaticResource LabelStyle}" Margin="0,8,0,4"/>
+                        <WrapPanel>
+                            <Button Content="E-Piano" Style="{StaticResource DarkButtonStyle}" Padding="8,4"
+                                    Command="{Binding LoadPresetCommand}" CommandParameter="EPiano" Margin="2"
+                                    ToolTip="Classic FM electric piano"/>
+                            <Button Content="Brass" Style="{StaticResource DarkButtonStyle}" Padding="8,4"
+                                    Command="{Binding LoadPresetCommand}" CommandParameter="Brass" Margin="2"
+                                    ToolTip="Bright brass section"/>
+                            <Button Content="Bell" Style="{StaticResource DarkButtonStyle}" Padding="8,4"
+                                    Command="{Binding LoadPresetCommand}" CommandParameter="Bell" Margin="2"
+                                    ToolTip="Metallic bell tones"/>
+                            <Button Content="Bass" Style="{StaticResource DarkButtonStyle}" Padding="8,4"
+                                    Command="{Binding LoadPresetCommand}" CommandParameter="Bass" Margin="2"
+                                    ToolTip="Deep FM bass"/>
+                            <Button Content="Organ" Style="{StaticResource DarkButtonStyle}" Padding="8,4"
+                                    Command="{Binding LoadPresetCommand}" CommandParameter="Organ" Margin="2"
+                                    ToolTip="Drawbar organ style"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Style="{StaticResource PanelStyle}" Margin="4,0,4,4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}"
+                           Style="{StaticResource LabelStyle}"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="Carriers: " Style="{StaticResource LabelStyle}"/>
+                    <ItemsControl ItemsSource="{Binding Operators}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Width="20" Height="20" Margin="2,0"
+                                        CornerRadius="10"
+                                        Background="{Binding IsCarrier, Converter={x:Static local:FMSynthControl.CarrierBackgroundConverter}}"
+                                        BorderBrush="{Binding OperatorColor, Converter={x:Static local:FMSynthControl.ColorToBrushConverter}}"
+                                        BorderThickness="2">
+                                    <TextBlock Text="{Binding OperatorNumber}"
+                                               Foreground="{StaticResource TextBrush}"
+                                               FontSize="10" FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,290 @@
+<UserControl x:Class="MusicEngineEditor.Controls.ModulationMatrixControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:MusicEngineEditor.Controls"
+             xmlns:vm="clr-namespace:MusicEngineEditor.ViewModels"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance Type=vm:ModulationMatrixViewModel, IsDesignTimeCreatable=True}">
+
+    <UserControl.Resources>
+        <!-- Colors -->
+        <Color x:Key="BackgroundColor">#0D0D0D</Color>
+        <Color x:Key="PanelColor">#181818</Color>
+        <Color x:Key="BorderColor">#2A2A2A</Color>
+        <Color x:Key="HeaderColor">#222222</Color>
+        <Color x:Key="CellColor">#1A1A1A</Color>
+        <Color x:Key="CellHoverColor">#252525</Color>
+        <Color x:Key="CellSelectedColor">#333333</Color>
+        <Color x:Key="TextPrimaryColor">#E0E0E0</Color>
+        <Color x:Key="TextSecondaryColor">#808080</Color>
+        <Color x:Key="AccentColor">#00D9FF</Color>
+        <Color x:Key="PositiveModColor">#00FF88</Color>
+        <Color x:Key="NegativeModColor">#FF4757</Color>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+        <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+        <SolidColorBrush x:Key="HeaderBrush" Color="{StaticResource HeaderColor}"/>
+        <SolidColorBrush x:Key="CellBrush" Color="{StaticResource CellColor}"/>
+        <SolidColorBrush x:Key="CellHoverBrush" Color="{StaticResource CellHoverColor}"/>
+        <SolidColorBrush x:Key="CellSelectedBrush" Color="{StaticResource CellSelectedColor}"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+        <SolidColorBrush x:Key="PositiveModBrush" Color="{StaticResource PositiveModColor}"/>
+        <SolidColorBrush x:Key="NegativeModBrush" Color="{StaticResource NegativeModColor}"/>
+
+        <!-- Toolbar Button Style -->
+        <Style x:Key="ToolbarButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource CellHoverBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Row Header Style -->
+        <Style x:Key="RowHeaderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource HeaderBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="Padding" Value="8,4"/>
+        </Style>
+
+        <!-- Column Header Style -->
+        <Style x:Key="ColumnHeaderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource HeaderBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="MinWidth" Value="60"/>
+            <Setter Property="Padding" Value="4"/>
+        </Style>
+
+        <!-- Amount Slider Style -->
+        <Style x:Key="AmountSliderStyle" TargetType="Slider">
+            <Setter Property="Minimum" Value="-100"/>
+            <Setter Property="Maximum" Value="100"/>
+            <Setter Property="TickFrequency" Value="5"/>
+            <Setter Property="IsSnapToTickEnabled" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Border Background="{StaticResource CellBrush}"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="2"
+                                    Height="8"/>
+                            <Track x:Name="PART_Track">
+                                <Track.Thumb>
+                                    <Thumb Width="16" Height="16">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Fill="{StaticResource AccentBrush}"
+                                                         Stroke="{StaticResource TextPrimaryBrush}"
+                                                         StrokeThickness="1"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Value Converters -->
+        <local:SourceTypeToIconConverter x:Key="SourceTypeToIconConverter"/>
+        <local:AmountToColorConverter x:Key="AmountToColorConverter"/>
+        <local:AmountToOpacityConverter x:Key="AmountToOpacityConverter"/>
+        <local:AmountToTextConverter x:Key="AmountToTextConverter"/>
+        <local:AmountToSliderConverter x:Key="AmountToSliderConverter"/>
+        <local:ModMatrixBoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <Border Background="{StaticResource BackgroundBrush}"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="4">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header Toolbar -->
+            <Border Grid.Row="0"
+                    Background="{StaticResource PanelBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    CornerRadius="4,4,0,0"
+                    Padding="8,6">
+                <DockPanel>
+                    <!-- Title -->
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                        <TextBlock Text="MODULATION MATRIX"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding ActiveRoutingCount, StringFormat=' ({0} active)'}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="11"
+                                   VerticalAlignment="Center"
+                                   Margin="4,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- Toolbar Buttons -->
+                    <StackPanel Orientation="Horizontal"
+                                DockPanel.Dock="Right"
+                                HorizontalAlignment="Right">
+                        <Button Content="Copy"
+                                Style="{StaticResource ToolbarButtonStyle}"
+                                Command="{Binding CopyRoutingCommand}"
+                                IsEnabled="{Binding SelectedCell.IsActive, FallbackValue=False}"
+                                ToolTip="Copy selected routing (Ctrl+C)"/>
+                        <Button Content="Paste"
+                                Style="{StaticResource ToolbarButtonStyle}"
+                                Command="{Binding PasteRoutingCommand}"
+                                IsEnabled="{Binding IsEditMode}"
+                                ToolTip="Paste routing to selected cell (Ctrl+V)"/>
+
+                        <Border Width="1" Background="{StaticResource BorderBrush}" Margin="8,2"/>
+
+                        <Button Content="Clear Selected"
+                                Style="{StaticResource ToolbarButtonStyle}"
+                                Command="{Binding ClearSelectedRoutingCommand}"
+                                IsEnabled="{Binding IsEditMode}"
+                                ToolTip="Clear selected routing (Delete)"/>
+                        <Button Content="Clear All"
+                                Style="{StaticResource ToolbarButtonStyle}"
+                                Command="{Binding ClearAllRoutingsCommand}"
+                                ToolTip="Clear all routings"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- Matrix Grid -->
+            <ScrollViewer Grid.Row="1"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto"
+                          Background="{StaticResource BackgroundBrush}">
+                <Grid x:Name="MatrixGrid" Margin="4">
+                    <!-- This grid will be populated programmatically -->
+                </Grid>
+            </ScrollViewer>
+
+            <!-- Edit Panel (shown when a cell is selected) -->
+            <Border Grid.Row="2"
+                    Background="{StaticResource PanelBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="0,1,0,0"
+                    Padding="12,8"
+                    Visibility="{Binding IsEditMode, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Source/Destination Info -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding SelectedCell.Source.Name, FallbackValue='Source'}"
+                                   Foreground="{StaticResource AccentBrush}"
+                                   FontWeight="SemiBold"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text=" -> "
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding SelectedCell.Destination.DisplayName, FallbackValue='Destination'}"
+                                   Foreground="{StaticResource PositiveModBrush}"
+                                   FontWeight="SemiBold"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Amount Slider -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="20,0">
+                        <Button Content="-"
+                                Style="{StaticResource ToolbarButtonStyle}"
+                                Width="24"
+                                Command="{Binding DecrementAmountCommand}"
+                                ToolTip="Decrease amount"/>
+                        <Slider x:Name="AmountSlider"
+                                Width="200"
+                                Margin="8,0"
+                                Minimum="-100"
+                                Maximum="100"
+                                Value="{Binding EditAmount, Converter={StaticResource AmountToSliderConverter}}"
+                                VerticalAlignment="Center"
+                                ValueChanged="AmountSlider_ValueChanged"/>
+                        <Button Content="+"
+                                Style="{StaticResource ToolbarButtonStyle}"
+                                Width="24"
+                                Command="{Binding IncrementAmountCommand}"
+                                ToolTip="Increase amount"/>
+                        <TextBlock x:Name="AmountDisplay"
+                                   Text="{Binding EditAmount, Converter={StaticResource AmountToTextConverter}}"
+                                   Foreground="{Binding EditAmount, Converter={StaticResource AmountToColorConverter}}"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Width="60"
+                                   TextAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Margin="12,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- Close Button -->
+                    <Button Grid.Column="2"
+                            Content="X"
+                            Style="{StaticResource ToolbarButtonStyle}"
+                            Width="24"
+                            Command="{Binding ExitEditModeCommand}"
+                            ToolTip="Close editor (Escape)"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

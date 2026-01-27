@@ -1,0 +1,614 @@
+<UserControl x:Class="MusicEngineEditor.Views.ModularSynthView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:MusicEngineEditor.Controls"
+             xmlns:vm="clr-namespace:MusicEngineEditor.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:ModularSynthViewModel}"
+             d:DesignWidth="1200" d:DesignHeight="800"
+             Background="#0D0D0D"
+             Focusable="True">
+
+    <UserControl.Resources>
+        <!-- Colors -->
+        <Color x:Key="BackgroundColor">#0D0D0D</Color>
+        <Color x:Key="PanelBackgroundColor">#181818</Color>
+        <Color x:Key="BorderColor">#2A2A2A</Color>
+        <Color x:Key="AccentColor">#00D9FF</Color>
+        <Color x:Key="TextPrimaryColor">#E0E0E0</Color>
+        <Color x:Key="TextSecondaryColor">#808080</Color>
+        <Color x:Key="ButtonHoverColor">#252525</Color>
+        <Color x:Key="GridLineColor">#1A1A1A</Color>
+        <Color x:Key="GridLineMajorColor">#252525</Color>
+
+        <!-- Cable Colors -->
+        <Color x:Key="CableAudioColor">#00D9FF</Color>
+        <Color x:Key="CableCVColor">#FFA500</Color>
+        <Color x:Key="CableGateColor">#00FF88</Color>
+        <Color x:Key="CableTriggerColor">#FF6B6B</Color>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+        <SolidColorBrush x:Key="PanelBackgroundBrush" Color="{StaticResource PanelBackgroundColor}"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
+        <SolidColorBrush x:Key="GridLineBrush" Color="{StaticResource GridLineColor}"/>
+        <SolidColorBrush x:Key="GridLineMajorBrush" Color="{StaticResource GridLineMajorColor}"/>
+
+        <!-- Button Style -->
+        <Style x:Key="ModularToolbarButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background">
+                                    <Setter.Value>
+                                        <SolidColorBrush Color="{StaticResource ButtonHoverColor}"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Module Palette Button Style -->
+        <Style x:Key="ModulePaletteButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#252525"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#303030"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Converters -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+    </UserControl.Resources>
+
+    <UserControl.InputBindings>
+        <KeyBinding Key="Delete" Command="{Binding DeleteSelectedModuleCommand}"/>
+        <KeyBinding Key="Escape" Command="{Binding CancelConnectionCommand}"/>
+        <KeyBinding Key="Add" Command="{Binding ZoomInCommand}"/>
+        <KeyBinding Key="Subtract" Command="{Binding ZoomOutCommand}"/>
+        <KeyBinding Key="D0" Modifiers="Control" Command="{Binding ResetZoomCommand}"/>
+    </UserControl.InputBindings>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <!-- Module Palette -->
+            <ColumnDefinition Width="180"/>
+            <!-- Main Canvas -->
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <!-- Toolbar -->
+            <RowDefinition Height="Auto"/>
+            <!-- Content -->
+            <RowDefinition Height="*"/>
+            <!-- Status Bar -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Top Toolbar -->
+        <Border Grid.Row="0" Grid.ColumnSpan="2"
+                Background="{StaticResource PanelBackgroundBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="8,6">
+            <DockPanel>
+                <!-- Left Section -->
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <TextBlock Text="Modular Synth Patch Editor"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Margin="0,0,16,0"/>
+
+                    <Rectangle Width="1" Fill="{StaticResource BorderBrush}" Margin="8,4"/>
+
+                    <!-- Zoom Controls -->
+                    <TextBlock Text="Zoom:"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               FontSize="11"
+                               VerticalAlignment="Center"
+                               Margin="8,0,4,0"/>
+                    <Button Content="-"
+                            Style="{StaticResource ModularToolbarButtonStyle}"
+                            Command="{Binding ZoomOutCommand}"
+                            ToolTip="Zoom Out"/>
+                    <TextBlock Text="{Binding ZoomLevel, StringFormat='{}{0:P0}'}"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               FontSize="11"
+                               VerticalAlignment="Center"
+                               Width="50"
+                               TextAlignment="Center"/>
+                    <Button Content="+"
+                            Style="{StaticResource ModularToolbarButtonStyle}"
+                            Command="{Binding ZoomInCommand}"
+                            ToolTip="Zoom In"/>
+                    <Button Content="Reset"
+                            Style="{StaticResource ModularToolbarButtonStyle}"
+                            Command="{Binding ResetZoomCommand}"
+                            ToolTip="Reset Zoom and Pan"
+                            Margin="8,2,2,2"/>
+
+                    <Rectangle Width="1" Fill="{StaticResource BorderBrush}" Margin="12,4"/>
+
+                    <!-- Edit Actions -->
+                    <Button Content="Clear All"
+                            Style="{StaticResource ModularToolbarButtonStyle}"
+                            Command="{Binding ClearAllCommand}"
+                            ToolTip="Clear All Modules"/>
+                    <Button Content="Reset"
+                            Style="{StaticResource ModularToolbarButtonStyle}"
+                            Command="{Binding ResetAllModulesCommand}"
+                            ToolTip="Reset All Module States"/>
+                </StackPanel>
+
+                <!-- Right Section -->
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                    <!-- Connection Status -->
+                    <Border Background="#2A2A2A"
+                            CornerRadius="4"
+                            Padding="8,4"
+                            Visibility="{Binding IsConnecting, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource AccentBrush}" Margin="0,0,6,0"/>
+                            <TextBlock Text="Connecting..."
+                                       Foreground="{StaticResource AccentBrush}"
+                                       FontSize="11"
+                                       VerticalAlignment="Center"/>
+                            <Button Content="Cancel"
+                                    Style="{StaticResource ModularToolbarButtonStyle}"
+                                    Command="{Binding CancelConnectionCommand}"
+                                    Padding="6,2"
+                                    Margin="8,0,0,0"
+                                    FontSize="10"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <Border/>
+            </DockPanel>
+        </Border>
+
+        <!-- Module Palette (Left Panel) -->
+        <Border Grid.Row="1" Grid.Column="0"
+                Background="{StaticResource PanelBackgroundBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,1,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Palette Header -->
+                <Border Grid.Row="0"
+                        Background="#1A1A1A"
+                        Padding="12,8"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="0,0,0,1">
+                    <TextBlock Text="Module Palette"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               FontSize="12"
+                               FontWeight="SemiBold"/>
+                </Border>
+
+                <!-- Module List -->
+                <ScrollViewer Grid.Row="1"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Padding="8">
+                    <StackPanel>
+                        <!-- Oscillators Section -->
+                        <TextBlock Text="OSCILLATORS"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="4,8,4,4"/>
+                        <Button Content="VCO - Oscillator"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.VCO}"
+                                ToolTip="Voltage Controlled Oscillator"/>
+                        <Button Content="Noise Generator"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.Noise}"
+                                ToolTip="White/Pink/Brown Noise"/>
+
+                        <!-- Filters Section -->
+                        <TextBlock Text="FILTERS"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="4,12,4,4"/>
+                        <Button Content="VCF - Filter"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.VCF}"
+                                ToolTip="Voltage Controlled Filter"/>
+
+                        <!-- Amplifiers Section -->
+                        <TextBlock Text="AMPLIFIERS"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="4,12,4,4"/>
+                        <Button Content="VCA - Amplifier"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.VCA}"
+                                ToolTip="Voltage Controlled Amplifier"/>
+
+                        <!-- Modulators Section -->
+                        <TextBlock Text="MODULATORS"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="4,12,4,4"/>
+                        <Button Content="LFO - Low Freq Osc"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.LFO}"
+                                ToolTip="Low Frequency Oscillator"/>
+                        <Button Content="ADSR - Envelope"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.ADSR}"
+                                ToolTip="Attack-Decay-Sustain-Release Envelope"/>
+
+                        <!-- Mixers Section -->
+                        <TextBlock Text="MIXERS"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="4,12,4,4"/>
+                        <Button Content="Mixer"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.Mixer}"
+                                ToolTip="4-Channel Mixer"/>
+
+                        <!-- Utilities Section -->
+                        <TextBlock Text="UTILITIES"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="4,12,4,4"/>
+                        <Button Content="Quantizer"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.Quantizer}"
+                                ToolTip="Scale Quantizer"/>
+                        <Button Content="Sample &amp; Hold"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.SampleAndHold}"
+                                ToolTip="Sample and Hold"/>
+                        <Button Content="Slew Limiter"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.SlewLimiter}"
+                                ToolTip="Portamento / Glide"/>
+                        <Button Content="Multiply"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.Multiply}"
+                                ToolTip="Signal Multiplier"/>
+                        <Button Content="Utility"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.Utility}"
+                                ToolTip="Offset, Scale, Invert"/>
+
+                        <!-- Sequencing Section -->
+                        <TextBlock Text="SEQUENCING"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="4,12,4,4"/>
+                        <Button Content="Sequencer"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.Sequencer}"
+                                ToolTip="Step Sequencer"/>
+                        <Button Content="Clock"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.Clock}"
+                                ToolTip="Clock Generator"/>
+
+                        <!-- Effects Section -->
+                        <TextBlock Text="EFFECTS"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="4,12,4,4"/>
+                        <Button Content="Delay"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.Delay}"
+                                ToolTip="Audio Delay"/>
+
+                        <!-- Logic Section -->
+                        <TextBlock Text="LOGIC"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="4,12,4,4"/>
+                        <Button Content="Logic"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.Logic}"
+                                ToolTip="AND, OR, XOR Gates"/>
+
+                        <!-- Output Section -->
+                        <TextBlock Text="OUTPUT"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="4,12,4,4"/>
+                        <Button Content="Output"
+                                Style="{StaticResource ModulePaletteButtonStyle}"
+                                Command="{Binding AddModuleCommand}"
+                                CommandParameter="{x:Static vm:ModuleType.Output}"
+                                ToolTip="Audio Output"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <!-- Main Canvas Area -->
+        <Border Grid.Row="1" Grid.Column="1"
+                Background="{StaticResource BackgroundBrush}"
+                ClipToBounds="True">
+            <Grid x:Name="CanvasContainer"
+                  MouseLeftButtonDown="OnCanvasMouseLeftButtonDown"
+                  MouseRightButtonUp="OnCanvasMouseRightButtonUp"
+                  MouseMove="OnCanvasMouseMove"
+                  MouseWheel="OnCanvasMouseWheel">
+
+                <!-- Background Grid Pattern -->
+                <Canvas x:Name="GridCanvas" ClipToBounds="True">
+                    <!-- Grid lines are drawn in code-behind -->
+                </Canvas>
+
+                <!-- Zoom/Pan Transform Container -->
+                <Canvas x:Name="PatchCanvas" ClipToBounds="True">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="ZoomTransform"
+                                            ScaleX="{Binding ZoomLevel}"
+                                            ScaleY="{Binding ZoomLevel}"/>
+                            <TranslateTransform x:Name="PanTransform"
+                                                X="{Binding PanX}"
+                                                Y="{Binding PanY}"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+
+                    <!-- Cables Layer -->
+                    <ItemsControl x:Name="CablesItemsControl"
+                                  ItemsSource="{Binding Cables}"
+                                  Canvas.ZIndex="0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:CableViewModel}">
+                                <Path x:Name="CablePath"
+                                      Stroke="{Binding CableColor}"
+                                      StrokeThickness="3"
+                                      StrokeLineJoin="Round"
+                                      Opacity="0.9"
+                                      Cursor="Hand"
+                                      MouseLeftButtonDown="OnCableMouseLeftButtonDown">
+                                    <Path.Data>
+                                        <PathGeometry>
+                                            <PathFigure StartPoint="{Binding StartPoint}">
+                                                <BezierSegment x:Name="CableBezier"
+                                                               Point1="{Binding StartPoint}"
+                                                               Point2="{Binding EndPoint}"
+                                                               Point3="{Binding EndPoint}"/>
+                                            </PathFigure>
+                                        </PathGeometry>
+                                    </Path.Data>
+                                    <Path.Style>
+                                        <Style TargetType="Path">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="StrokeThickness" Value="4"/>
+                                                    <Setter Property="Effect">
+                                                        <Setter.Value>
+                                                            <DropShadowEffect Color="{Binding CableColorValue}"
+                                                                              BlurRadius="8"
+                                                                              ShadowDepth="0"
+                                                                              Opacity="0.8"/>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Path.Style>
+                                </Path>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Connection Preview Line -->
+                    <Path x:Name="ConnectionPreviewPath"
+                          Stroke="{StaticResource AccentBrush}"
+                          StrokeThickness="2"
+                          StrokeDashArray="4,2"
+                          Opacity="0.7"
+                          Visibility="{Binding IsConnecting, Converter={StaticResource BoolToVisibility}}"
+                          Canvas.ZIndex="1"/>
+
+                    <!-- Modules Layer -->
+                    <ItemsControl x:Name="ModulesItemsControl"
+                                  ItemsSource="{Binding Modules}"
+                                  Canvas.ZIndex="2">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:ModuleViewModel}">
+                                <controls:ModuleControl Width="{Binding Width}"
+                                                        Height="{Binding Height}"
+                                                        PortClicked="OnModulePortClicked"
+                                                        ModuleSelected="OnModuleSelected"
+                                                        PositionChanged="OnModulePositionChanged"
+                                                        DeleteRequested="OnModuleDeleteRequested"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Canvas>
+
+                <!-- Legend -->
+                <Border Background="#181818"
+                        CornerRadius="6"
+                        Padding="12,8"
+                        Margin="16"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Opacity="0.9">
+                    <StackPanel>
+                        <TextBlock Text="Signal Types"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,6"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <Ellipse Width="10" Height="10" Fill="#00D9FF" Margin="0,0,6,0"/>
+                            <TextBlock Text="Audio" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <Ellipse Width="10" Height="10" Fill="#FFA500" Margin="0,0,6,0"/>
+                            <TextBlock Text="CV (Control)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <Ellipse Width="10" Height="10" Fill="#00FF88" Margin="0,0,6,0"/>
+                            <TextBlock Text="Gate" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                            <Ellipse Width="10" Height="10" Fill="#FF6B6B" Margin="0,0,6,0"/>
+                            <TextBlock Text="Trigger" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Grid.ColumnSpan="2"
+                Background="{StaticResource PanelBackgroundBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="12,4">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left"
+                           Text="{Binding StatusMessage}"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <TextBlock Text="Modules:"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               FontSize="11"
+                               VerticalAlignment="Center"
+                               Margin="0,0,4,0"/>
+                    <TextBlock Text="{Binding Modules.Count}"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               FontSize="11"
+                               VerticalAlignment="Center"
+                               Margin="0,0,16,0"/>
+
+                    <TextBlock Text="Cables:"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               FontSize="11"
+                               VerticalAlignment="Center"
+                               Margin="0,0,4,0"/>
+                    <TextBlock Text="{Binding Cables.Count}"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               FontSize="11"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <Border/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

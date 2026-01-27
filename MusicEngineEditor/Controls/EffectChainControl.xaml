@@ -91,7 +91,7 @@
                                     Background="#00D9FF"
                                     CornerRadius="2"
                                     HorizontalAlignment="Left"
-                                    Width="{Binding Value, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static local:PercentageConverter.Instance}}"/>
+                                    Width="{Binding Value, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static local:EffectChainPercentageConverter.Instance}}"/>
                             <Track x:Name="PART_Track">
                                 <Track.Thumb>
                                     <Thumb Width="8" Height="8" Opacity="0"/>

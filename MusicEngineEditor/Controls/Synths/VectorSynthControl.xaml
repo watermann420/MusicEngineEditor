@@ -1,0 +1,768 @@
+<UserControl x:Class="MusicEngineEditor.Controls.Synths.VectorSynthControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:MusicEngineEditor.Controls.Synths"
+             xmlns:vm="clr-namespace:MusicEngineEditor.ViewModels.Synths"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="900"
+             d:DataContext="{d:DesignInstance Type=vm:VectorSynthViewModel, IsDesignTimeCreatable=False}"
+             MinHeight="500" MinWidth="700">
+
+    <UserControl.Resources>
+        <!-- Colors -->
+        <Color x:Key="BackgroundColor">#0D0D0D</Color>
+        <Color x:Key="PanelColor">#181818</Color>
+        <Color x:Key="BorderColor">#2A2A2A</Color>
+        <Color x:Key="TextPrimaryColor">#E0E0E0</Color>
+        <Color x:Key="TextSecondaryColor">#808080</Color>
+        <Color x:Key="AccentColor">#00D9FF</Color>
+        <Color x:Key="CornerAColor">#00D9FF</Color>
+        <Color x:Key="CornerBColor">#FF6B6B</Color>
+        <Color x:Key="CornerCColor">#00FF88</Color>
+        <Color x:Key="CornerDColor">#FFA500</Color>
+        <Color x:Key="RecordingColor">#FF4444</Color>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+        <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+        <SolidColorBrush x:Key="CornerABrush" Color="{StaticResource CornerAColor}"/>
+        <SolidColorBrush x:Key="CornerBBrush" Color="{StaticResource CornerBColor}"/>
+        <SolidColorBrush x:Key="CornerCBrush" Color="{StaticResource CornerCColor}"/>
+        <SolidColorBrush x:Key="CornerDBrush" Color="{StaticResource CornerDColor}"/>
+        <SolidColorBrush x:Key="RecordingBrush" Color="{StaticResource RecordingColor}"/>
+
+        <!-- XY Pad Gradient -->
+        <LinearGradientBrush x:Key="XYPadGradientHorizontal" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#00D9FF" Offset="0"/>
+            <GradientStop Color="#FF6B6B" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Button Style -->
+        <Style x:Key="VectorButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#252525"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Record Button Style -->
+        <Style x:Key="RecordButtonStyle" TargetType="Button" BasedOn="{StaticResource VectorButtonStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsRecordingPath}" Value="True">
+                    <Setter Property="Background" Value="{StaticResource RecordingBrush}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource RecordingBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Toggle Button Style -->
+        <Style x:Key="VectorToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#252525"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Slider Style -->
+        <Style x:Key="VectorSliderStyle" TargetType="Slider">
+            <Setter Property="Minimum" Value="0"/>
+            <Setter Property="Maximum" Value="1"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+        </Style>
+
+        <!-- Corner Label Style -->
+        <Style x:Key="CornerLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="4"/>
+        </Style>
+
+        <!-- ComboBox Style -->
+        <Style x:Key="VectorComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+
+        <!-- Label Style -->
+        <Style x:Key="ParamLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Value Label Style -->
+        <Style x:Key="ParamValueStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="MinWidth" Value="40"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="{StaticResource BackgroundBrush}"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="6">
+        <Grid Margin="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="350"/>
+                <ColumnDefinition Width="280"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Side: XY Pad and Path Controls -->
+            <Grid Grid.Column="0" Margin="0,0,8,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <Border Grid.Row="0" Background="{StaticResource PanelBrush}"
+                        CornerRadius="4" Padding="12,8" Margin="0,0,0,8">
+                    <DockPanel>
+                        <TextBlock Text="VECTOR SYNTH"
+                                   Foreground="{StaticResource AccentBrush}"
+                                   FontSize="14" FontWeight="Bold"
+                                   VerticalAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <!-- Preset Buttons -->
+                            <Button Content="Pad" Style="{StaticResource VectorButtonStyle}"
+                                    Command="{Binding LoadPresetCommand}" CommandParameter="pad"/>
+                            <Button Content="Lead" Style="{StaticResource VectorButtonStyle}"
+                                    Command="{Binding LoadPresetCommand}" CommandParameter="lead"/>
+                            <Button Content="Texture" Style="{StaticResource VectorButtonStyle}"
+                                    Command="{Binding LoadPresetCommand}" CommandParameter="texture"/>
+                            <Button Content="Bass" Style="{StaticResource VectorButtonStyle}"
+                                    Command="{Binding LoadPresetCommand}" CommandParameter="bass"/>
+                            <Border Width="1" Background="{StaticResource BorderBrush}" Margin="8,4"/>
+                            <Button Content="Reset" Style="{StaticResource VectorButtonStyle}"
+                                    Command="{Binding ResetToDefaultsCommand}"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- XY Pad -->
+                <Border Grid.Row="1" Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        CornerRadius="4" Margin="0,0,0,8">
+                    <Grid>
+                        <!-- XY Pad Canvas -->
+                        <Canvas x:Name="XYPadCanvas"
+                                ClipToBounds="True"
+                                MouseLeftButtonDown="XYPad_MouseLeftButtonDown"
+                                MouseMove="XYPad_MouseMove"
+                                MouseLeftButtonUp="XYPad_MouseLeftButtonUp"
+                                MouseLeave="XYPad_MouseLeave">
+                            <Canvas.Background>
+                                <DrawingBrush TileMode="None" Stretch="Fill">
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <!-- Background gradient mesh simulation -->
+                                            <GeometryDrawing>
+                                                <GeometryDrawing.Geometry>
+                                                    <RectangleGeometry Rect="0,0,1,1"/>
+                                                </GeometryDrawing.Geometry>
+                                                <GeometryDrawing.Brush>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                        <GradientStop Color="#1A00D9FF" Offset="0"/>
+                                                        <GradientStop Color="#1AFF6B6B" Offset="0.5"/>
+                                                        <GradientStop Color="#1AFFA500" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </GeometryDrawing.Brush>
+                                            </GeometryDrawing>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Canvas.Background>
+                        </Canvas>
+
+                        <!-- Corner Labels -->
+                        <TextBlock Text="A" Style="{StaticResource CornerLabelStyle}"
+                                   Foreground="{StaticResource CornerABrush}"
+                                   HorizontalAlignment="Left" VerticalAlignment="Top"
+                                   Margin="8"/>
+                        <TextBlock Text="B" Style="{StaticResource CornerLabelStyle}"
+                                   Foreground="{StaticResource CornerBBrush}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Top"
+                                   Margin="8"/>
+                        <TextBlock Text="C" Style="{StaticResource CornerLabelStyle}"
+                                   Foreground="{StaticResource CornerCBrush}"
+                                   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                   Margin="8"/>
+                        <TextBlock Text="D" Style="{StaticResource CornerLabelStyle}"
+                                   Foreground="{StaticResource CornerDBrush}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                   Margin="8"/>
+
+                        <!-- Position Indicator (drawn in code-behind) -->
+                        <Ellipse x:Name="PositionIndicator"
+                                 Width="20" Height="20"
+                                 Fill="{StaticResource AccentBrush}"
+                                 Stroke="White" StrokeThickness="2"
+                                 HorizontalAlignment="Left" VerticalAlignment="Top"
+                                 IsHitTestVisible="False"
+                                 Opacity="0.9">
+                            <Ellipse.Effect>
+                                <DropShadowEffect Color="{StaticResource AccentColor}"
+                                                  BlurRadius="10" ShadowDepth="0"/>
+                            </Ellipse.Effect>
+                        </Ellipse>
+
+                        <!-- Grid Lines -->
+                        <Canvas x:Name="GridLinesCanvas" IsHitTestVisible="False"/>
+
+                        <!-- Path Display Canvas -->
+                        <Canvas x:Name="PathDisplayCanvas" IsHitTestVisible="False"/>
+
+                        <!-- Mix Level Display -->
+                        <Border Background="#80000000" CornerRadius="4"
+                                HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                                Padding="8,4" Margin="8">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="A:" Foreground="{StaticResource CornerABrush}" FontSize="10" Margin="0,0,2,0"/>
+                                <TextBlock x:Name="MixAText" Text="25%" Foreground="{StaticResource TextPrimaryBrush}" FontSize="10" FontFamily="Consolas" Margin="0,0,8,0"/>
+                                <TextBlock Text="B:" Foreground="{StaticResource CornerBBrush}" FontSize="10" Margin="0,0,2,0"/>
+                                <TextBlock x:Name="MixBText" Text="25%" Foreground="{StaticResource TextPrimaryBrush}" FontSize="10" FontFamily="Consolas" Margin="0,0,8,0"/>
+                                <TextBlock Text="C:" Foreground="{StaticResource CornerCBrush}" FontSize="10" Margin="0,0,2,0"/>
+                                <TextBlock x:Name="MixCText" Text="25%" Foreground="{StaticResource TextPrimaryBrush}" FontSize="10" FontFamily="Consolas" Margin="0,0,8,0"/>
+                                <TextBlock Text="D:" Foreground="{StaticResource CornerDBrush}" FontSize="10" Margin="0,0,2,0"/>
+                                <TextBlock x:Name="MixDText" Text="25%" Foreground="{StaticResource TextPrimaryBrush}" FontSize="10" FontFamily="Consolas"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Vector Envelope Controls -->
+                <Border Grid.Row="2" Background="{StaticResource PanelBrush}"
+                        CornerRadius="4" Padding="12,8" Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+                            <ToggleButton Content="Enable Path"
+                                          Style="{StaticResource VectorToggleStyle}"
+                                          IsChecked="{Binding VectorEnvelopeEnabled, Mode=TwoWay}"/>
+                            <Button x:Name="RecordPathButton" Content="Record"
+                                    Style="{StaticResource RecordButtonStyle}"
+                                    Click="RecordPath_Click"/>
+                            <Button Content="Clear" Style="{StaticResource VectorButtonStyle}"
+                                    Command="{Binding ClearPathCommand}"/>
+                            <Button Content="Add Point" Style="{StaticResource VectorButtonStyle}"
+                                    Command="{Binding AddPathPointCommand}"/>
+                            <ToggleButton x:Name="LoopModeToggle" Content="Loop"
+                                          Style="{StaticResource VectorToggleStyle}"
+                                          IsChecked="{Binding LoopModeEnabled, Mode=TwoWay}"
+                                          ToolTip="Loop the vector envelope path"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal"
+                                    HorizontalAlignment="Center" Margin="16,0">
+                            <TextBlock Text="Time:" Style="{StaticResource ParamLabelStyle}" Margin="0,0,4,0"/>
+                            <Slider Value="{Binding VectorEnvelopeTime, Mode=TwoWay}"
+                                    Minimum="0.1" Maximum="10" Width="100"
+                                    Style="{StaticResource VectorSliderStyle}"/>
+                            <TextBlock Text="{Binding VectorEnvelopeTime, StringFormat={}{0:F2}s}"
+                                       Style="{StaticResource ParamValueStyle}" Margin="4,0,0,0"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
+                            <Button Content="A" Style="{StaticResource VectorButtonStyle}"
+                                    Foreground="{StaticResource CornerABrush}"
+                                    Command="{Binding SetCornerCommand}" CommandParameter="A"
+                                    ToolTip="Jump to corner A"/>
+                            <Button Content="B" Style="{StaticResource VectorButtonStyle}"
+                                    Foreground="{StaticResource CornerBBrush}"
+                                    Command="{Binding SetCornerCommand}" CommandParameter="B"
+                                    ToolTip="Jump to corner B"/>
+                            <Button Content="C" Style="{StaticResource VectorButtonStyle}"
+                                    Foreground="{StaticResource CornerCBrush}"
+                                    Command="{Binding SetCornerCommand}" CommandParameter="C"
+                                    ToolTip="Jump to corner C"/>
+                            <Button Content="D" Style="{StaticResource VectorButtonStyle}"
+                                    Foreground="{StaticResource CornerDBrush}"
+                                    Command="{Binding SetCornerCommand}" CommandParameter="D"
+                                    ToolTip="Jump to corner D"/>
+                            <Button Content="Center" Style="{StaticResource VectorButtonStyle}"
+                                    Command="{Binding CenterVectorCommand}"/>
+                        </StackPanel>
+
+                        <!-- Vector Path Editor Canvas -->
+                        <Border Grid.Row="1" Grid.ColumnSpan="3" Margin="0,8,0,0"
+                                Background="#101010" BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1" CornerRadius="4" Height="80">
+                            <Grid>
+                                <Canvas x:Name="PathEditorCanvas" ClipToBounds="True"
+                                        MouseLeftButtonDown="PathEditor_MouseLeftButtonDown"
+                                        MouseMove="PathEditor_MouseMove"
+                                        MouseLeftButtonUp="PathEditor_MouseLeftButtonUp">
+                                    <Canvas.Background>
+                                        <DrawingBrush TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
+                                            <DrawingBrush.Drawing>
+                                                <GeometryDrawing>
+                                                    <GeometryDrawing.Pen>
+                                                        <Pen Brush="#1A808080" Thickness="0.5"/>
+                                                    </GeometryDrawing.Pen>
+                                                    <GeometryDrawing.Geometry>
+                                                        <GeometryGroup>
+                                                            <LineGeometry StartPoint="0,0" EndPoint="20,0"/>
+                                                            <LineGeometry StartPoint="0,0" EndPoint="0,20"/>
+                                                        </GeometryGroup>
+                                                    </GeometryDrawing.Geometry>
+                                                </GeometryDrawing>
+                                            </DrawingBrush.Drawing>
+                                        </DrawingBrush>
+                                    </Canvas.Background>
+                                </Canvas>
+                                <!-- Path timeline labels -->
+                                <TextBlock Text="0s" Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="9" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                           Margin="4,0,0,2"/>
+                                <TextBlock Text="{Binding VectorEnvelopeTime, StringFormat={}{0:F1}s}"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="9" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                           Margin="0,0,4,2"/>
+                                <TextBlock Text="X" Foreground="{StaticResource AccentBrush}"
+                                           FontSize="9" HorizontalAlignment="Left" VerticalAlignment="Top"
+                                           Margin="4,2,0,0"/>
+                                <TextBlock Text="Y" Foreground="{StaticResource CornerCBrush}"
+                                           FontSize="9" HorizontalAlignment="Left" VerticalAlignment="Top"
+                                           Margin="16,2,0,0"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Status Bar -->
+                <Border Grid.Row="3" Background="{StaticResource PanelBrush}"
+                        CornerRadius="4" Padding="12,6">
+                    <DockPanel>
+                        <TextBlock x:Name="StatusText"
+                                   Text="{Binding StatusMessage}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10"/>
+                        <TextBlock HorizontalAlignment="Right"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10">
+                            <Run Text="X:"/>
+                            <Run Text="{Binding VectorX, StringFormat={}{0:F3}}" Foreground="{StaticResource AccentBrush}"/>
+                            <Run Text=" Y:"/>
+                            <Run Text="{Binding VectorY, StringFormat={}{0:F3}}" Foreground="{StaticResource AccentBrush}"/>
+                        </TextBlock>
+                    </DockPanel>
+                </Border>
+            </Grid>
+
+            <!-- Right Side: Parameters -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Oscillator Selection with Mini Displays -->
+                <Border Grid.Row="0" Background="{StaticResource PanelBrush}"
+                        CornerRadius="4" Padding="12,8" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock Text="OSCILLATORS" Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                        <UniformGrid Columns="2" Rows="2">
+                            <!-- Oscillator A (Cyan - Top Left) -->
+                            <Border x:Name="OscABorder" Margin="2" Background="#101010"
+                                    BorderBrush="{StaticResource CornerABrush}" BorderThickness="1"
+                                    CornerRadius="4" Cursor="Hand"
+                                    MouseLeftButtonDown="OscBorder_MouseLeftButtonDown" Tag="A">
+                                <Grid Margin="6,4">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="A" FontWeight="Bold" FontSize="12"
+                                               Foreground="{StaticResource CornerABrush}"/>
+                                    <TextBlock Grid.Row="1" x:Name="OscAWaveformText" Text="Saw"
+                                               Foreground="{StaticResource TextPrimaryBrush}" FontSize="10"/>
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal">
+                                        <TextBlock x:Name="OscAOctaveText" Text="Oct:0" FontSize="9"
+                                                   Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,6,0"/>
+                                        <TextBlock x:Name="OscALevelText" Text="100%"  FontSize="9"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <!-- Oscillator B (Red - Top Right) -->
+                            <Border x:Name="OscBBorder" Margin="2" Background="#101010"
+                                    BorderBrush="{StaticResource CornerBBrush}" BorderThickness="1"
+                                    CornerRadius="4" Cursor="Hand"
+                                    MouseLeftButtonDown="OscBorder_MouseLeftButtonDown" Tag="B">
+                                <Grid Margin="6,4">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="B" FontWeight="Bold" FontSize="12"
+                                               Foreground="{StaticResource CornerBBrush}"/>
+                                    <TextBlock Grid.Row="1" x:Name="OscBWaveformText" Text="Square"
+                                               Foreground="{StaticResource TextPrimaryBrush}" FontSize="10"/>
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal">
+                                        <TextBlock x:Name="OscBOctaveText" Text="Oct:0" FontSize="9"
+                                                   Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,6,0"/>
+                                        <TextBlock x:Name="OscBLevelText" Text="100%"  FontSize="9"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <!-- Oscillator C (Green - Bottom Left) -->
+                            <Border x:Name="OscCBorder" Margin="2" Background="#101010"
+                                    BorderBrush="{StaticResource CornerCBrush}" BorderThickness="1"
+                                    CornerRadius="4" Cursor="Hand"
+                                    MouseLeftButtonDown="OscBorder_MouseLeftButtonDown" Tag="C">
+                                <Grid Margin="6,4">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="C" FontWeight="Bold" FontSize="12"
+                                               Foreground="{StaticResource CornerCBrush}"/>
+                                    <TextBlock Grid.Row="1" x:Name="OscCWaveformText" Text="Triangle"
+                                               Foreground="{StaticResource TextPrimaryBrush}" FontSize="10"/>
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal">
+                                        <TextBlock x:Name="OscCOctaveText" Text="Oct:0" FontSize="9"
+                                                   Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,6,0"/>
+                                        <TextBlock x:Name="OscCLevelText" Text="100%"  FontSize="9"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <!-- Oscillator D (Orange - Bottom Right) -->
+                            <Border x:Name="OscDBorder" Margin="2" Background="#101010"
+                                    BorderBrush="{StaticResource CornerDBrush}" BorderThickness="1"
+                                    CornerRadius="4" Cursor="Hand"
+                                    MouseLeftButtonDown="OscBorder_MouseLeftButtonDown" Tag="D">
+                                <Grid Margin="6,4">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="D" FontWeight="Bold" FontSize="12"
+                                               Foreground="{StaticResource CornerDBrush}"/>
+                                    <TextBlock Grid.Row="1" x:Name="OscDWaveformText" Text="Sine"
+                                               Foreground="{StaticResource TextPrimaryBrush}" FontSize="10"/>
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal">
+                                        <TextBlock x:Name="OscDOctaveText" Text="Oct:0" FontSize="9"
+                                                   Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,6,0"/>
+                                        <TextBlock x:Name="OscDLevelText" Text="100%"  FontSize="9"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Parameters ScrollViewer -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- Selected Oscillator Parameters -->
+                        <Border x:Name="OscillatorParamsPanel" Background="{StaticResource PanelBrush}"
+                                CornerRadius="4" Padding="12,8" Margin="0,0,0,8"
+                                Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock x:Name="SelectedOscLabel" Text="OSCILLATOR A"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                                <!-- Waveform -->
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Waveform" Style="{StaticResource ParamLabelStyle}"/>
+                                    <ComboBox x:Name="WaveformCombo" Grid.Column="1"
+                                              Style="{StaticResource VectorComboBoxStyle}"
+                                              SelectionChanged="WaveformCombo_SelectionChanged"/>
+                                </Grid>
+
+                                <!-- Detune -->
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="40"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Detune" Style="{StaticResource ParamLabelStyle}"/>
+                                    <Slider x:Name="DetuneSlider" Grid.Column="1"
+                                            Minimum="-100" Maximum="100"
+                                            Style="{StaticResource VectorSliderStyle}"
+                                            ValueChanged="DetuneSlider_ValueChanged"/>
+                                    <TextBlock x:Name="DetuneValue" Grid.Column="2"
+                                               Style="{StaticResource ParamValueStyle}"/>
+                                </Grid>
+
+                                <!-- Octave -->
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="40"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Octave" Style="{StaticResource ParamLabelStyle}"/>
+                                    <Slider x:Name="OctaveSlider" Grid.Column="1"
+                                            Minimum="-2" Maximum="2"
+                                            Style="{StaticResource VectorSliderStyle}"
+                                            IsSnapToTickEnabled="True" TickFrequency="1"
+                                            ValueChanged="OctaveSlider_ValueChanged"/>
+                                    <TextBlock x:Name="OctaveValue" Grid.Column="2"
+                                               Style="{StaticResource ParamValueStyle}"/>
+                                </Grid>
+
+                                <!-- Level -->
+                                <Grid Margin="0,0,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="40"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Level" Style="{StaticResource ParamLabelStyle}"/>
+                                    <Slider x:Name="LevelSlider" Grid.Column="1"
+                                            Minimum="0" Maximum="1"
+                                            Style="{StaticResource VectorSliderStyle}"
+                                            ValueChanged="LevelSlider_ValueChanged"/>
+                                    <TextBlock x:Name="LevelValue" Grid.Column="2"
+                                               Style="{StaticResource ParamValueStyle}"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ADSR Envelope -->
+                        <Border Background="{StaticResource PanelBrush}"
+                                CornerRadius="4" Padding="12,8" Margin="0,0,0,8">
+                            <StackPanel>
+                                <TextBlock Text="AMPLITUDE ENVELOPE" Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                                <!-- Attack -->
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="40"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Attack" Style="{StaticResource ParamLabelStyle}"/>
+                                    <Slider Grid.Column="1" Value="{Binding Attack, Mode=TwoWay}"
+                                            Minimum="0.001" Maximum="2"
+                                            Style="{StaticResource VectorSliderStyle}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Attack, StringFormat={}{0:F3}s}"
+                                               Style="{StaticResource ParamValueStyle}"/>
+                                </Grid>
+
+                                <!-- Decay -->
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="40"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Decay" Style="{StaticResource ParamLabelStyle}"/>
+                                    <Slider Grid.Column="1" Value="{Binding Decay, Mode=TwoWay}"
+                                            Minimum="0.001" Maximum="2"
+                                            Style="{StaticResource VectorSliderStyle}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Decay, StringFormat={}{0:F3}s}"
+                                               Style="{StaticResource ParamValueStyle}"/>
+                                </Grid>
+
+                                <!-- Sustain -->
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="40"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Sustain" Style="{StaticResource ParamLabelStyle}"/>
+                                    <Slider Grid.Column="1" Value="{Binding Sustain, Mode=TwoWay}"
+                                            Minimum="0" Maximum="1"
+                                            Style="{StaticResource VectorSliderStyle}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Sustain, StringFormat={}{0:P0}}"
+                                               Style="{StaticResource ParamValueStyle}"/>
+                                </Grid>
+
+                                <!-- Release -->
+                                <Grid Margin="0,0,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="40"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Release" Style="{StaticResource ParamLabelStyle}"/>
+                                    <Slider Grid.Column="1" Value="{Binding Release, Mode=TwoWay}"
+                                            Minimum="0.001" Maximum="3"
+                                            Style="{StaticResource VectorSliderStyle}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Release, StringFormat={}{0:F3}s}"
+                                               Style="{StaticResource ParamValueStyle}"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Filter -->
+                        <Border Background="{StaticResource PanelBrush}"
+                                CornerRadius="4" Padding="12,8" Margin="0,0,0,8">
+                            <StackPanel>
+                                <TextBlock Text="FILTER" Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                                <!-- Cutoff -->
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="40"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Cutoff" Style="{StaticResource ParamLabelStyle}"/>
+                                    <Slider Grid.Column="1" Value="{Binding FilterCutoff, Mode=TwoWay}"
+                                            Minimum="0" Maximum="1"
+                                            Style="{StaticResource VectorSliderStyle}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding FilterCutoff, StringFormat={}{0:P0}}"
+                                               Style="{StaticResource ParamValueStyle}"/>
+                                </Grid>
+
+                                <!-- Resonance -->
+                                <Grid Margin="0,0,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="40"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Resonance" Style="{StaticResource ParamLabelStyle}"/>
+                                    <Slider Grid.Column="1" Value="{Binding FilterResonance, Mode=TwoWay}"
+                                            Minimum="0" Maximum="1"
+                                            Style="{StaticResource VectorSliderStyle}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding FilterResonance, StringFormat={}{0:P0}}"
+                                               Style="{StaticResource ParamValueStyle}"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Master -->
+                        <Border Background="{StaticResource PanelBrush}"
+                                CornerRadius="4" Padding="12,8">
+                            <StackPanel>
+                                <TextBlock Text="MASTER" Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                                <!-- Volume -->
+                                <Grid Margin="0,0,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="40"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Volume" Style="{StaticResource ParamLabelStyle}"/>
+                                    <Slider Grid.Column="1" Value="{Binding Volume, Mode=TwoWay}"
+                                            Minimum="0" Maximum="1"
+                                            Style="{StaticResource VectorSliderStyle}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Volume, StringFormat={}{0:P0}}"
+                                               Style="{StaticResource ParamValueStyle}"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Quick Actions -->
+                <Border Grid.Row="2" Background="{StaticResource PanelBrush}"
+                        CornerRadius="4" Padding="8" Margin="0,8,0,0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="All Notes Off" Style="{StaticResource VectorButtonStyle}"
+                                Command="{Binding AllNotesOffCommand}"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

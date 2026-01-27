@@ -1,0 +1,829 @@
+<UserControl x:Class="MusicEngineEditor.Controls.Performance.GrooveBoxControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:MusicEngineEditor.Controls.Performance"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="900"
+             Background="#0D0D0D">
+
+    <UserControl.Resources>
+        <!-- Theme Colors -->
+        <Color x:Key="GrooveBoxBackgroundColor">#0D0D0D</Color>
+        <Color x:Key="GrooveBoxPanelColor">#181818</Color>
+        <Color x:Key="GrooveBoxAccentColor">#00D9FF</Color>
+        <Color x:Key="GrooveBoxSuccessColor">#00FF88</Color>
+        <Color x:Key="GrooveBoxWarningColor">#FFB800</Color>
+        <Color x:Key="GrooveBoxErrorColor">#FF4757</Color>
+        <Color x:Key="GrooveBoxTextColor">#E0E0E0</Color>
+        <Color x:Key="GrooveBoxTextSecondaryColor">#808080</Color>
+        <Color x:Key="GrooveBoxBorderColor">#2A2A2A</Color>
+        <Color x:Key="GrooveBoxHoverColor">#252525</Color>
+        <Color x:Key="GrooveBoxPadActiveColor">#00D9FF</Color>
+        <Color x:Key="GrooveBoxPadTriggerColor">#00FF88</Color>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="GrooveBoxBackgroundBrush" Color="{StaticResource GrooveBoxBackgroundColor}"/>
+        <SolidColorBrush x:Key="GrooveBoxPanelBrush" Color="{StaticResource GrooveBoxPanelColor}"/>
+        <SolidColorBrush x:Key="GrooveBoxAccentBrush" Color="{StaticResource GrooveBoxAccentColor}"/>
+        <SolidColorBrush x:Key="GrooveBoxSuccessBrush" Color="{StaticResource GrooveBoxSuccessColor}"/>
+        <SolidColorBrush x:Key="GrooveBoxWarningBrush" Color="{StaticResource GrooveBoxWarningColor}"/>
+        <SolidColorBrush x:Key="GrooveBoxErrorBrush" Color="{StaticResource GrooveBoxErrorColor}"/>
+        <SolidColorBrush x:Key="GrooveBoxTextBrush" Color="{StaticResource GrooveBoxTextColor}"/>
+        <SolidColorBrush x:Key="GrooveBoxTextSecondaryBrush" Color="{StaticResource GrooveBoxTextSecondaryColor}"/>
+        <SolidColorBrush x:Key="GrooveBoxBorderBrush" Color="{StaticResource GrooveBoxBorderColor}"/>
+        <SolidColorBrush x:Key="GrooveBoxHoverBrush" Color="{StaticResource GrooveBoxHoverColor}"/>
+
+        <!-- Converters -->
+        <local:GrooveBoxBoolToVisibilityConverter x:Key="GrooveBoxBoolToVisConverter"/>
+        <local:GrooveBoxInverseBoolConverter x:Key="GrooveBoxInverseBoolConverter"/>
+        <local:GrooveBoxPatternIndexConverter x:Key="GrooveBoxPatternIndexConverter"/>
+        <local:GrooveBoxPadColorConverter x:Key="GrooveBoxPadColorConverter"/>
+
+        <!-- Drum Pad Button Style -->
+        <Style x:Key="GrooveBoxDrumPadStyle" TargetType="Button">
+            <Setter Property="Width" Value="70"/>
+            <Setter Property="Height" Value="70"/>
+            <Setter Property="Background" Value="{StaticResource GrooveBoxPanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource GrooveBoxTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource GrooveBoxBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <Grid>
+                                <!-- Pad Content -->
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Margin="4"/>
+                                <!-- Velocity indicator at bottom -->
+                                <Border x:Name="VelocityIndicator"
+                                        Height="3"
+                                        VerticalAlignment="Bottom"
+                                        Margin="4"
+                                        CornerRadius="1"
+                                        Background="{StaticResource GrooveBoxAccentBrush}"
+                                        Opacity="0"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource GrooveBoxHoverBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource GrooveBoxAccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource GrooveBoxAccentBrush}"/>
+                                <Setter Property="Foreground" Value="#0D0D0D"/>
+                                <Setter TargetName="VelocityIndicator" Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Pattern Selector Button Style -->
+        <Style x:Key="GrooveBoxPatternButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Background" Value="{StaticResource GrooveBoxPanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource GrooveBoxTextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource GrooveBoxBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource GrooveBoxHoverBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource GrooveBoxAccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource GrooveBoxAccentBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource GrooveBoxAccentBrush}"/>
+                                <Setter Property="Foreground" Value="#0D0D0D"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Control Button Style -->
+        <Style x:Key="GrooveBoxControlButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource GrooveBoxPanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource GrooveBoxTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource GrooveBoxBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource GrooveBoxHoverBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource GrooveBoxAccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource GrooveBoxAccentBrush}"/>
+                                <Setter Property="Foreground" Value="#0D0D0D"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Toggle Button Style -->
+        <Style x:Key="GrooveBoxToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="{StaticResource GrooveBoxPanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource GrooveBoxTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource GrooveBoxBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource GrooveBoxHoverBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource GrooveBoxAccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource GrooveBoxAccentBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource GrooveBoxAccentBrush}"/>
+                                <Setter Property="Foreground" Value="#0D0D0D"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Transport Button Style -->
+        <Style x:Key="GrooveBoxTransportButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="44"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Background" Value="{StaticResource GrooveBoxPanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource GrooveBoxTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource GrooveBoxBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="22">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource GrooveBoxHoverBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource GrooveBoxAccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource GrooveBoxAccentBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Knob Slider Style -->
+        <Style x:Key="GrooveBoxKnobSliderStyle" TargetType="Slider">
+            <Setter Property="Minimum" Value="0"/>
+            <Setter Property="Maximum" Value="100"/>
+            <Setter Property="Orientation" Value="Vertical"/>
+            <Setter Property="Height" Value="60"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Border Width="6"
+                                    Background="{StaticResource GrooveBoxBorderBrush}"
+                                    CornerRadius="3"
+                                    HorizontalAlignment="Center"/>
+                            <Border x:Name="PART_SelectionRange"
+                                    Width="6"
+                                    VerticalAlignment="Bottom"
+                                    Background="{StaticResource GrooveBoxAccentBrush}"
+                                    CornerRadius="3"
+                                    HorizontalAlignment="Center"/>
+                            <Track x:Name="PART_Track">
+                                <Track.Thumb>
+                                    <Thumb Width="18" Height="18">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Fill="{StaticResource GrooveBoxAccentBrush}"
+                                                         Width="18" Height="18"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Horizontal Slider Style -->
+        <Style x:Key="GrooveBoxSliderStyle" TargetType="Slider">
+            <Setter Property="Minimum" Value="0"/>
+            <Setter Property="Maximum" Value="100"/>
+            <Setter Property="Foreground" Value="{StaticResource GrooveBoxAccentBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Border Height="4"
+                                    Background="{StaticResource GrooveBoxBorderBrush}"
+                                    CornerRadius="2"
+                                    VerticalAlignment="Center"/>
+                            <Track x:Name="PART_Track">
+                                <Track.Thumb>
+                                    <Thumb Width="14" Height="14">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Fill="{StaticResource GrooveBoxAccentBrush}"
+                                                         Width="14" Height="14"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="{StaticResource GrooveBoxBackgroundBrush}"
+            BorderBrush="{StaticResource GrooveBoxBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="6">
+        <Grid Margin="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    Background="{StaticResource GrooveBoxPanelBrush}"
+                    CornerRadius="4"
+                    Padding="12,8"
+                    Margin="0,0,0,12">
+                <DockPanel>
+                    <!-- Title -->
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="GROOVEBOX"
+                                   Foreground="{StaticResource GrooveBoxTextBrush}"
+                                   FontSize="14"
+                                   FontWeight="Bold"/>
+                        <TextBlock x:Name="StatusText"
+                                   Text=" - Ready"
+                                   Foreground="{StaticResource GrooveBoxTextSecondaryBrush}"
+                                   FontSize="14"
+                                   Margin="4,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- Header Controls -->
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <!-- Tempo Display -->
+                        <Border Background="#2A2A2A"
+                                CornerRadius="3"
+                                Padding="8,4"
+                                Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="BPM: "
+                                           Foreground="{StaticResource GrooveBoxTextSecondaryBrush}"
+                                           FontSize="11"/>
+                                <TextBlock x:Name="TempoDisplay"
+                                           Text="120.0"
+                                           Foreground="{StaticResource GrooveBoxWarningBrush}"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Current Step Display -->
+                        <Border Background="#2A2A2A"
+                                CornerRadius="3"
+                                Padding="8,4"
+                                Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Step: "
+                                           Foreground="{StaticResource GrooveBoxTextSecondaryBrush}"
+                                           FontSize="11"/>
+                                <TextBlock x:Name="StepDisplay"
+                                           Text="1"
+                                           Foreground="{StaticResource GrooveBoxAccentBrush}"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock x:Name="StepTotalDisplay"
+                                           Text="/16"
+                                           Foreground="{StaticResource GrooveBoxTextSecondaryBrush}"
+                                           FontSize="11"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Tempo Lock Toggle -->
+                        <ToggleButton x:Name="TempoLockToggle"
+                                      Content="TEMPO LOCK"
+                                      Style="{StaticResource GrooveBoxToggleStyle}"
+                                      ToolTip="Lock tempo to prevent external changes"
+                                      Checked="TempoLockToggle_Changed"
+                                      Unchecked="TempoLockToggle_Changed"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- Main Content Area -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Section: Pads and Pattern Selector -->
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Pattern Selector -->
+                    <Border Grid.Row="0"
+                            Background="{StaticResource GrooveBoxPanelBrush}"
+                            CornerRadius="4"
+                            Padding="12,8"
+                            Margin="0,0,12,12">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,8">
+                                <TextBlock Text="PATTERN SELECTOR"
+                                           Foreground="{StaticResource GrooveBoxTextBrush}"
+                                           FontSize="10"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"/>
+
+                                <!-- Pattern Chain Mode Toggle -->
+                                <ToggleButton x:Name="PatternChainToggle"
+                                              Content="CHAIN"
+                                              Style="{StaticResource GrooveBoxToggleStyle}"
+                                              DockPanel.Dock="Right"
+                                              HorizontalAlignment="Right"
+                                              Padding="8,4"
+                                              ToolTip="Enable pattern chain mode for song playback"
+                                              Checked="PatternChainToggle_Changed"
+                                              Unchecked="PatternChainToggle_Changed"/>
+                            </DockPanel>
+
+                            <!-- Pattern Bank Selector (A-H) -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <TextBlock Text="Bank:"
+                                           Foreground="{StaticResource GrooveBoxTextSecondaryBrush}"
+                                           FontSize="10"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"/>
+                                <UniformGrid x:Name="PatternBankGrid" Rows="1" Columns="8">
+                                    <ToggleButton Content="A" Tag="0" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternBank_Checked"/>
+                                    <ToggleButton Content="B" Tag="1" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternBank_Checked"/>
+                                    <ToggleButton Content="C" Tag="2" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternBank_Checked"/>
+                                    <ToggleButton Content="D" Tag="3" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternBank_Checked"/>
+                                    <ToggleButton Content="E" Tag="4" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternBank_Checked"/>
+                                    <ToggleButton Content="F" Tag="5" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternBank_Checked"/>
+                                    <ToggleButton Content="G" Tag="6" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternBank_Checked"/>
+                                    <ToggleButton Content="H" Tag="7" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternBank_Checked"/>
+                                </UniformGrid>
+                            </StackPanel>
+
+                            <!-- Pattern Number Selector (1-8) -->
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Pattern:"
+                                           Foreground="{StaticResource GrooveBoxTextSecondaryBrush}"
+                                           FontSize="10"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"/>
+                                <UniformGrid x:Name="PatternNumberGrid" Rows="1" Columns="8">
+                                    <ToggleButton Content="1" Tag="0" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternNumber_Checked"/>
+                                    <ToggleButton Content="2" Tag="1" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternNumber_Checked"/>
+                                    <ToggleButton Content="3" Tag="2" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternNumber_Checked"/>
+                                    <ToggleButton Content="4" Tag="3" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternNumber_Checked"/>
+                                    <ToggleButton Content="5" Tag="4" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternNumber_Checked"/>
+                                    <ToggleButton Content="6" Tag="5" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternNumber_Checked"/>
+                                    <ToggleButton Content="7" Tag="6" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternNumber_Checked"/>
+                                    <ToggleButton Content="8" Tag="7" Style="{StaticResource GrooveBoxPatternButtonStyle}" Checked="PatternNumber_Checked"/>
+                                </UniformGrid>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Drum Pads (4x4 Grid) -->
+                    <Border Grid.Row="1"
+                            Background="{StaticResource GrooveBoxPanelBrush}"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,12,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0"
+                                       Text="DRUM PADS"
+                                       Foreground="{StaticResource GrooveBoxTextBrush}"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,8"/>
+
+                            <UniformGrid x:Name="DrumPadGrid"
+                                         Grid.Row="1"
+                                         Rows="4" Columns="4"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center">
+                                <!-- Row 1: Pads 13-16 -->
+                                <Button x:Name="Pad13" Tag="12" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="13&#x0a;Rim" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+                                <Button x:Name="Pad14" Tag="13" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="14&#x0a;Cowbell" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+                                <Button x:Name="Pad15" Tag="14" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="15&#x0a;China" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+                                <Button x:Name="Pad16" Tag="15" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="16&#x0a;Bell" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+
+                                <!-- Row 2: Pads 9-12 -->
+                                <Button x:Name="Pad9" Tag="8" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="9&#x0a;Crash" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+                                <Button x:Name="Pad10" Tag="9" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="10&#x0a;Pedal HH" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+                                <Button x:Name="Pad11" Tag="10" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="11&#x0a;Tom Lo 2" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+                                <Button x:Name="Pad12" Tag="11" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="12&#x0a;Tom Mid" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+
+                                <!-- Row 3: Pads 5-8 -->
+                                <Button x:Name="Pad5" Tag="4" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="5&#x0a;Clap" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+                                <Button x:Name="Pad6" Tag="5" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="6&#x0a;Tom Lo" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+                                <Button x:Name="Pad7" Tag="6" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="7&#x0a;Tom Hi" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+                                <Button x:Name="Pad8" Tag="7" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="8&#x0a;Ride" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+
+                                <!-- Row 4: Pads 1-4 -->
+                                <Button x:Name="Pad1" Tag="0" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="1&#x0a;Kick" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+                                <Button x:Name="Pad2" Tag="1" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="2&#x0a;Snare" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+                                <Button x:Name="Pad3" Tag="2" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="3&#x0a;HH Closed" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+                                <Button x:Name="Pad4" Tag="3" Style="{StaticResource GrooveBoxDrumPadStyle}" Content="4&#x0a;HH Open" Click="DrumPad_Click" PreviewMouseDown="DrumPad_PreviewMouseDown" PreviewMouseUp="DrumPad_PreviewMouseUp" Margin="2"/>
+                            </UniformGrid>
+                        </Grid>
+                    </Border>
+
+                    <!-- Transport Controls -->
+                    <Border Grid.Row="2"
+                            Background="{StaticResource GrooveBoxPanelBrush}"
+                            CornerRadius="4"
+                            Padding="12,8"
+                            Margin="0,0,12,0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <!-- Play Button -->
+                            <Button x:Name="PlayButton"
+                                    Style="{StaticResource GrooveBoxTransportButtonStyle}"
+                                    Click="Play_Click"
+                                    ToolTip="Play (Space)">
+                                <Polygon Points="0,0 16,10 0,20" Fill="{StaticResource GrooveBoxSuccessBrush}"/>
+                            </Button>
+
+                            <!-- Stop Button -->
+                            <Button x:Name="StopButton"
+                                    Style="{StaticResource GrooveBoxTransportButtonStyle}"
+                                    Click="Stop_Click"
+                                    ToolTip="Stop"
+                                    Margin="8,0,0,0">
+                                <Rectangle Width="14" Height="14" Fill="{StaticResource GrooveBoxTextBrush}"/>
+                            </Button>
+
+                            <!-- Record Button -->
+                            <Button x:Name="RecordButton"
+                                    Style="{StaticResource GrooveBoxTransportButtonStyle}"
+                                    Click="Record_Click"
+                                    ToolTip="Record Pattern"
+                                    Margin="16,0,0,0">
+                                <Ellipse Width="16" Height="16" Fill="{StaticResource GrooveBoxErrorBrush}"/>
+                            </Button>
+
+                            <!-- Fill Button -->
+                            <Button x:Name="FillButton"
+                                    Content="FILL"
+                                    Style="{StaticResource GrooveBoxControlButtonStyle}"
+                                    Click="Fill_Click"
+                                    ToolTip="Trigger fill pattern"
+                                    Margin="16,0,0,0"/>
+
+                            <!-- Variation A/B Toggle -->
+                            <ToggleButton x:Name="VariationToggle"
+                                          Content="VAR A"
+                                          Style="{StaticResource GrooveBoxToggleStyle}"
+                                          ToolTip="Toggle between variation A and B"
+                                          Checked="VariationToggle_Changed"
+                                          Unchecked="VariationToggle_Changed"
+                                          Margin="16,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Right Section: Kit Browser, Swing, Bass Synth -->
+                <StackPanel Grid.Column="1" Width="200">
+
+                    <!-- Kit Browser -->
+                    <Border Background="{StaticResource GrooveBoxPanelBrush}"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="KIT BROWSER"
+                                       Foreground="{StaticResource GrooveBoxTextBrush}"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,8"/>
+
+                            <ComboBox x:Name="KitComboBox"
+                                      FontSize="11"
+                                      Margin="0,0,0,8"
+                                      SelectionChanged="KitComboBox_SelectionChanged"
+                                      ToolTip="Select drum kit">
+                                <ComboBoxItem Content="808 Classic" IsSelected="True"/>
+                                <ComboBoxItem Content="909 Analog"/>
+                                <ComboBoxItem Content="CR-78"/>
+                                <ComboBoxItem Content="LinnDrum"/>
+                                <ComboBoxItem Content="Acoustic Kit"/>
+                                <ComboBoxItem Content="Electro Kit"/>
+                                <ComboBoxItem Content="Hip-Hop Kit"/>
+                                <ComboBoxItem Content="Trap Kit"/>
+                            </ComboBox>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Content="PREV"
+                                        Style="{StaticResource GrooveBoxControlButtonStyle}"
+                                        Click="PrevKit_Click"
+                                        Padding="8,4"
+                                        Width="60"/>
+                                <Button Content="NEXT"
+                                        Style="{StaticResource GrooveBoxControlButtonStyle}"
+                                        Click="NextKit_Click"
+                                        Padding="8,4"
+                                        Width="60"
+                                        Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Swing Knob -->
+                    <Border Background="{StaticResource GrooveBoxPanelBrush}"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="SWING"
+                                       Foreground="{StaticResource GrooveBoxTextBrush}"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,0,0,8"/>
+
+                            <Grid HorizontalAlignment="Center">
+                                <Slider x:Name="SwingSlider"
+                                        Style="{StaticResource GrooveBoxKnobSliderStyle}"
+                                        Value="0"
+                                        Minimum="0"
+                                        Maximum="100"
+                                        ValueChanged="SwingSlider_ValueChanged"
+                                        ToolTip="Adjust swing amount"/>
+                            </Grid>
+
+                            <TextBlock x:Name="SwingValueText"
+                                       Text="0%"
+                                       Foreground="{StaticResource GrooveBoxAccentBrush}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Bass Synth Controls -->
+                    <Border Background="{StaticResource GrooveBoxPanelBrush}"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="BASS SYNTH"
+                                       Foreground="{StaticResource GrooveBoxTextBrush}"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,8"/>
+
+                            <!-- Bass Enable Toggle -->
+                            <ToggleButton x:Name="BassEnableToggle"
+                                          Content="ENABLE"
+                                          Style="{StaticResource GrooveBoxToggleStyle}"
+                                          HorizontalAlignment="Stretch"
+                                          Margin="0,0,0,8"
+                                          Checked="BassEnableToggle_Changed"
+                                          Unchecked="BassEnableToggle_Changed"/>
+
+                            <!-- Bass Cutoff -->
+                            <StackPanel Margin="0,0,0,8">
+                                <DockPanel>
+                                    <TextBlock Text="Cutoff"
+                                               Foreground="{StaticResource GrooveBoxTextSecondaryBrush}"
+                                               FontSize="10"/>
+                                    <TextBlock x:Name="BassCutoffText"
+                                               Text="50%"
+                                               Foreground="{StaticResource GrooveBoxAccentBrush}"
+                                               FontSize="10"
+                                               DockPanel.Dock="Right"
+                                               HorizontalAlignment="Right"/>
+                                </DockPanel>
+                                <Slider x:Name="BassCutoffSlider"
+                                        Style="{StaticResource GrooveBoxSliderStyle}"
+                                        Value="50"
+                                        ValueChanged="BassCutoffSlider_ValueChanged"/>
+                            </StackPanel>
+
+                            <!-- Bass Resonance -->
+                            <StackPanel Margin="0,0,0,8">
+                                <DockPanel>
+                                    <TextBlock Text="Resonance"
+                                               Foreground="{StaticResource GrooveBoxTextSecondaryBrush}"
+                                               FontSize="10"/>
+                                    <TextBlock x:Name="BassResonanceText"
+                                               Text="30%"
+                                               Foreground="{StaticResource GrooveBoxAccentBrush}"
+                                               FontSize="10"
+                                               DockPanel.Dock="Right"
+                                               HorizontalAlignment="Right"/>
+                                </DockPanel>
+                                <Slider x:Name="BassResonanceSlider"
+                                        Style="{StaticResource GrooveBoxSliderStyle}"
+                                        Value="30"
+                                        ValueChanged="BassResonanceSlider_ValueChanged"/>
+                            </StackPanel>
+
+                            <!-- Bass Decay -->
+                            <StackPanel>
+                                <DockPanel>
+                                    <TextBlock Text="Decay"
+                                               Foreground="{StaticResource GrooveBoxTextSecondaryBrush}"
+                                               FontSize="10"/>
+                                    <TextBlock x:Name="BassDecayText"
+                                               Text="40%"
+                                               Foreground="{StaticResource GrooveBoxAccentBrush}"
+                                               FontSize="10"
+                                               DockPanel.Dock="Right"
+                                               HorizontalAlignment="Right"/>
+                                </DockPanel>
+                                <Slider x:Name="BassDecaySlider"
+                                        Style="{StaticResource GrooveBoxSliderStyle}"
+                                        Value="40"
+                                        ValueChanged="BassDecaySlider_ValueChanged"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Master Volume -->
+                    <Border Background="{StaticResource GrooveBoxPanelBrush}"
+                            CornerRadius="4"
+                            Padding="12">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,4">
+                                <TextBlock Text="MASTER"
+                                           Foreground="{StaticResource GrooveBoxTextBrush}"
+                                           FontSize="10"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock x:Name="MasterVolumeText"
+                                           Text="80%"
+                                           Foreground="{StaticResource GrooveBoxAccentBrush}"
+                                           FontSize="10"
+                                           FontWeight="SemiBold"
+                                           DockPanel.Dock="Right"
+                                           HorizontalAlignment="Right"/>
+                            </DockPanel>
+                            <Slider x:Name="MasterVolumeSlider"
+                                    Style="{StaticResource GrooveBoxSliderStyle}"
+                                    Value="80"
+                                    ValueChanged="MasterVolumeSlider_ValueChanged"
+                                    ToolTip="Master volume"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!-- Footer: Step Indicator and Info -->
+            <Border Grid.Row="2"
+                    Margin="0,12,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Step Indicator LEDs -->
+                    <Border Grid.Column="0"
+                            Background="{StaticResource GrooveBoxPanelBrush}"
+                            CornerRadius="4"
+                            Padding="12,8"
+                            Margin="0,0,12,0">
+                        <StackPanel>
+                            <TextBlock Text="STEP SEQUENCE"
+                                       Foreground="{StaticResource GrooveBoxTextSecondaryBrush}"
+                                       FontSize="9"
+                                       Margin="0,0,0,4"/>
+                            <UniformGrid x:Name="StepIndicatorGrid" Rows="1" Columns="16">
+                                <!-- Step indicators will be created in code-behind -->
+                            </UniformGrid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Current Pattern Info -->
+                    <Border Grid.Column="1"
+                            Background="{StaticResource GrooveBoxPanelBrush}"
+                            CornerRadius="4"
+                            Padding="12,8"
+                            Width="140">
+                        <StackPanel>
+                            <TextBlock Text="CURRENT PATTERN"
+                                       Foreground="{StaticResource GrooveBoxTextSecondaryBrush}"
+                                       FontSize="9"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock x:Name="CurrentPatternText"
+                                       Text="A1"
+                                       Foreground="{StaticResource GrooveBoxAccentBrush}"
+                                       FontSize="20"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock x:Name="QueuedPatternText"
+                                       Text=""
+                                       Foreground="{StaticResource GrooveBoxWarningBrush}"
+                                       FontSize="10"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

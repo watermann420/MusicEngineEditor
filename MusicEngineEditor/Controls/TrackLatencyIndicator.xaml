@@ -43,7 +43,7 @@
         </LinearGradientBrush>
 
         <!-- Bool to Visibility Converter -->
-        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <local:LatencyBoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </UserControl.Resources>
 
     <Border Background="{StaticResource TrackBackgroundBrush}"

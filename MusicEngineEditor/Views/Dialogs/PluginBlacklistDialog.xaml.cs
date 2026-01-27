@@ -41,7 +41,7 @@ public partial class PluginBlacklistDialog : Window
         UpdateStatusText();
 
         // Add a simple converter for the IsEnabled binding
-        Resources.Add("GreaterThanZeroConverter", new GreaterThanZeroConverter());
+        Resources.Add("GreaterThanZeroConverter", new BlacklistGreaterThanZeroConverter());
     }
 
     /// <summary>
@@ -277,7 +277,7 @@ public partial class PluginBlacklistDialog : Window
 /// <summary>
 /// Converter that returns true if the value is greater than zero.
 /// </summary>
-public class GreaterThanZeroConverter : System.Windows.Data.IValueConverter
+public class BlacklistGreaterThanZeroConverter : System.Windows.Data.IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
     {

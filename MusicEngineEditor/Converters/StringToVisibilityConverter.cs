@@ -113,3 +113,61 @@ public class IntToVisibilityConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
+/// <summary>
+/// Converts an enum value to boolean.
+/// Returns true if the value equals the converter parameter.
+/// Used for binding ToggleButton.IsChecked to enum properties.
+/// </summary>
+public class EnumBooleanConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value == null || parameter == null)
+            return false;
+
+        string paramString = parameter.ToString() ?? string.Empty;
+        string valueString = value.ToString() ?? string.Empty;
+
+        return valueString.Equals(paramString, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is bool boolValue && boolValue && parameter != null)
+        {
+            string paramString = parameter.ToString() ?? string.Empty;
+            if (targetType.IsEnum)
+            {
+                return Enum.Parse(targetType, paramString);
+            }
+        }
+        return System.Windows.Data.Binding.DoNothing;
+    }
+}
+
+/// <summary>
+/// Converts an enum value to Visibility.
+/// Returns Visible if the value equals the converter parameter, Collapsed otherwise.
+/// Used for showing/hiding UI elements based on enum selection.
+/// </summary>
+public class EnumVisibilityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value == null || parameter == null)
+            return Visibility.Collapsed;
+
+        string paramString = parameter.ToString() ?? string.Empty;
+        string valueString = value.ToString() ?? string.Empty;
+
+        return valueString.Equals(paramString, StringComparison.OrdinalIgnoreCase)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}

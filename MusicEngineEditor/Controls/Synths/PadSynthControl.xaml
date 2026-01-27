@@ -1,0 +1,655 @@
+<UserControl x:Class="MusicEngineEditor.Controls.Synths.PadSynthControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:MusicEngineEditor.Controls.Synths"
+             xmlns:vm="clr-namespace:MusicEngineEditor.ViewModels.Synths"
+             xmlns:converters="clr-namespace:MusicEngineEditor.Converters"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:PadSynthViewModel}"
+             d:DesignHeight="700" d:DesignWidth="800"
+             Background="#0D0D0D">
+
+    <UserControl.Resources>
+        <!-- Local Converters -->
+        <converters:BoolToVisibilityConverter x:Key="LocalBoolToVisibilityConverter"/>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <local:HarmonicBarHeightConverter x:Key="HarmonicBarHeightConverter"/>
+
+        <!-- Local Colors -->
+        <Color x:Key="PadSynthBackground">#0D0D0D</Color>
+        <Color x:Key="PadSynthPanel">#181818</Color>
+        <Color x:Key="PadSynthAccent">#00D9FF</Color>
+        <Color x:Key="PadSynthAccentDark">#00A8CC</Color>
+        <Color x:Key="PadSynthPurple">#9B59B6</Color>
+        <Color x:Key="PadSynthBorder">#2A2A2A</Color>
+        <Color x:Key="PadSynthText">#E0E0E0</Color>
+        <Color x:Key="PadSynthTextDim">#808080</Color>
+        <Color x:Key="PadSynthSuccess">#00FF88</Color>
+
+        <SolidColorBrush x:Key="PadSynthBackgroundBrush" Color="{StaticResource PadSynthBackground}"/>
+        <SolidColorBrush x:Key="PadSynthPanelBrush" Color="{StaticResource PadSynthPanel}"/>
+        <SolidColorBrush x:Key="PadSynthAccentBrush" Color="{StaticResource PadSynthAccent}"/>
+        <SolidColorBrush x:Key="PadSynthAccentDarkBrush" Color="{StaticResource PadSynthAccentDark}"/>
+        <SolidColorBrush x:Key="PadSynthPurpleBrush" Color="{StaticResource PadSynthPurple}"/>
+        <SolidColorBrush x:Key="PadSynthBorderBrush" Color="{StaticResource PadSynthBorder}"/>
+        <SolidColorBrush x:Key="PadSynthTextBrush" Color="{StaticResource PadSynthText}"/>
+        <SolidColorBrush x:Key="PadSynthTextDimBrush" Color="{StaticResource PadSynthTextDim}"/>
+        <SolidColorBrush x:Key="PadSynthSuccessBrush" Color="{StaticResource PadSynthSuccess}"/>
+
+        <!-- Cyan to Purple Gradient for Header -->
+        <LinearGradientBrush x:Key="HeaderGradientBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#00D9FF" Offset="0"/>
+            <GradientStop Color="#9B59B6" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Section Header Style -->
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource PadSynthAccentBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <!-- Parameter Label Style -->
+        <Style x:Key="ParamLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{StaticResource PadSynthTextDimBrush}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Parameter Value Style -->
+        <Style x:Key="ParamValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{StaticResource PadSynthTextBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="MinWidth" Value="45"/>
+            <Setter Property="TextAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Panel Border Style -->
+        <Style x:Key="PanelStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource PadSynthPanelBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource PadSynthBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="14"/>
+        </Style>
+
+        <!-- Generate Button Style -->
+        <Style x:Key="GenerateButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PadSynthAccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <Border.Effect>
+                                <DropShadowEffect x:Name="glow"
+                                                  Color="#00D9FF"
+                                                  BlurRadius="0"
+                                                  ShadowDepth="0"
+                                                  Opacity="0"/>
+                            </Border.Effect>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="glow"
+                                                           Storyboard.TargetProperty="BlurRadius"
+                                                           To="12" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="glow"
+                                                           Storyboard.TargetProperty="Opacity"
+                                                           To="0.6" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="glow"
+                                                           Storyboard.TargetProperty="BlurRadius"
+                                                           To="0" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="glow"
+                                                           Storyboard.TargetProperty="Opacity"
+                                                           To="0" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource PadSynthAccentDarkBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Background" Value="#3D4550"/>
+                                <Setter Property="Foreground" Value="#6F737A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Preset Button Style -->
+        <Style x:Key="PresetButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource PadSynthTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource PadSynthBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#252525"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PadSynthAccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource PadSynthAccentBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Padding="16,12" Background="#141414">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="PadSynth"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource HeaderGradientBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="Paul Nasca Algorithm"
+                               FontSize="11"
+                               Foreground="{StaticResource PadSynthTextDimBrush}"
+                               VerticalAlignment="Center"
+                               Margin="12,0,0,0"/>
+                </StackPanel>
+
+                <!-- Presets -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="Presets:"
+                               Style="{StaticResource ParamLabelStyle}"
+                               Margin="0,0,8,0"/>
+                    <Button Content="Evolving" Style="{StaticResource PresetButtonStyle}"
+                            Command="{Binding LoadPresetCommand}" CommandParameter="Evolving" Margin="0,0,4,0"/>
+                    <Button Content="Chorus" Style="{StaticResource PresetButtonStyle}"
+                            Command="{Binding LoadPresetCommand}" CommandParameter="Chorus" Margin="0,0,4,0"/>
+                    <Button Content="Choir" Style="{StaticResource PresetButtonStyle}"
+                            Command="{Binding LoadPresetCommand}" CommandParameter="Choir" Margin="0,0,4,0"/>
+                    <Button Content="Ambient" Style="{StaticResource PresetButtonStyle}"
+                            Command="{Binding LoadPresetCommand}" CommandParameter="Ambient"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="280"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Harmonic Profile Editor -->
+                <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource PanelStyle}" Margin="0,0,12,12">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="200"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Header with Profile Selection -->
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="Harmonic Profile" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding AvailableProfiles}"
+                                      SelectedItem="{Binding SelectedProfile}"
+                                      MinWidth="100"
+                                      Margin="0,0,8,0"/>
+
+                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                <Button Content="Reset" Style="{StaticResource PresetButtonStyle}"
+                                        Command="{Binding ResetHarmonicsCommand}" Margin="0,0,4,0"/>
+                                <Button Content="Clear" Style="{StaticResource PresetButtonStyle}"
+                                        Command="{Binding ClearHarmonicsCommand}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Harmonic Number Labels -->
+                        <ItemsControl Grid.Row="1" ItemsSource="{Binding Harmonics}" Margin="0,4,0,0">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Rows="1"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Label}"
+                                               FontSize="8"
+                                               Foreground="{StaticResource PadSynthTextDimBrush}"
+                                               HorizontalAlignment="Center"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Harmonic Bars -->
+                        <ItemsControl Grid.Row="2"
+                                      x:Name="HarmonicBarsControl"
+                                      ItemsSource="{Binding Harmonics}"
+                                      Margin="0,4,0,0">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Rows="1"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:HarmonicBarViewModel}">
+                                    <Grid Margin="1,0" Background="Transparent"
+                                          Tag="{Binding HarmonicNumber}"
+                                          MouseLeftButtonDown="HarmonicBar_MouseLeftButtonDown"
+                                          MouseMove="HarmonicBar_MouseMove"
+                                          MouseLeftButtonUp="HarmonicBar_MouseLeftButtonUp"
+                                          MouseEnter="HarmonicBar_MouseEnter"
+                                          MouseLeave="HarmonicBar_MouseLeave"
+                                          Cursor="Hand">
+                                        <Grid.ToolTip>
+                                            <ToolTip>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Harmonic "/>
+                                                    <TextBlock Text="{Binding HarmonicNumber}"/>
+                                                    <TextBlock Text=": "/>
+                                                    <TextBlock Text="{Binding Amplitude, StringFormat={}{0:P0}}"/>
+                                                </StackPanel>
+                                            </ToolTip>
+                                        </Grid.ToolTip>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Bar Background -->
+                                        <Border Grid.Row="0"
+                                                Background="#1A1A1A"
+                                                CornerRadius="2"/>
+
+                                        <!-- Bar Fill -->
+                                        <Border Grid.Row="0"
+                                                x:Name="BarFill"
+                                                Background="{Binding BarColor}"
+                                                CornerRadius="2"
+                                                VerticalAlignment="Bottom">
+                                            <Border.Height>
+                                                <MultiBinding Converter="{StaticResource HarmonicBarHeightConverter}">
+                                                    <Binding Path="Amplitude"/>
+                                                    <Binding Path="ActualHeight" RelativeSource="{RelativeSource AncestorType=Grid}"/>
+                                                </MultiBinding>
+                                            </Border.Height>
+                                        </Border>
+
+                                        <!-- Hover Highlight -->
+                                        <Border Grid.Row="0"
+                                                Background="#00D9FF"
+                                                Opacity="0.15"
+                                                CornerRadius="2"
+                                                Visibility="{Binding IsHovered, Converter={StaticResource LocalBoolToVisibilityConverter}}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </Border>
+
+                <!-- Right Side Parameters -->
+                <Grid Grid.Row="0" Grid.Column="1" Grid.RowSpan="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Bandwidth Panel -->
+                    <Border Grid.Row="0" Style="{StaticResource PanelStyle}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Bandwidth" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <!-- Bandwidth -->
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Bandwidth (cents)" Style="{StaticResource ParamLabelStyle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Bandwidth, StringFormat={}{0:F0}}" Style="{StaticResource ParamValueStyle}"/>
+                            </Grid>
+                            <Slider Value="{Binding Bandwidth}" Minimum="1" Maximum="200" TickFrequency="1"/>
+
+                            <!-- Bandwidth Scale -->
+                            <Grid Margin="0,12,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Scale" Style="{StaticResource ParamLabelStyle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding BandwidthScale, StringFormat={}{0:F2}}" Style="{StaticResource ParamValueStyle}"/>
+                            </Grid>
+                            <Slider Value="{Binding BandwidthScale}" Minimum="0.1" Maximum="3" TickFrequency="0.1"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Unison Panel -->
+                    <Border Grid.Row="1" Style="{StaticResource PanelStyle}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Unison / Spread" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <!-- Detune -->
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Detune (cents)" Style="{StaticResource ParamLabelStyle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Detune, StringFormat={}{0:F1}}" Style="{StaticResource ParamValueStyle}"/>
+                            </Grid>
+                            <Slider Value="{Binding Detune}" Minimum="-100" Maximum="100" TickFrequency="1"/>
+
+                            <!-- Unison Voices -->
+                            <Grid Margin="0,12,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Unison Voices" Style="{StaticResource ParamLabelStyle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding UnisonVoices}" Style="{StaticResource ParamValueStyle}"/>
+                            </Grid>
+                            <Slider Value="{Binding UnisonVoices}" Minimum="1" Maximum="8" TickFrequency="1" IsSnapToTickEnabled="True"/>
+
+                            <!-- Unison Detune -->
+                            <Grid Margin="0,12,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Unison Detune" Style="{StaticResource ParamLabelStyle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding UnisonDetune, StringFormat={}{0:F1}}" Style="{StaticResource ParamValueStyle}"/>
+                            </Grid>
+                            <Slider Value="{Binding UnisonDetune}" Minimum="0" Maximum="50" TickFrequency="1"/>
+
+                            <!-- Unison Spread -->
+                            <Grid Margin="0,12,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Stereo Spread" Style="{StaticResource ParamLabelStyle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding UnisonSpread, StringFormat={}{0:P0}}" Style="{StaticResource ParamValueStyle}"/>
+                            </Grid>
+                            <Slider Value="{Binding UnisonSpread}" Minimum="0" Maximum="1" TickFrequency="0.05"/>
+
+                            <!-- Evolution Speed -->
+                            <Grid Margin="0,12,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Evolution Speed" Style="{StaticResource ParamLabelStyle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding EvolutionSpeed, StringFormat={}{0:P0}}" Style="{StaticResource ParamValueStyle}"/>
+                            </Grid>
+                            <Slider Value="{Binding EvolutionSpeed}" Minimum="0" Maximum="1" TickFrequency="0.05"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Envelope Panel -->
+                    <Border Grid.Row="2" Style="{StaticResource PanelStyle}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Amplitude Envelope" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Attack -->
+                                <StackPanel Grid.Row="0" Grid.Column="0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Attack" Style="{StaticResource ParamLabelStyle}"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Attack, StringFormat={}{0:F2}s}" Style="{StaticResource ParamValueStyle}"/>
+                                    </Grid>
+                                    <Slider Value="{Binding Attack}" Minimum="0.01" Maximum="5" TickFrequency="0.01"/>
+                                </StackPanel>
+
+                                <!-- Decay -->
+                                <StackPanel Grid.Row="0" Grid.Column="2">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Decay" Style="{StaticResource ParamLabelStyle}"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Decay, StringFormat={}{0:F2}s}" Style="{StaticResource ParamValueStyle}"/>
+                                    </Grid>
+                                    <Slider Value="{Binding Decay}" Minimum="0.01" Maximum="5" TickFrequency="0.01"/>
+                                </StackPanel>
+
+                                <!-- Sustain -->
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,8,0,0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Sustain" Style="{StaticResource ParamLabelStyle}"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Sustain, StringFormat={}{0:P0}}" Style="{StaticResource ParamValueStyle}"/>
+                                    </Grid>
+                                    <Slider Value="{Binding Sustain}" Minimum="0" Maximum="1" TickFrequency="0.01"/>
+                                </StackPanel>
+
+                                <!-- Release -->
+                                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,8,0,0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Release" Style="{StaticResource ParamLabelStyle}"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Release, StringFormat={}{0:F2}s}" Style="{StaticResource ParamValueStyle}"/>
+                                    </Grid>
+                                    <Slider Value="{Binding Release}" Minimum="0.01" Maximum="10" TickFrequency="0.01"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Seed / Volume Panel -->
+                    <Border Grid.Row="3" Style="{StaticResource PanelStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Output / Variation" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <!-- Volume -->
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Volume" Style="{StaticResource ParamLabelStyle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Volume, StringFormat={}{0:P0}}" Style="{StaticResource ParamValueStyle}"/>
+                            </Grid>
+                            <Slider Value="{Binding Volume}" Minimum="0" Maximum="1" TickFrequency="0.01"/>
+
+                            <!-- Seed -->
+                            <Grid Margin="0,12,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Random Seed" Style="{StaticResource ParamLabelStyle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Seed}" Style="{StaticResource ParamValueStyle}" Margin="0,0,8,0"/>
+                                <Button Grid.Column="2" Content="Randomize" Style="{StaticResource PresetButtonStyle}"
+                                        Command="{Binding RandomizeSeedCommand}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Waveform Preview -->
+                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource PanelStyle}" Margin="0,0,12,12">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="100"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="Waveform Preview" Style="{StaticResource SectionHeaderStyle}"/>
+
+                        <Border Grid.Row="1" Background="#0A0A0A" CornerRadius="4">
+                            <Canvas x:Name="WaveformCanvas" ClipToBounds="True">
+                                <Polyline x:Name="WaveformPolyline"
+                                          Points="{Binding WaveformPoints}"
+                                          Stroke="{StaticResource PadSynthAccentBrush}"
+                                          StrokeThickness="1.5"
+                                          StrokeLineJoin="Round"/>
+
+                                <!-- Center Line -->
+                                <Line X1="0" Y1="50" X2="400" Y2="50"
+                                      Stroke="{StaticResource PadSynthBorderBrush}"
+                                      StrokeThickness="1"
+                                      StrokeDashArray="4,2"/>
+
+                                <!-- No Waveform Text -->
+                                <TextBlock Text="Generate wavetable to preview"
+                                           Foreground="{StaticResource PadSynthTextDimBrush}"
+                                           FontSize="11"
+                                           Canvas.Left="100" Canvas.Top="43"
+                                           Visibility="{Binding HasWaveform, Converter={StaticResource LocalBoolToVisibilityConverter}, ConverterParameter=inverse}"/>
+                            </Canvas>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Generate Section -->
+                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource PanelStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Generate Button -->
+                        <Button Grid.Column="0"
+                                Content="Generate Wavetable"
+                                Style="{StaticResource GenerateButtonStyle}"
+                                Command="{Binding GenerateWavetableCommand}"
+                                IsEnabled="{Binding IsGenerating, Converter={StaticResource InverseBooleanConverter}}"/>
+
+                        <!-- Progress -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="20,0">
+                            <ProgressBar Value="{Binding GenerationProgress}"
+                                         Height="6"
+                                         Visibility="{Binding IsGenerating, Converter={StaticResource LocalBoolToVisibilityConverter}}"/>
+                            <TextBlock Text="{Binding GenerationStatus}"
+                                       Style="{StaticResource ParamLabelStyle}"
+                                       Margin="0,6,0,0"/>
+                        </StackPanel>
+
+                        <!-- Preview Controls -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="Preview (C4)"
+                                    Style="{StaticResource PresetButtonStyle}"
+                                    Command="{Binding PreviewNoteCommand}"
+                                    CommandParameter="60"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="Stop"
+                                    Style="{StaticResource PresetButtonStyle}"
+                                    Command="{Binding StopPreviewCommand}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="#141414" Padding="12,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Text="{Binding GenerationStatus}"
+                           Style="{StaticResource ParamLabelStyle}"/>
+
+                <TextBlock Grid.Column="1"
+                           Text="Tip: Drag on harmonic bars to edit amplitudes"
+                           Style="{StaticResource ParamLabelStyle}"
+                           Foreground="{StaticResource PadSynthTextDimBrush}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

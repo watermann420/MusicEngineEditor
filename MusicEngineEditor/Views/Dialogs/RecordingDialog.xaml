@@ -18,7 +18,7 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <local:BoolToColorConverter x:Key="BoolToColorConverter"/>
-        <local:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <local:RecordingInverseBooleanConverter x:Key="InverseBooleanConverter"/>
 
         <!-- Level Meter Style -->
         <Style x:Key="LevelMeterStyle" TargetType="ProgressBar">

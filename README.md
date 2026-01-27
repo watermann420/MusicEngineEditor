@@ -38,6 +38,38 @@ Discord: discord.gg/tWkqHMsB6a
 - Performance monitoring
 - VST plugin support
 
+### Synthesizer Editors (New - January 2026)
+- **FM Synth Editor** - 6-operator matrix, algorithm selector, modulation routing
+- **Granular Synth Editor** - Grain visualization, position/size/density controls
+- **Wavetable Synth Editor** - Wavetable display, morph slider, position automation
+- **Drum Synth Editor** - 808/909 style models with waveform preview
+- **PadSynth Editor** - Harmonic spectrum, bandwidth, detune controls
+- **Vector Synth Editor** - XY pad for 4-oscillator crossfade, path automation
+- **Additive Synth Editor** - Harmonic bars, Hammond drawbars, waveform preview
+
+### Effect Editors (New - January 2026)
+- **Convolution Reverb** - IR waveform display, file browser, pre-delay, decay
+- **Multiband Compressor** - 4-band spectrum with draggable crossovers
+- **Vocoder** - Band visualization, carrier selector, formant shift
+- **Spectral Gate** - Drawable threshold curve, gate activity display
+
+### Analysis Tools (New - January 2026)
+- **Spectrogram 3D** - 3D waterfall display with rotation/zoom
+- **Frequency Collision Detector** - Multi-track spectrum, collision warnings
+- **Mix Radar** - Radar chart for 8 frequency bands
+- **Phase Analyzer** - Phase correlation, mono compatibility meter
+
+### MIDI Tools (New - January 2026)
+- **MPE Control** - Per-note pitch bend, pressure, slide lanes
+- **Expression Map Editor** - Articulation list, keyswitch assignment
+- **Probability Sequencer** - Step probability, ratchets, conditions
+
+### Performance Tools (New - January 2026)
+- **Live Looper** - 8-layer looper with waveforms, overdub
+- **Performance Mode** - Scene manager with crossfade, MIDI mapping
+- **DJ Effects** - Filter XY pad, beat repeat, brake/spin
+- **GrooveBox** - 4x4 drum pads, pattern selector, tempo, swing
+
 ---
 
 ## Quick Start
@@ -127,21 +159,29 @@ dotnet run --project MusicEngineEditor
 
 ```
 MusicEngineEditor/
-├── Controls/        # UI controls (meters, visualizations)
-├── Editor/          # Code editor components
-├── Models/          # Data models
-├── Services/        # Business logic
-├── ViewModels/      # MVVM ViewModels
-├── Views/           # XAML Views
-└── Themes/          # Dark/Light themes
+├── Controls/              # UI controls
+│   ├── Synths/            # Synthesizer editors (FM, Granular, Wavetable, etc.)
+│   ├── Effects/           # Effect editors (Convolution, Multiband, Vocoder, etc.)
+│   ├── Analysis/          # Analysis tools (Spectrogram3D, MixRadar, Phase, etc.)
+│   ├── MIDI/              # MIDI controls (MPE, Expression Maps, Probability)
+│   └── Performance/       # Performance tools (Looper, DJ, GrooveBox)
+├── Editor/                # Code editor components
+├── Models/                # Data models
+├── Services/              # Business logic
+├── ViewModels/            # MVVM ViewModels
+│   └── Synths/            # Synthesizer ViewModels
+├── Views/                 # XAML Views
+│   └── Dialogs/           # Modal dialogs
+└── Themes/                # Dark/Light themes
 
-MusicEngine/         # Core audio engine (separate repo)
+MusicEngine/               # Core audio engine (separate repo)
 └── Core/
-    ├── Sequencer.cs
-    ├── Pattern.cs
-    ├── Effects/
-    ├── Analysis/
-    └── Modulation/  # VCV Rack-style system
+    ├── Synthesizers/      # 45+ synthesizers
+    ├── Effects/           # 100+ effects
+    ├── Analysis/          # Spectrum, Tempo, Chord detection
+    ├── Sequencing/        # Step, Probability, Euclidean
+    ├── Midi/              # MPE, MIDI 2.0, Expression Maps
+    └── Modulation/        # VCV Rack-style system
 ```
 
 ---

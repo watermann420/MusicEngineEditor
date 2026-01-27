@@ -391,9 +391,9 @@ public class InverseBooleanToVisibilityConverter : IValueConverter
 /// <summary>
 /// Converts a percentage value to a width.
 /// </summary>
-public class PercentageConverter : IValueConverter
+public class EffectChainPercentageConverter : IValueConverter
 {
-    public static PercentageConverter Instance { get; } = new();
+    public static EffectChainPercentageConverter Instance { get; } = new();
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

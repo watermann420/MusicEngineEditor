@@ -1,0 +1,661 @@
+<UserControl x:Class="MusicEngineEditor.Controls.Analysis.FrequencyCollisionControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:MusicEngineEditor.Controls.Analysis"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="800"
+             Background="#0D0D0D">
+
+    <UserControl.Resources>
+        <!-- Theme Colors -->
+        <Color x:Key="FrequencyCollisionBackgroundColor">#0D0D0D</Color>
+        <Color x:Key="FrequencyCollisionPanelColor">#181818</Color>
+        <Color x:Key="FrequencyCollisionAccentColor">#00D9FF</Color>
+        <Color x:Key="FrequencyCollisionErrorColor">#FF4757</Color>
+        <Color x:Key="FrequencyCollisionWarningColor">#FFA502</Color>
+        <Color x:Key="FrequencyCollisionSuccessColor">#00FF88</Color>
+        <Color x:Key="FrequencyCollisionTextColor">#E0E0E0</Color>
+        <Color x:Key="FrequencyCollisionSecondaryTextColor">#808080</Color>
+        <Color x:Key="FrequencyCollisionBorderColor">#2A2A2A</Color>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="FrequencyCollisionBackgroundBrush" Color="{StaticResource FrequencyCollisionBackgroundColor}"/>
+        <SolidColorBrush x:Key="FrequencyCollisionPanelBrush" Color="{StaticResource FrequencyCollisionPanelColor}"/>
+        <SolidColorBrush x:Key="FrequencyCollisionAccentBrush" Color="{StaticResource FrequencyCollisionAccentColor}"/>
+        <SolidColorBrush x:Key="FrequencyCollisionErrorBrush" Color="{StaticResource FrequencyCollisionErrorColor}"/>
+        <SolidColorBrush x:Key="FrequencyCollisionWarningBrush" Color="{StaticResource FrequencyCollisionWarningColor}"/>
+        <SolidColorBrush x:Key="FrequencyCollisionSuccessBrush" Color="{StaticResource FrequencyCollisionSuccessColor}"/>
+        <SolidColorBrush x:Key="FrequencyCollisionTextBrush" Color="{StaticResource FrequencyCollisionTextColor}"/>
+        <SolidColorBrush x:Key="FrequencyCollisionSecondaryTextBrush" Color="{StaticResource FrequencyCollisionSecondaryTextColor}"/>
+        <SolidColorBrush x:Key="FrequencyCollisionBorderBrush" Color="{StaticResource FrequencyCollisionBorderColor}"/>
+
+        <!-- Track Color Brushes -->
+        <SolidColorBrush x:Key="FrequencyCollisionTrackABrush" Color="#00D9FF"/>
+        <SolidColorBrush x:Key="FrequencyCollisionTrackBBrush" Color="#FF6B9D"/>
+        <SolidColorBrush x:Key="FrequencyCollisionTrackCBrush" Color="#7FFF00"/>
+        <SolidColorBrush x:Key="FrequencyCollisionTrackDBrush" Color="#FFD93D"/>
+        <SolidColorBrush x:Key="FrequencyCollisionTrackEBrush" Color="#C77DFF"/>
+        <SolidColorBrush x:Key="FrequencyCollisionTrackFBrush" Color="#FF8C42"/>
+
+        <!-- Collision Zone Gradient -->
+        <LinearGradientBrush x:Key="FrequencyCollisionZoneGradient" StartPoint="0,1" EndPoint="0,0">
+            <GradientStop Color="#40FF4757" Offset="0.0"/>
+            <GradientStop Color="#80FF4757" Offset="0.5"/>
+            <GradientStop Color="#FFFF4757" Offset="1.0"/>
+        </LinearGradientBrush>
+
+        <!-- Parameter Label Style -->
+        <Style x:Key="FrequencyCollisionParameterLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{StaticResource FrequencyCollisionSecondaryTextBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+
+        <!-- Parameter Value Style -->
+        <Style x:Key="FrequencyCollisionParameterValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{StaticResource FrequencyCollisionTextBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="MinWidth" Value="50"/>
+            <Setter Property="TextAlignment" Value="Right"/>
+        </Style>
+
+        <!-- Button Style -->
+        <Style x:Key="FrequencyCollisionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource FrequencyCollisionPanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource FrequencyCollisionTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource FrequencyCollisionBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush"
+                                        Value="{StaticResource FrequencyCollisionAccentBrush}"/>
+                                <Setter TargetName="border" Property="Background" Value="#222222"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background"
+                                        Value="{StaticResource FrequencyCollisionAccentBrush}"/>
+                                <Setter Property="Foreground" Value="#0D0D0D"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Primary Button Style -->
+        <Style x:Key="FrequencyCollisionPrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource FrequencyCollisionButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource FrequencyCollisionAccentBrush}"/>
+            <Setter Property="Foreground" Value="#0D0D0D"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <!-- CheckBox Style -->
+        <Style x:Key="FrequencyCollisionCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource FrequencyCollisionTextBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="checkBorder"
+                                    Grid.Column="0"
+                                    Width="16" Height="16"
+                                    Background="Transparent"
+                                    BorderBrush="{StaticResource FrequencyCollisionBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="3">
+                                <Path x:Name="checkMark"
+                                      Data="M2,5 L5,8 L10,2"
+                                      Stroke="{StaticResource FrequencyCollisionAccentBrush}"
+                                      StrokeThickness="2"
+                                      Visibility="Collapsed"
+                                      Margin="2"/>
+                            </Border>
+                            <ContentPresenter Grid.Column="2"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="checkMark" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="checkBorder" Property="BorderBrush"
+                                        Value="{StaticResource FrequencyCollisionAccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="checkBorder" Property="BorderBrush"
+                                        Value="{StaticResource FrequencyCollisionAccentBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Slider Style -->
+        <Style x:Key="FrequencyCollisionSliderStyle" TargetType="Slider">
+            <Setter Property="Minimum" Value="0"/>
+            <Setter Property="Maximum" Value="100"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Border Height="4" VerticalAlignment="Center"
+                                    Background="#2A2A2A" CornerRadius="2"/>
+                            <Track x:Name="PART_Track">
+                                <Track.Thumb>
+                                    <Thumb Width="14" Height="14">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Fill="{StaticResource FrequencyCollisionAccentBrush}"
+                                                         Width="14" Height="14"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- EQ Suggestion Item Style -->
+        <Style x:Key="FrequencyCollisionEqSuggestionItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource FrequencyCollisionTextBrush}"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{StaticResource FrequencyCollisionBorderBrush}"
+                                BorderThickness="0,0,0,1"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#222222"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="border" Property="Background"
+                                        Value="{StaticResource FrequencyCollisionAccentBrush}"/>
+                                <Setter Property="Foreground" Value="#0D0D0D"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ListBox Style -->
+        <Style x:Key="FrequencyCollisionListBoxStyle" TargetType="ListBox">
+            <Setter Property="Background" Value="{StaticResource FrequencyCollisionPanelBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource FrequencyCollisionBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="ItemContainerStyle" Value="{StaticResource FrequencyCollisionEqSuggestionItemStyle}"/>
+        </Style>
+
+        <!-- ComboBox Style -->
+        <Style x:Key="FrequencyCollisionComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="{StaticResource FrequencyCollisionPanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource FrequencyCollisionTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource FrequencyCollisionBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Border BorderBrush="{StaticResource FrequencyCollisionBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="6"
+            Background="{StaticResource FrequencyCollisionBackgroundBrush}"
+            Padding="16">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*" MinHeight="250"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="160"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="180"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="Frequency Collision Detector"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource FrequencyCollisionTextBrush}"
+                               VerticalAlignment="Center"/>
+
+                    <!-- Overall Collision Indicator -->
+                    <Border x:Name="CollisionIndicatorBorder"
+                            Margin="16,0,0,0"
+                            Background="{StaticResource FrequencyCollisionSuccessBrush}"
+                            CornerRadius="4"
+                            Padding="12,4"
+                            VerticalAlignment="Center">
+                        <TextBlock x:Name="CollisionIndicatorText"
+                                   Text="No Collision"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   Foreground="#0D0D0D"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- Preset Selection -->
+                <ComboBox Grid.Column="1"
+                          x:Name="PresetComboBox"
+                          Style="{StaticResource FrequencyCollisionComboBoxStyle}"
+                          MinWidth="140"
+                          Margin="0,0,12,0"
+                          SelectionChanged="PresetComboBox_SelectionChanged"
+                          ToolTip="Analysis preset">
+                    <ComboBoxItem Content="Full Range" IsSelected="True"/>
+                    <ComboBoxItem Content="Kick/Bass"/>
+                    <ComboBoxItem Content="Vocal/Instrument"/>
+                </ComboBox>
+
+                <!-- Analyze Button -->
+                <Button Grid.Column="2"
+                        x:Name="AnalyzeButton"
+                        Content="Analyze"
+                        Style="{StaticResource FrequencyCollisionPrimaryButtonStyle}"
+                        Click="AnalyzeButton_Click"
+                        Margin="0,0,12,0"
+                        ToolTip="Run collision analysis"/>
+
+                <!-- Reset Button -->
+                <Button Grid.Column="3"
+                        x:Name="ResetButton"
+                        Content="Reset"
+                        Style="{StaticResource FrequencyCollisionButtonStyle}"
+                        Click="ResetButton_Click"
+                        ToolTip="Reset analysis"/>
+            </Grid>
+
+            <!-- Track Selector Panel -->
+            <Border Grid.Row="1" Grid.Column="0"
+                    Background="{StaticResource FrequencyCollisionPanelBrush}"
+                    BorderBrush="{StaticResource FrequencyCollisionBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Margin="0,0,12,0"
+                    Padding="12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="Track Selection"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource FrequencyCollisionTextBrush}"
+                               Margin="0,0,0,12"/>
+
+                    <ScrollViewer Grid.Row="1"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel x:Name="TrackSelectorPanel">
+                            <!-- Track checkboxes will be added dynamically -->
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- Spectrum Display with Collision Overlay -->
+            <Border Grid.Row="1" Grid.Column="1"
+                    Background="{StaticResource FrequencyCollisionPanelBrush}"
+                    BorderBrush="{StaticResource FrequencyCollisionBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- dB Scale -->
+                    <Canvas x:Name="DbScaleCanvas"
+                            Grid.Row="0" Grid.Column="0"
+                            Background="Transparent"/>
+
+                    <!-- Main Spectrum Canvas -->
+                    <Canvas x:Name="SpectrumCanvas"
+                            Grid.Row="0" Grid.Column="1"
+                            ClipToBounds="True"
+                            Background="Transparent"
+                            MouseMove="SpectrumCanvas_MouseMove"
+                            MouseLeave="SpectrumCanvas_MouseLeave"/>
+
+                    <!-- Frequency Labels -->
+                    <Canvas x:Name="FrequencyLabelCanvas"
+                            Grid.Row="1" Grid.Column="1"
+                            Height="20"
+                            Background="Transparent"/>
+
+                    <!-- Hover Info Tooltip -->
+                    <Border x:Name="HoverInfoBorder"
+                            Grid.Row="0" Grid.Column="1"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Background="#E0181818"
+                            BorderBrush="{StaticResource FrequencyCollisionBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="8,4"
+                            Visibility="Collapsed"
+                            IsHitTestVisible="False">
+                        <StackPanel>
+                            <TextBlock x:Name="HoverFrequencyText"
+                                       Text="1000 Hz"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource FrequencyCollisionTextBrush}"/>
+                            <TextBlock x:Name="HoverCollisionText"
+                                       Text="Collision: None"
+                                       FontSize="10"
+                                       Foreground="{StaticResource FrequencyCollisionSecondaryTextBrush}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Legend -->
+                    <Border Grid.Row="0" Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Background="#80181818"
+                            CornerRadius="0,0,0,4"
+                            Padding="8,4"
+                            Margin="0,0,0,0">
+                        <StackPanel x:Name="LegendPanel" Orientation="Vertical">
+                            <!-- Legend items added dynamically -->
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Collision Severity Meter -->
+            <Border Grid.Row="2" Grid.ColumnSpan="2"
+                    Background="{StaticResource FrequencyCollisionPanelBrush}"
+                    BorderBrush="{StaticResource FrequencyCollisionBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Height="50"
+                    Margin="0,12,0,0"
+                    Padding="12,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center">
+                        <TextBlock Text="Collision Severity"
+                                   FontSize="11"
+                                   Foreground="{StaticResource FrequencyCollisionSecondaryTextBrush}"/>
+                        <TextBlock x:Name="SeverityScoreText"
+                                   Text="0%"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource FrequencyCollisionTextBrush}"/>
+                    </StackPanel>
+
+                    <!-- Severity Bar -->
+                    <Border Grid.Column="1"
+                            Margin="16,0"
+                            Height="16"
+                            Background="#2A2A2A"
+                            CornerRadius="8"
+                            VerticalAlignment="Center">
+                        <Border x:Name="SeverityBar"
+                                HorizontalAlignment="Left"
+                                Width="0"
+                                Background="{StaticResource FrequencyCollisionSuccessBrush}"
+                                CornerRadius="8"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="2" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <TextBlock Text="Primary Collision"
+                                   FontSize="11"
+                                   Foreground="{StaticResource FrequencyCollisionSecondaryTextBrush}"/>
+                        <TextBlock x:Name="PrimaryCollisionText"
+                                   Text="None"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource FrequencyCollisionTextBrush}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Parameters -->
+            <Grid Grid.Row="3" Grid.ColumnSpan="2" Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Collision Threshold -->
+                <StackPanel Grid.Column="0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Collision Threshold"
+                                   Style="{StaticResource FrequencyCollisionParameterLabelStyle}"/>
+                        <TextBlock Grid.Column="1" x:Name="ThresholdValue" Text="30%"
+                                   Style="{StaticResource FrequencyCollisionParameterValueStyle}"/>
+                    </Grid>
+                    <Slider x:Name="ThresholdSlider"
+                            Style="{StaticResource FrequencyCollisionSliderStyle}"
+                            Minimum="10" Maximum="80" Value="30"
+                            ValueChanged="ThresholdSlider_ValueChanged"
+                            ToolTip="Minimum overlap to consider a collision"/>
+                </StackPanel>
+
+                <!-- Masking Threshold -->
+                <StackPanel Grid.Column="2">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Masking Threshold"
+                                   Style="{StaticResource FrequencyCollisionParameterLabelStyle}"/>
+                        <TextBlock Grid.Column="1" x:Name="MaskingThresholdValue" Text="-40 dB"
+                                   Style="{StaticResource FrequencyCollisionParameterValueStyle}"/>
+                    </Grid>
+                    <Slider x:Name="MaskingThresholdSlider"
+                            Style="{StaticResource FrequencyCollisionSliderStyle}"
+                            Minimum="-80" Maximum="-20" Value="-40"
+                            ValueChanged="MaskingThresholdSlider_ValueChanged"
+                            ToolTip="Minimum level for masking analysis"/>
+                </StackPanel>
+
+                <!-- Smoothing -->
+                <StackPanel Grid.Column="4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Smoothing"
+                                   Style="{StaticResource FrequencyCollisionParameterLabelStyle}"/>
+                        <TextBlock Grid.Column="1" x:Name="SmoothingValue" Text="30%"
+                                   Style="{StaticResource FrequencyCollisionParameterValueStyle}"/>
+                    </Grid>
+                    <Slider x:Name="SmoothingSlider"
+                            Style="{StaticResource FrequencyCollisionSliderStyle}"
+                            Minimum="0" Maximum="99" Value="30"
+                            ValueChanged="SmoothingSlider_ValueChanged"
+                            ToolTip="Temporal smoothing for analysis"/>
+                </StackPanel>
+
+                <!-- Max EQ Cut -->
+                <StackPanel Grid.Column="6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Max EQ Cut"
+                                   Style="{StaticResource FrequencyCollisionParameterLabelStyle}"/>
+                        <TextBlock Grid.Column="1" x:Name="MaxCutValue" Text="-12 dB"
+                                   Style="{StaticResource FrequencyCollisionParameterValueStyle}"/>
+                    </Grid>
+                    <Slider x:Name="MaxCutSlider"
+                            Style="{StaticResource FrequencyCollisionSliderStyle}"
+                            Minimum="-24" Maximum="-3" Value="-12"
+                            ValueChanged="MaxCutSlider_ValueChanged"
+                            ToolTip="Maximum suggested EQ cut depth"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- EQ Suggestions Panel -->
+            <Border Grid.Row="4" Grid.ColumnSpan="2"
+                    Background="{StaticResource FrequencyCollisionPanelBrush}"
+                    BorderBrush="{StaticResource FrequencyCollisionBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Margin="0,12,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0" Margin="12,8,12,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="Suggested EQ Cuts"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource FrequencyCollisionTextBrush}"/>
+                            <TextBlock Grid.Column="1"
+                                       x:Name="SuggestionCountText"
+                                       Text="0 suggestions"
+                                       FontSize="11"
+                                       Foreground="{StaticResource FrequencyCollisionSecondaryTextBrush}"/>
+                        </Grid>
+
+                        <ListBox Grid.Row="1"
+                                 x:Name="EqSuggestionsListBox"
+                                 Style="{StaticResource FrequencyCollisionListBoxStyle}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 SelectionChanged="EqSuggestionsListBox_SelectionChanged"
+                                 ToolTip="Click to apply suggestion">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="60"/>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding FrequencyText}"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{StaticResource FrequencyCollisionAccentBrush}"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding CutText}"
+                                                   Foreground="{StaticResource FrequencyCollisionErrorBrush}"/>
+                                        <TextBlock Grid.Column="2"
+                                                   Text="{Binding SourceText}"
+                                                   Foreground="{StaticResource FrequencyCollisionSecondaryTextBrush}"/>
+                                        <TextBlock Grid.Column="3"
+                                                   Text="{Binding SeverityText}"
+                                                   Foreground="{StaticResource FrequencyCollisionWarningBrush}"
+                                                   HorizontalAlignment="Right"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+
+                    <!-- Apply Buttons -->
+                    <StackPanel Grid.Column="1"
+                                Orientation="Vertical"
+                                VerticalAlignment="Center"
+                                Margin="12">
+                        <Button x:Name="ApplySelectedButton"
+                                Content="Apply Selected"
+                                Style="{StaticResource FrequencyCollisionButtonStyle}"
+                                Click="ApplySelectedButton_Click"
+                                Margin="0,0,0,8"
+                                ToolTip="Apply selected EQ suggestion"/>
+                        <Button x:Name="ApplyAllButton"
+                                Content="Apply All"
+                                Style="{StaticResource FrequencyCollisionPrimaryButtonStyle}"
+                                Click="ApplyAllButton_Click"
+                                ToolTip="Apply all EQ suggestions"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

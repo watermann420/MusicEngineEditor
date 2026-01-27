@@ -1,0 +1,536 @@
+<UserControl x:Class="MusicEngineEditor.Controls.Effects.ConvolutionReverbControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:MusicEngineEditor.Controls.Effects"
+             mc:Ignorable="d"
+             d:DesignHeight="520" d:DesignWidth="380"
+             Background="#0D0D0D">
+
+    <UserControl.Resources>
+        <!-- Converters -->
+        <local:ConvolutionReverbDecayMultiplierConverter x:Key="DecayMultiplierConverter"/>
+        <local:ConvolutionReverbFrequencyConverter x:Key="FrequencyConverter"/>
+        <local:ConvolutionReverbPercentConverter x:Key="PercentConverter"/>
+        <local:ConvolutionReverbMsConverter x:Key="MsConverter"/>
+
+        <!-- Colors -->
+        <SolidColorBrush x:Key="ConvReverbBackgroundBrush" Color="#0D0D0D"/>
+        <SolidColorBrush x:Key="ConvReverbPanelBrush" Color="#181818"/>
+        <SolidColorBrush x:Key="ConvReverbAccentBrush" Color="#00D9FF"/>
+        <SolidColorBrush x:Key="ConvReverbSuccessBrush" Color="#00FF88"/>
+        <SolidColorBrush x:Key="ConvReverbTextBrush" Color="#E0E0E0"/>
+        <SolidColorBrush x:Key="ConvReverbSecondaryTextBrush" Color="#808080"/>
+        <SolidColorBrush x:Key="ConvReverbBorderBrush" Color="#2A2A2A"/>
+        <SolidColorBrush x:Key="ConvReverbWaveformBrush" Color="#00D9FF"/>
+        <SolidColorBrush x:Key="ConvReverbWaveformFillBrush" Color="#4000D9FF"/>
+
+        <!-- Parameter Label Style -->
+        <Style x:Key="ConvReverbLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{StaticResource ConvReverbSecondaryTextBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+
+        <!-- Parameter Value Style -->
+        <Style x:Key="ConvReverbValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{StaticResource ConvReverbTextBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="MinWidth" Value="50"/>
+            <Setter Property="TextAlignment" Value="Right"/>
+        </Style>
+
+        <!-- Slider Style -->
+        <Style x:Key="ConvReverbSliderStyle" TargetType="Slider">
+            <Setter Property="Minimum" Value="0"/>
+            <Setter Property="Maximum" Value="100"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Border x:Name="TrackBackground"
+                                    Height="4"
+                                    Background="{StaticResource ConvReverbBorderBrush}"
+                                    CornerRadius="2"
+                                    VerticalAlignment="Center"/>
+                            <Track x:Name="PART_Track">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="Slider.DecreaseLarge">
+                                        <RepeatButton.Template>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Border Height="4"
+                                                        Background="{StaticResource ConvReverbAccentBrush}"
+                                                        CornerRadius="2,0,0,2"/>
+                                            </ControlTemplate>
+                                        </RepeatButton.Template>
+                                    </RepeatButton>
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="Slider.IncreaseLarge">
+                                        <RepeatButton.Template>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Border Background="Transparent"/>
+                                            </ControlTemplate>
+                                        </RepeatButton.Template>
+                                    </RepeatButton>
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb>
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Width="14" Height="14"
+                                                         Fill="{StaticResource ConvReverbAccentBrush}"
+                                                         Stroke="{StaticResource ConvReverbBackgroundBrush}"
+                                                         StrokeThickness="2"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Button Style -->
+        <Style x:Key="ConvReverbButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource ConvReverbPanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource ConvReverbTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ConvReverbBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource ConvReverbAccentBrush}"/>
+                                <Setter TargetName="border" Property="Background" Value="#252525"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource ConvReverbAccentBrush}"/>
+                                <Setter Property="Foreground" Value="#0D0D0D"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Primary Button Style -->
+        <Style x:Key="ConvReverbPrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ConvReverbButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource ConvReverbAccentBrush}"/>
+            <Setter Property="Foreground" Value="#0D0D0D"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="Transparent"
+                                BorderThickness="0"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Toggle Button Style (Bypass) -->
+        <Style x:Key="ConvReverbBypassToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource ConvReverbSecondaryTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ConvReverbBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#FF6B35"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource ConvReverbAccentBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Border BorderBrush="{StaticResource ConvReverbBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="6"
+            Background="{StaticResource ConvReverbPanelBrush}"
+            Padding="16">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row="0" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Text="Convolution Reverb"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource ConvReverbTextBrush}"/>
+
+                <ToggleButton Grid.Column="1"
+                              x:Name="BypassToggle"
+                              Content="Bypass"
+                              Style="{StaticResource ConvReverbBypassToggleStyle}"
+                              Click="BypassToggle_Click"/>
+            </Grid>
+
+            <!-- IR Waveform Display -->
+            <Border Grid.Row="1"
+                    Background="{StaticResource ConvReverbBackgroundBrush}"
+                    BorderBrush="{StaticResource ConvReverbBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Height="100"
+                    Margin="0,0,0,12">
+                <Grid>
+                    <Canvas x:Name="IRWaveformCanvas"
+                            ClipToBounds="True"
+                            Background="Transparent"
+                            SizeChanged="IRWaveformCanvas_SizeChanged">
+                        <!-- Center Line -->
+                        <Line x:Name="IRCenterLine"
+                              Stroke="#303030"
+                              StrokeThickness="1"
+                              StrokeDashArray="4,2"
+                              IsHitTestVisible="False"/>
+                        <!-- Waveform Path -->
+                        <Path x:Name="IRWaveformPath"
+                              Fill="{StaticResource ConvReverbWaveformFillBrush}"
+                              Stroke="{StaticResource ConvReverbWaveformBrush}"
+                              StrokeThickness="1"
+                              IsHitTestVisible="False"/>
+                    </Canvas>
+
+                    <!-- No IR Message -->
+                    <TextBlock x:Name="NoIRText"
+                               Text="No impulse response loaded"
+                               FontSize="11"
+                               Foreground="{StaticResource ConvReverbSecondaryTextBrush}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+
+                    <!-- IR Info Overlay -->
+                    <StackPanel x:Name="IRInfoPanel"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Bottom"
+                                Margin="8,0,0,8"
+                                Visibility="Collapsed">
+                        <Border Background="#80000000"
+                                CornerRadius="3"
+                                Padding="6,3">
+                            <TextBlock x:Name="IRInfoText"
+                                       FontSize="10"
+                                       Foreground="{StaticResource ConvReverbTextBrush}"/>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- IR File Browser -->
+            <Grid Grid.Row="2" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0"
+                        Background="{StaticResource ConvReverbBackgroundBrush}"
+                        BorderBrush="{StaticResource ConvReverbBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Margin="0,0,8,0">
+                    <TextBlock x:Name="IRFileNameText"
+                               Text="Default IR"
+                               FontSize="11"
+                               Foreground="{StaticResource ConvReverbSecondaryTextBrush}"
+                               VerticalAlignment="Center"
+                               Margin="10,0"
+                               TextTrimming="CharacterEllipsis"/>
+                </Border>
+
+                <Button Grid.Column="1"
+                        x:Name="BrowseIRButton"
+                        Content="Browse..."
+                        Style="{StaticResource ConvReverbButtonStyle}"
+                        Click="BrowseIRButton_Click"
+                        Margin="0,0,8,0"/>
+
+                <Button Grid.Column="2"
+                        x:Name="PreviewIRButton"
+                        Content="Preview"
+                        Style="{StaticResource ConvReverbButtonStyle}"
+                        Click="PreviewIRButton_Click"
+                        IsEnabled="False"/>
+            </Grid>
+
+            <!-- Pre-delay -->
+            <StackPanel Grid.Row="3" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="Pre-delay"
+                               Style="{StaticResource ConvReverbLabelStyle}"/>
+                    <TextBlock Grid.Column="1"
+                               x:Name="PreDelayValue"
+                               Text="0 ms"
+                               Style="{StaticResource ConvReverbValueStyle}"/>
+                </Grid>
+                <Slider x:Name="PreDelaySlider"
+                        Style="{StaticResource ConvReverbSliderStyle}"
+                        Minimum="0"
+                        Maximum="200"
+                        Value="0"
+                        ValueChanged="PreDelaySlider_ValueChanged"/>
+            </StackPanel>
+
+            <!-- Decay Time Multiplier -->
+            <StackPanel Grid.Row="4" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="Decay Time"
+                               Style="{StaticResource ConvReverbLabelStyle}"/>
+                    <TextBlock Grid.Column="1"
+                               x:Name="DecayValue"
+                               Text="1.0x"
+                               Style="{StaticResource ConvReverbValueStyle}"/>
+                </Grid>
+                <Slider x:Name="DecaySlider"
+                        Style="{StaticResource ConvReverbSliderStyle}"
+                        Minimum="0"
+                        Maximum="100"
+                        Value="33.33"
+                        ValueChanged="DecaySlider_ValueChanged"/>
+            </StackPanel>
+
+            <!-- Filter Section -->
+            <Border Grid.Row="5"
+                    Background="{StaticResource ConvReverbBackgroundBrush}"
+                    CornerRadius="4"
+                    Padding="12"
+                    Margin="0,0,0,12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="FILTERS"
+                               FontSize="10"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource ConvReverbSecondaryTextBrush}"
+                               Margin="0,0,0,12"/>
+
+                    <!-- Lo-Cut -->
+                    <StackPanel Grid.Row="1" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="Lo-Cut"
+                                       Style="{StaticResource ConvReverbLabelStyle}"/>
+                            <TextBlock Grid.Column="1"
+                                       x:Name="LoCutValue"
+                                       Text="20 Hz"
+                                       Style="{StaticResource ConvReverbValueStyle}"/>
+                        </Grid>
+                        <Slider x:Name="LoCutSlider"
+                                Style="{StaticResource ConvReverbSliderStyle}"
+                                Minimum="0"
+                                Maximum="100"
+                                Value="0"
+                                ValueChanged="LoCutSlider_ValueChanged"/>
+                    </StackPanel>
+
+                    <!-- Hi-Cut -->
+                    <StackPanel Grid.Row="2">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="Hi-Cut"
+                                       Style="{StaticResource ConvReverbLabelStyle}"/>
+                            <TextBlock Grid.Column="1"
+                                       x:Name="HiCutValue"
+                                       Text="20 kHz"
+                                       Style="{StaticResource ConvReverbValueStyle}"/>
+                        </Grid>
+                        <Slider x:Name="HiCutSlider"
+                                Style="{StaticResource ConvReverbSliderStyle}"
+                                Minimum="0"
+                                Maximum="100"
+                                Value="100"
+                                ValueChanged="HiCutSlider_ValueChanged"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Dry/Wet and Stereo Width -->
+            <Grid Grid.Row="6" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Dry/Wet Mix -->
+                <StackPanel Grid.Column="0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Dry/Wet"
+                                   Style="{StaticResource ConvReverbLabelStyle}"/>
+                        <TextBlock Grid.Column="1"
+                                   x:Name="DryWetValue"
+                                   Text="30%"
+                                   Style="{StaticResource ConvReverbValueStyle}"/>
+                    </Grid>
+                    <Slider x:Name="DryWetSlider"
+                            Style="{StaticResource ConvReverbSliderStyle}"
+                            Minimum="0"
+                            Maximum="100"
+                            Value="30"
+                            ValueChanged="DryWetSlider_ValueChanged"/>
+                </StackPanel>
+
+                <!-- Stereo Width -->
+                <StackPanel Grid.Column="2">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Stereo Width"
+                                   Style="{StaticResource ConvReverbLabelStyle}"/>
+                        <TextBlock Grid.Column="1"
+                                   x:Name="StereoWidthValue"
+                                   Text="100%"
+                                   Style="{StaticResource ConvReverbValueStyle}"/>
+                    </Grid>
+                    <Slider x:Name="StereoWidthSlider"
+                            Style="{StaticResource ConvReverbSliderStyle}"
+                            Minimum="0"
+                            Maximum="100"
+                            Value="100"
+                            ValueChanged="StereoWidthSlider_ValueChanged"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Preset Section -->
+            <Border Grid.Row="7"
+                    Background="{StaticResource ConvReverbBackgroundBrush}"
+                    CornerRadius="4"
+                    Padding="12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="Preset:"
+                               FontSize="11"
+                               Foreground="{StaticResource ConvReverbSecondaryTextBrush}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+
+                    <ComboBox Grid.Column="1"
+                              x:Name="PresetComboBox"
+                              SelectionChanged="PresetComboBox_SelectionChanged"
+                              Background="{StaticResource ConvReverbPanelBrush}"
+                              Foreground="{StaticResource ConvReverbTextBrush}"
+                              BorderBrush="{StaticResource ConvReverbBorderBrush}">
+                        <ComboBoxItem Content="Default" IsSelected="True"/>
+                        <ComboBoxItem Content="Small Room"/>
+                        <ComboBoxItem Content="Large Hall"/>
+                        <ComboBoxItem Content="Plate"/>
+                        <ComboBoxItem Content="Cathedral"/>
+                        <ComboBoxItem Content="Bright Room"/>
+                        <ComboBoxItem Content="Dark Hall"/>
+                        <ComboBoxItem Content="Custom"/>
+                    </ComboBox>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

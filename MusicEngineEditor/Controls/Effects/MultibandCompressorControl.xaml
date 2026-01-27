@@ -1,0 +1,805 @@
+<UserControl x:Class="MusicEngineEditor.Controls.Effects.MultibandCompressorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:MusicEngineEditor.Controls.Effects"
+             mc:Ignorable="d"
+             d:DesignHeight="500" d:DesignWidth="800"
+             Background="#0D0D0D"
+             MinHeight="400"
+             MinWidth="600">
+
+    <UserControl.Resources>
+        <!-- Converters -->
+        <local:MultibandCompressorBoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <local:MultibandCompressorInverseBoolConverter x:Key="InverseBoolConverter"/>
+
+        <!-- Band Colors -->
+        <Color x:Key="LowBandColor">#FF6B6B</Color>
+        <Color x:Key="LowMidBandColor">#FFA500</Color>
+        <Color x:Key="HighMidBandColor">#00FF88</Color>
+        <Color x:Key="HighBandColor">#00D9FF</Color>
+
+        <SolidColorBrush x:Key="LowBandBrush" Color="{StaticResource LowBandColor}"/>
+        <SolidColorBrush x:Key="LowMidBandBrush" Color="{StaticResource LowMidBandColor}"/>
+        <SolidColorBrush x:Key="HighMidBandBrush" Color="{StaticResource HighMidBandColor}"/>
+        <SolidColorBrush x:Key="HighBandBrush" Color="{StaticResource HighBandColor}"/>
+
+        <!-- Theme Colors -->
+        <Color x:Key="BackgroundColor">#0D0D0D</Color>
+        <Color x:Key="PanelColor">#181818</Color>
+        <Color x:Key="AccentColor">#00D9FF</Color>
+        <Color x:Key="TextColor">#E0E0E0</Color>
+        <Color x:Key="SecondaryTextColor">#808080</Color>
+        <Color x:Key="BorderColor">#2A2A2A</Color>
+
+        <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+        <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+        <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}"/>
+        <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+
+        <!-- GR Meter Gradient -->
+        <LinearGradientBrush x:Key="GRGradientBrush" StartPoint="0,1" EndPoint="0,0">
+            <GradientStop Color="#00FF88" Offset="0.0"/>
+            <GradientStop Color="#FFA500" Offset="0.5"/>
+            <GradientStop Color="#FF6B6B" Offset="1.0"/>
+        </LinearGradientBrush>
+
+        <!-- Knob Style -->
+        <Style x:Key="KnobSliderStyle" TargetType="Slider">
+            <Setter Property="Minimum" Value="0"/>
+            <Setter Property="Maximum" Value="100"/>
+            <Setter Property="Orientation" Value="Vertical"/>
+            <Setter Property="Height" Value="60"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Border Background="{StaticResource PanelBrush}"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="3"
+                                    Height="60"
+                                    Width="40">
+                                <Track x:Name="PART_Track">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Command="Slider.DecreaseLarge" Opacity="0"/>
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb Width="36" Height="14">
+                                            <Thumb.Template>
+                                                <ControlTemplate TargetType="Thumb">
+                                                    <Border Background="{DynamicResource AccentBrush}"
+                                                            CornerRadius="2"
+                                                            Height="8"
+                                                            Width="32"/>
+                                                </ControlTemplate>
+                                            </Thumb.Template>
+                                        </Thumb>
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Command="Slider.IncreaseLarge" Opacity="0"/>
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Solo/Bypass Toggle Button Style -->
+        <Style x:Key="BandToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="{StaticResource PanelBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="3">
+                            <TextBlock x:Name="content"
+                                       Text="{TemplateBinding Content}"
+                                       FontSize="10"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="content" Property="Foreground" Value="#0D0D0D"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Parameter Label Style -->
+        <Style x:Key="ParamLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
+        </Style>
+
+        <!-- Parameter Value Style -->
+        <Style x:Key="ParamValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="{StaticResource BackgroundBrush}"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="6"
+            Padding="12">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="140"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    Background="{StaticResource PanelBrush}"
+                    CornerRadius="4"
+                    Padding="12,8"
+                    Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="Multiband Compressor"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextBrush}"
+                               VerticalAlignment="Center"/>
+
+                    <!-- Crossover Frequencies Display -->
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="Crossovers:"
+                                   FontSize="10"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"/>
+                        <TextBlock x:Name="CrossoverLowText"
+                                   Text="200 Hz"
+                                   FontSize="10"
+                                   FontFamily="Consolas"
+                                   Foreground="{StaticResource LowBandBrush}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,12,0"/>
+                        <TextBlock x:Name="CrossoverMidText"
+                                   Text="1000 Hz"
+                                   FontSize="10"
+                                   FontFamily="Consolas"
+                                   Foreground="{StaticResource LowMidBandBrush}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,12,0"/>
+                        <TextBlock x:Name="CrossoverHighText"
+                                   Text="5000 Hz"
+                                   FontSize="10"
+                                   FontFamily="Consolas"
+                                   Foreground="{StaticResource HighMidBandBrush}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Bypass Button -->
+                    <ToggleButton x:Name="BypassAllButton"
+                                  Grid.Column="2"
+                                  Content="BYPASS"
+                                  Style="{StaticResource BandToggleButtonStyle}"
+                                  Width="60"
+                                  ToolTip="Bypass all bands"/>
+                </Grid>
+            </Border>
+
+            <!-- Spectrum Display with Band Regions -->
+            <Border Grid.Row="1"
+                    Background="{StaticResource PanelBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Margin="0,0,0,8"
+                    ClipToBounds="True">
+                <Grid>
+                    <!-- Frequency Scale Canvas -->
+                    <Canvas x:Name="FrequencyScaleCanvas"
+                            Height="20"
+                            VerticalAlignment="Bottom"
+                            Margin="40,0,20,0"/>
+
+                    <!-- Band Regions Canvas -->
+                    <Canvas x:Name="BandRegionsCanvas"
+                            Margin="40,10,20,25"
+                            MouseLeftButtonDown="OnBandRegionsMouseDown"
+                            MouseMove="OnBandRegionsMouseMove"
+                            MouseLeftButtonUp="OnBandRegionsMouseUp"
+                            MouseLeave="OnBandRegionsMouseLeave"/>
+
+                    <!-- dB Scale -->
+                    <Canvas x:Name="DbScaleCanvas"
+                            Width="35"
+                            HorizontalAlignment="Left"
+                            Margin="0,10,0,25"/>
+
+                    <!-- Crossover Handles -->
+                    <Canvas x:Name="CrossoverHandlesCanvas"
+                            Margin="40,10,20,25"/>
+                </Grid>
+            </Border>
+
+            <!-- Band Controls -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Low Band -->
+                <Border Grid.Column="0"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource LowBandBrush}"
+                        BorderThickness="2,2,1,2"
+                        CornerRadius="4,0,0,4"
+                        Padding="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Band Header -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                            <TextBlock Text="LOW"
+                                       FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource LowBandBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <ToggleButton x:Name="LowSoloButton"
+                                          Content="S"
+                                          Style="{StaticResource BandToggleButtonStyle}"
+                                          ToolTip="Solo Low Band"
+                                          Checked="OnSoloChanged"
+                                          Unchecked="OnSoloChanged"
+                                          Margin="0,0,4,0"/>
+                            <ToggleButton x:Name="LowBypassButton"
+                                          Content="B"
+                                          Style="{StaticResource BandToggleButtonStyle}"
+                                          ToolTip="Bypass Low Band"
+                                          Checked="OnBypassChanged"
+                                          Unchecked="OnBypassChanged"/>
+                        </StackPanel>
+
+                        <!-- GR Meter -->
+                        <Border Grid.Row="1"
+                                Background="#0A0A0A"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="2"
+                                Height="60"
+                                Margin="0,0,0,8">
+                            <Grid>
+                                <Border x:Name="LowGRBar"
+                                        Background="{StaticResource GRGradientBrush}"
+                                        VerticalAlignment="Bottom"
+                                        Margin="2"
+                                        CornerRadius="1"
+                                        Height="0"/>
+                                <TextBlock x:Name="LowGRText"
+                                           Text="0.0 dB"
+                                           FontSize="9"
+                                           FontFamily="Consolas"
+                                           Foreground="{StaticResource LowBandBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Bottom"
+                                           Margin="0,0,0,4"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Parameters -->
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Threshold -->
+                            <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="THRESHOLD" Style="{StaticResource ParamLabelStyle}"/>
+                            <Slider x:Name="LowThresholdSlider"
+                                    Grid.Row="1" Grid.ColumnSpan="2"
+                                    Minimum="-60" Maximum="0" Value="-20"
+                                    ValueChanged="OnThresholdChanged"
+                                    Margin="4,2"/>
+                            <TextBlock x:Name="LowThresholdText"
+                                       Grid.Row="1" Grid.ColumnSpan="2"
+                                       Text="-20 dB"
+                                       Style="{StaticResource ParamValueStyle}"
+                                       VerticalAlignment="Bottom"
+                                       Margin="0,0,0,-12"/>
+
+                            <!-- Ratio -->
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="2,8,2,0">
+                                <TextBlock Text="RATIO" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="LowRatioSlider"
+                                        Minimum="1" Maximum="20" Value="4"
+                                        ValueChanged="OnRatioChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="LowRatioText" Text="4:1" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Gain -->
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="2,8,2,0">
+                                <TextBlock Text="GAIN" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="LowGainSlider"
+                                        Minimum="-12" Maximum="12" Value="0"
+                                        ValueChanged="OnGainChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="LowGainText" Text="0 dB" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Attack -->
+                            <StackPanel Grid.Row="3" Grid.Column="0" Margin="2,4,2,0">
+                                <TextBlock Text="ATTACK" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="LowAttackSlider"
+                                        Minimum="0.1" Maximum="100" Value="5"
+                                        ValueChanged="OnAttackChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="LowAttackText" Text="5 ms" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Release -->
+                            <StackPanel Grid.Row="3" Grid.Column="1" Margin="2,4,2,0">
+                                <TextBlock Text="RELEASE" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="LowReleaseSlider"
+                                        Minimum="10" Maximum="1000" Value="100"
+                                        ValueChanged="OnReleaseChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="LowReleaseText" Text="100 ms" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Low-Mid Band -->
+                <Border Grid.Column="1"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource LowMidBandBrush}"
+                        BorderThickness="1,2,1,2"
+                        Padding="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Band Header -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                            <TextBlock Text="LOW-MID"
+                                       FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource LowMidBandBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <ToggleButton x:Name="LowMidSoloButton"
+                                          Content="S"
+                                          Style="{StaticResource BandToggleButtonStyle}"
+                                          ToolTip="Solo Low-Mid Band"
+                                          Checked="OnSoloChanged"
+                                          Unchecked="OnSoloChanged"
+                                          Margin="0,0,4,0"/>
+                            <ToggleButton x:Name="LowMidBypassButton"
+                                          Content="B"
+                                          Style="{StaticResource BandToggleButtonStyle}"
+                                          ToolTip="Bypass Low-Mid Band"
+                                          Checked="OnBypassChanged"
+                                          Unchecked="OnBypassChanged"/>
+                        </StackPanel>
+
+                        <!-- GR Meter -->
+                        <Border Grid.Row="1"
+                                Background="#0A0A0A"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="2"
+                                Height="60"
+                                Margin="0,0,0,8">
+                            <Grid>
+                                <Border x:Name="LowMidGRBar"
+                                        Background="{StaticResource GRGradientBrush}"
+                                        VerticalAlignment="Bottom"
+                                        Margin="2"
+                                        CornerRadius="1"
+                                        Height="0"/>
+                                <TextBlock x:Name="LowMidGRText"
+                                           Text="0.0 dB"
+                                           FontSize="9"
+                                           FontFamily="Consolas"
+                                           Foreground="{StaticResource LowMidBandBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Bottom"
+                                           Margin="0,0,0,4"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Parameters -->
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Threshold -->
+                            <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="THRESHOLD" Style="{StaticResource ParamLabelStyle}"/>
+                            <Slider x:Name="LowMidThresholdSlider"
+                                    Grid.Row="1" Grid.ColumnSpan="2"
+                                    Minimum="-60" Maximum="0" Value="-20"
+                                    ValueChanged="OnThresholdChanged"
+                                    Margin="4,2"/>
+                            <TextBlock x:Name="LowMidThresholdText"
+                                       Grid.Row="1" Grid.ColumnSpan="2"
+                                       Text="-20 dB"
+                                       Style="{StaticResource ParamValueStyle}"
+                                       VerticalAlignment="Bottom"
+                                       Margin="0,0,0,-12"/>
+
+                            <!-- Ratio -->
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="2,8,2,0">
+                                <TextBlock Text="RATIO" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="LowMidRatioSlider"
+                                        Minimum="1" Maximum="20" Value="4"
+                                        ValueChanged="OnRatioChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="LowMidRatioText" Text="4:1" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Gain -->
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="2,8,2,0">
+                                <TextBlock Text="GAIN" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="LowMidGainSlider"
+                                        Minimum="-12" Maximum="12" Value="0"
+                                        ValueChanged="OnGainChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="LowMidGainText" Text="0 dB" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Attack -->
+                            <StackPanel Grid.Row="3" Grid.Column="0" Margin="2,4,2,0">
+                                <TextBlock Text="ATTACK" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="LowMidAttackSlider"
+                                        Minimum="0.1" Maximum="100" Value="5"
+                                        ValueChanged="OnAttackChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="LowMidAttackText" Text="5 ms" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Release -->
+                            <StackPanel Grid.Row="3" Grid.Column="1" Margin="2,4,2,0">
+                                <TextBlock Text="RELEASE" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="LowMidReleaseSlider"
+                                        Minimum="10" Maximum="1000" Value="100"
+                                        ValueChanged="OnReleaseChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="LowMidReleaseText" Text="100 ms" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- High-Mid Band -->
+                <Border Grid.Column="2"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource HighMidBandBrush}"
+                        BorderThickness="1,2,1,2"
+                        Padding="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Band Header -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                            <TextBlock Text="HIGH-MID"
+                                       FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource HighMidBandBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <ToggleButton x:Name="HighMidSoloButton"
+                                          Content="S"
+                                          Style="{StaticResource BandToggleButtonStyle}"
+                                          ToolTip="Solo High-Mid Band"
+                                          Checked="OnSoloChanged"
+                                          Unchecked="OnSoloChanged"
+                                          Margin="0,0,4,0"/>
+                            <ToggleButton x:Name="HighMidBypassButton"
+                                          Content="B"
+                                          Style="{StaticResource BandToggleButtonStyle}"
+                                          ToolTip="Bypass High-Mid Band"
+                                          Checked="OnBypassChanged"
+                                          Unchecked="OnBypassChanged"/>
+                        </StackPanel>
+
+                        <!-- GR Meter -->
+                        <Border Grid.Row="1"
+                                Background="#0A0A0A"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="2"
+                                Height="60"
+                                Margin="0,0,0,8">
+                            <Grid>
+                                <Border x:Name="HighMidGRBar"
+                                        Background="{StaticResource GRGradientBrush}"
+                                        VerticalAlignment="Bottom"
+                                        Margin="2"
+                                        CornerRadius="1"
+                                        Height="0"/>
+                                <TextBlock x:Name="HighMidGRText"
+                                           Text="0.0 dB"
+                                           FontSize="9"
+                                           FontFamily="Consolas"
+                                           Foreground="{StaticResource HighMidBandBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Bottom"
+                                           Margin="0,0,0,4"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Parameters -->
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Threshold -->
+                            <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="THRESHOLD" Style="{StaticResource ParamLabelStyle}"/>
+                            <Slider x:Name="HighMidThresholdSlider"
+                                    Grid.Row="1" Grid.ColumnSpan="2"
+                                    Minimum="-60" Maximum="0" Value="-18"
+                                    ValueChanged="OnThresholdChanged"
+                                    Margin="4,2"/>
+                            <TextBlock x:Name="HighMidThresholdText"
+                                       Grid.Row="1" Grid.ColumnSpan="2"
+                                       Text="-18 dB"
+                                       Style="{StaticResource ParamValueStyle}"
+                                       VerticalAlignment="Bottom"
+                                       Margin="0,0,0,-12"/>
+
+                            <!-- Ratio -->
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="2,8,2,0">
+                                <TextBlock Text="RATIO" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="HighMidRatioSlider"
+                                        Minimum="1" Maximum="20" Value="4"
+                                        ValueChanged="OnRatioChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="HighMidRatioText" Text="4:1" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Gain -->
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="2,8,2,0">
+                                <TextBlock Text="GAIN" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="HighMidGainSlider"
+                                        Minimum="-12" Maximum="12" Value="0"
+                                        ValueChanged="OnGainChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="HighMidGainText" Text="0 dB" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Attack -->
+                            <StackPanel Grid.Row="3" Grid.Column="0" Margin="2,4,2,0">
+                                <TextBlock Text="ATTACK" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="HighMidAttackSlider"
+                                        Minimum="0.1" Maximum="100" Value="5"
+                                        ValueChanged="OnAttackChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="HighMidAttackText" Text="5 ms" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Release -->
+                            <StackPanel Grid.Row="3" Grid.Column="1" Margin="2,4,2,0">
+                                <TextBlock Text="RELEASE" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="HighMidReleaseSlider"
+                                        Minimum="10" Maximum="1000" Value="100"
+                                        ValueChanged="OnReleaseChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="HighMidReleaseText" Text="100 ms" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- High Band -->
+                <Border Grid.Column="3"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource HighBandBrush}"
+                        BorderThickness="1,2,2,2"
+                        CornerRadius="0,4,4,0"
+                        Padding="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Band Header -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                            <TextBlock Text="HIGH"
+                                       FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource HighBandBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <ToggleButton x:Name="HighSoloButton"
+                                          Content="S"
+                                          Style="{StaticResource BandToggleButtonStyle}"
+                                          ToolTip="Solo High Band"
+                                          Checked="OnSoloChanged"
+                                          Unchecked="OnSoloChanged"
+                                          Margin="0,0,4,0"/>
+                            <ToggleButton x:Name="HighBypassButton"
+                                          Content="B"
+                                          Style="{StaticResource BandToggleButtonStyle}"
+                                          ToolTip="Bypass High Band"
+                                          Checked="OnBypassChanged"
+                                          Unchecked="OnBypassChanged"/>
+                        </StackPanel>
+
+                        <!-- GR Meter -->
+                        <Border Grid.Row="1"
+                                Background="#0A0A0A"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="2"
+                                Height="60"
+                                Margin="0,0,0,8">
+                            <Grid>
+                                <Border x:Name="HighGRBar"
+                                        Background="{StaticResource GRGradientBrush}"
+                                        VerticalAlignment="Bottom"
+                                        Margin="2"
+                                        CornerRadius="1"
+                                        Height="0"/>
+                                <TextBlock x:Name="HighGRText"
+                                           Text="0.0 dB"
+                                           FontSize="9"
+                                           FontFamily="Consolas"
+                                           Foreground="{StaticResource HighBandBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Bottom"
+                                           Margin="0,0,0,4"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Parameters -->
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Threshold -->
+                            <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="THRESHOLD" Style="{StaticResource ParamLabelStyle}"/>
+                            <Slider x:Name="HighThresholdSlider"
+                                    Grid.Row="1" Grid.ColumnSpan="2"
+                                    Minimum="-60" Maximum="0" Value="-16"
+                                    ValueChanged="OnThresholdChanged"
+                                    Margin="4,2"/>
+                            <TextBlock x:Name="HighThresholdText"
+                                       Grid.Row="1" Grid.ColumnSpan="2"
+                                       Text="-16 dB"
+                                       Style="{StaticResource ParamValueStyle}"
+                                       VerticalAlignment="Bottom"
+                                       Margin="0,0,0,-12"/>
+
+                            <!-- Ratio -->
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="2,8,2,0">
+                                <TextBlock Text="RATIO" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="HighRatioSlider"
+                                        Minimum="1" Maximum="20" Value="3"
+                                        ValueChanged="OnRatioChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="HighRatioText" Text="3:1" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Gain -->
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="2,8,2,0">
+                                <TextBlock Text="GAIN" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="HighGainSlider"
+                                        Minimum="-12" Maximum="12" Value="0"
+                                        ValueChanged="OnGainChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="HighGainText" Text="0 dB" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Attack -->
+                            <StackPanel Grid.Row="3" Grid.Column="0" Margin="2,4,2,0">
+                                <TextBlock Text="ATTACK" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="HighAttackSlider"
+                                        Minimum="0.1" Maximum="100" Value="5"
+                                        ValueChanged="OnAttackChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="HighAttackText" Text="5 ms" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+
+                            <!-- Release -->
+                            <StackPanel Grid.Row="3" Grid.Column="1" Margin="2,4,2,0">
+                                <TextBlock Text="RELEASE" Style="{StaticResource ParamLabelStyle}"/>
+                                <Slider x:Name="HighReleaseSlider"
+                                        Minimum="10" Maximum="1000" Value="100"
+                                        ValueChanged="OnReleaseChanged"
+                                        Margin="0,2"/>
+                                <TextBlock x:Name="HighReleaseText" Text="100 ms" Style="{StaticResource ParamValueStyle}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

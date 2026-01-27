@@ -57,7 +57,7 @@ public class StringToVisibilityConverter : IValueConverter
 /// <summary>
 /// Converter that converts boolean to visibility.
 /// </summary>
-public class BoolToVisibilityConverter : IValueConverter
+public class LatencyBoolToVisibilityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

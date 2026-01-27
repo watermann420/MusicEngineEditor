@@ -1,0 +1,1044 @@
+<UserControl x:Class="MusicEngineEditor.Controls.AIFeaturesPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:MusicEngineEditor.Controls"
+             xmlns:vm="clr-namespace:MusicEngineEditor.ViewModels"
+             mc:Ignorable="d"
+             d:DesignHeight="800" d:DesignWidth="400">
+
+    <UserControl.DataContext>
+        <vm:AIFeaturesViewModel/>
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <!-- Colors -->
+        <Color x:Key="BackgroundColor">#0D0D0D</Color>
+        <Color x:Key="PanelColor">#181818</Color>
+        <Color x:Key="HeaderColor">#1F1F1F</Color>
+        <Color x:Key="BorderColor">#2A2A2A</Color>
+        <Color x:Key="TextPrimaryColor">#E0E0E0</Color>
+        <Color x:Key="TextSecondaryColor">#808080</Color>
+        <Color x:Key="AccentColor">#00D9FF</Color>
+        <Color x:Key="SuccessColor">#00FF88</Color>
+        <Color x:Key="WarningColor">#FFB800</Color>
+        <Color x:Key="HoverColor">#252525</Color>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+        <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}"/>
+        <SolidColorBrush x:Key="HeaderBrush" Color="{StaticResource HeaderColor}"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+        <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+        <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+        <SolidColorBrush x:Key="HoverBrush" Color="{StaticResource HoverColor}"/>
+
+        <!-- Expander Style -->
+        <Style x:Key="AIExpanderStyle" TargetType="Expander">
+            <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Expander">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Header -->
+                                <ToggleButton x:Name="HeaderToggle"
+                                              Grid.Row="0"
+                                              IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                              Background="{StaticResource HeaderBrush}"
+                                              BorderThickness="0"
+                                              Cursor="Hand">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    CornerRadius="6,6,0,0"
+                                                    Padding="12,10">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- Expand Arrow -->
+                                                    <Path x:Name="Arrow"
+                                                          Grid.Column="0"
+                                                          Data="M 0 0 L 5 5 L 0 10 Z"
+                                                          Fill="{StaticResource AccentBrush}"
+                                                          VerticalAlignment="Center"
+                                                          Margin="0,0,10,0"
+                                                          RenderTransformOrigin="0.5,0.5">
+                                                        <Path.RenderTransform>
+                                                            <RotateTransform Angle="0"/>
+                                                        </Path.RenderTransform>
+                                                    </Path>
+
+                                                    <!-- Header Content -->
+                                                    <ContentPresenter Grid.Column="1"
+                                                                      Content="{TemplateBinding Content}"
+                                                                      VerticalAlignment="Center"/>
+
+                                                    <!-- AI Badge -->
+                                                    <Border Grid.Column="2"
+                                                            Background="{StaticResource AccentBrush}"
+                                                            CornerRadius="3"
+                                                            Padding="6,2">
+                                                        <TextBlock Text="AI"
+                                                                   Foreground="#0D0D0D"
+                                                                   FontSize="9"
+                                                                   FontWeight="Bold"/>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="Arrow" Property="RenderTransform">
+                                                        <Setter.Value>
+                                                            <RotateTransform Angle="90"/>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource HoverBrush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                    <ContentPresenter ContentSource="Header"/>
+                                </ToggleButton>
+
+                                <!-- Content -->
+                                <ContentPresenter x:Name="ContentArea"
+                                                  Grid.Row="1"
+                                                  Visibility="Collapsed"
+                                                  Margin="12,8,12,12"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsExpanded" Value="True">
+                                <Setter TargetName="ContentArea" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Button Style -->
+        <Style x:Key="AIButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="#0D0D0D"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#33E0FF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#00B3CC"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Background" Value="#404040"/>
+                                <Setter Property="Foreground" Value="#808080"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Secondary Button Style -->
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource HoverBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="#0D0D0D"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Success Button Style -->
+        <Style x:Key="SuccessButtonStyle" TargetType="Button" BasedOn="{StaticResource AIButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#33FFAA"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Slider Style -->
+        <Style x:Key="AISliderStyle" TargetType="Slider">
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Background" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto" MinHeight="{TemplateBinding MinHeight}"/>
+                            </Grid.RowDefinitions>
+                            <Border x:Name="TrackBackground"
+                                    Grid.Row="1"
+                                    Height="4"
+                                    Background="{StaticResource BorderBrush}"
+                                    CornerRadius="2"
+                                    Margin="5,0"/>
+                            <Track x:Name="PART_Track" Grid.Row="1">
+                                <Track.Thumb>
+                                    <Thumb Width="14" Height="14">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Fill="{StaticResource AccentBrush}"
+                                                         Effect="{x:Null}"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ComboBox Style -->
+        <Style x:Key="AIComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+
+        <!-- Label Style -->
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+
+        <!-- Value Label Style -->
+        <Style x:Key="ValueLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <!-- Status Label Style -->
+        <Style x:Key="StatusLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontStyle" Value="Italic"/>
+        </Style>
+
+        <!-- ListBox Style -->
+        <Style x:Key="AIListBoxStyle" TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        </Style>
+
+        <!-- ListBoxItem Style -->
+        <Style x:Key="AIListBoxItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource HoverBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#1A00D9FF"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Progress Bar Style -->
+        <Style x:Key="AIProgressBarStyle" TargetType="ProgressBar">
+            <Setter Property="Background" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Height" Value="6"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="3"/>
+                            <Border x:Name="PART_Indicator"
+                                    Background="{TemplateBinding Foreground}"
+                                    CornerRadius="3"
+                                    HorizontalAlignment="Left"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Toggle Button Style for A/B -->
+        <Style x:Key="ABToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="{StaticResource PanelBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="#0D0D0D"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource SuccessBrush}"/>
+                                <Setter Property="Foreground" Value="#0D0D0D"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="{StaticResource BackgroundBrush}"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="8">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    Background="{StaticResource HeaderBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    CornerRadius="8,8,0,0"
+                    Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <TextBlock Text="AI FEATURES"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center"/>
+                        <Border Background="{StaticResource AccentBrush}"
+                                CornerRadius="3"
+                                Padding="6,2"
+                                Margin="10,0,0,0"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="POWERED BY ML"
+                                       Foreground="#0D0D0D"
+                                       FontSize="8"
+                                       FontWeight="Bold"/>
+                        </Border>
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding StatusMessage}"
+                               Style="{StaticResource StatusLabelStyle}"
+                               VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+
+            <!-- Content -->
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Padding="12">
+                <StackPanel>
+
+                    <!-- AI Denoiser Section -->
+                    <Expander Style="{StaticResource AIExpanderStyle}"
+                              Header="AI Denoiser"
+                              IsExpanded="True">
+                        <StackPanel>
+                            <TextBlock Text="Neural network-based noise reduction"
+                                       Style="{StaticResource StatusLabelStyle}"
+                                       Margin="0,0,0,12"/>
+
+                            <!-- Threshold Slider -->
+                            <TextBlock Text="THRESHOLD" Style="{StaticResource LabelStyle}"/>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
+                                </Grid.ColumnDefinitions>
+                                <Slider Grid.Column="0"
+                                        Style="{StaticResource AISliderStyle}"
+                                        Minimum="0" Maximum="1"
+                                        Value="{Binding DenoiserThreshold}"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding DenoiserThreshold, StringFormat={}{0:P0}}"
+                                           Style="{StaticResource ValueLabelStyle}"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <!-- Buttons -->
+                            <WrapPanel Margin="0,0,0,8">
+                                <Button Content="Learn Noise"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Command="{Binding LearnNoiseProfileCommand}"
+                                        IsEnabled="{Binding DenoiserLearning, Converter={x:Static local:AIPanelInverseBooleanConverter.Instance}}"
+                                        Margin="0,0,8,0"/>
+                                <Button Content="Preview"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Command="{Binding ToggleDenoiserPreviewCommand}"
+                                        Margin="0,0,8,0"/>
+                                <Button Content="Apply"
+                                        Style="{StaticResource AIButtonStyle}"
+                                        Command="{Binding ApplyDenoiserCommand}"/>
+                            </WrapPanel>
+
+                            <TextBlock Text="{Binding DenoiserStatus}"
+                                       Style="{StaticResource StatusLabelStyle}"/>
+                        </StackPanel>
+                    </Expander>
+
+                    <!-- AI Declip Section -->
+                    <Expander Style="{StaticResource AIExpanderStyle}"
+                              Header="AI Declip">
+                        <StackPanel>
+                            <TextBlock Text="ML-based clipping restoration"
+                                       Style="{StaticResource StatusLabelStyle}"
+                                       Margin="0,0,0,12"/>
+
+                            <!-- Sensitivity Slider -->
+                            <TextBlock Text="SENSITIVITY" Style="{StaticResource LabelStyle}"/>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
+                                </Grid.ColumnDefinitions>
+                                <Slider Grid.Column="0"
+                                        Style="{StaticResource AISliderStyle}"
+                                        Minimum="0" Maximum="1"
+                                        Value="{Binding DeclipSensitivity}"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding DeclipSensitivity, StringFormat={}{0:P0}}"
+                                           Style="{StaticResource ValueLabelStyle}"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <!-- Quality Mode -->
+                            <TextBlock Text="QUALITY MODE" Style="{StaticResource LabelStyle}"/>
+                            <ComboBox Style="{StaticResource AIComboBoxStyle}"
+                                      ItemsSource="{Binding DeclipQualities}"
+                                      SelectedItem="{Binding DeclipQualityMode}"
+                                      Margin="0,0,0,12"/>
+
+                            <!-- Buttons -->
+                            <WrapPanel Margin="0,0,0,8">
+                                <Button Content="Preview"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Command="{Binding ToggleDeclipPreviewCommand}"
+                                        Margin="0,0,8,0"/>
+                                <Button Content="Apply"
+                                        Style="{StaticResource AIButtonStyle}"
+                                        Command="{Binding ApplyDeclipCommand}"/>
+                            </WrapPanel>
+
+                            <TextBlock Text="{Binding DeclipStatus}"
+                                       Style="{StaticResource StatusLabelStyle}"/>
+                        </StackPanel>
+                    </Expander>
+
+                    <!-- Chord Suggestion Section -->
+                    <Expander Style="{StaticResource AIExpanderStyle}"
+                              Header="Chord Suggestion">
+                        <StackPanel>
+                            <TextBlock Text="AI-powered chord progressions"
+                                       Style="{StaticResource StatusLabelStyle}"
+                                       Margin="0,0,0,12"/>
+
+                            <!-- Key Selection -->
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="KEY" Style="{StaticResource LabelStyle}"/>
+                                    <ComboBox Style="{StaticResource AIComboBoxStyle}"
+                                              ItemsSource="{Binding KeyNames}"
+                                              SelectedIndex="{Binding KeyRoot}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="SCALE" Style="{StaticResource LabelStyle}"/>
+                                    <ComboBox Style="{StaticResource AIComboBoxStyle}">
+                                        <ComboBoxItem Content="Major" IsSelected="{Binding IsMinorKey, Converter={x:Static local:AIPanelInverseBooleanConverter.Instance}}"/>
+                                        <ComboBoxItem Content="Minor" IsSelected="{Binding IsMinorKey}"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Style Selection -->
+                            <TextBlock Text="STYLE" Style="{StaticResource LabelStyle}"/>
+                            <ComboBox Style="{StaticResource AIComboBoxStyle}"
+                                      ItemsSource="{Binding ChordStyles}"
+                                      SelectedItem="{Binding ChordStyle}"
+                                      Margin="0,0,0,12"/>
+
+                            <!-- Generate Button -->
+                            <Button Content="Generate Suggestions"
+                                    Style="{StaticResource AIButtonStyle}"
+                                    Command="{Binding GenerateChordSuggestionsCommand}"
+                                    Margin="0,0,0,12"/>
+
+                            <!-- Suggested Chords List -->
+                            <ListBox Style="{StaticResource AIListBoxStyle}"
+                                     ItemContainerStyle="{StaticResource AIListBoxItemStyle}"
+                                     ItemsSource="{Binding SuggestedChords}"
+                                     SelectedItem="{Binding SelectedChord}"
+                                     MaxHeight="200">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding ChordName}"
+                                                       FontWeight="Bold"
+                                                       Foreground="{StaticResource AccentBrush}"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,8,0"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding RomanNumeral}"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="2"
+                                                       Text="{Binding Score, StringFormat={}{0:P0}}"
+                                                       Foreground="{StaticResource SuccessBrush}"
+                                                       VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <!-- Insert Button -->
+                            <Button Content="Insert Selected Chord"
+                                    Style="{StaticResource SuccessButtonStyle}"
+                                    Command="{Binding InsertSelectedChordCommand}"
+                                    IsEnabled="{Binding SelectedChord, Converter={x:Static local:AIPanelNotNullConverter.Instance}}"
+                                    Margin="0,12,0,0"/>
+                        </StackPanel>
+                    </Expander>
+
+                    <!-- Melody Generator Section -->
+                    <Expander Style="{StaticResource AIExpanderStyle}"
+                              Header="Melody Generator">
+                        <StackPanel>
+                            <TextBlock Text="AI melody completion and generation"
+                                       Style="{StaticResource StatusLabelStyle}"
+                                       Margin="0,0,0,12"/>
+
+                            <!-- Seed Pattern -->
+                            <TextBlock Text="SEED PATTERN" Style="{StaticResource LabelStyle}"/>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding SeedPattern, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="{StaticResource PanelBrush}"
+                                         Foreground="{StaticResource TextPrimaryBrush}"
+                                         BorderBrush="{StaticResource BorderBrush}"
+                                         Padding="8,6"/>
+                                <Button Grid.Column="1"
+                                        Content="Random"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Command="{Binding RandomizeSeedCommand}"
+                                        Margin="8,0,0,0"/>
+                            </Grid>
+
+                            <!-- Style -->
+                            <TextBlock Text="STYLE" Style="{StaticResource LabelStyle}"/>
+                            <ComboBox Style="{StaticResource AIComboBoxStyle}"
+                                      ItemsSource="{Binding MelodyStyles}"
+                                      SelectedItem="{Binding MelodyStyle}"
+                                      Margin="0,0,0,12"/>
+
+                            <!-- Contour -->
+                            <TextBlock Text="CONTOUR" Style="{StaticResource LabelStyle}"/>
+                            <ComboBox Style="{StaticResource AIComboBoxStyle}"
+                                      ItemsSource="{Binding ContourShapes}"
+                                      SelectedItem="{Binding MelodyContour}"
+                                      Margin="0,0,0,12"/>
+
+                            <!-- Temperature -->
+                            <TextBlock Text="TEMPERATURE (CREATIVITY)" Style="{StaticResource LabelStyle}"/>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
+                                </Grid.ColumnDefinitions>
+                                <Slider Grid.Column="0"
+                                        Style="{StaticResource AISliderStyle}"
+                                        Minimum="0" Maximum="1"
+                                        Value="{Binding MelodyTemperature}"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding MelodyTemperature, StringFormat={}{0:F2}}"
+                                           Style="{StaticResource ValueLabelStyle}"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <!-- Density -->
+                            <TextBlock Text="DENSITY" Style="{StaticResource LabelStyle}"/>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
+                                </Grid.ColumnDefinitions>
+                                <Slider Grid.Column="0"
+                                        Style="{StaticResource AISliderStyle}"
+                                        Minimum="0" Maximum="1"
+                                        Value="{Binding MelodyDensity}"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding MelodyDensity, StringFormat={}{0:P0}}"
+                                           Style="{StaticResource ValueLabelStyle}"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <!-- Generate Button -->
+                            <Button Content="Generate Melody"
+                                    Style="{StaticResource AIButtonStyle}"
+                                    Command="{Binding GenerateMelodyCommand}"
+                                    Margin="0,0,0,8"/>
+
+                            <TextBlock Text="{Binding MelodyStatus}"
+                                       Style="{StaticResource StatusLabelStyle}"/>
+                        </StackPanel>
+                    </Expander>
+
+                    <!-- Mix Assistant Section -->
+                    <Expander Style="{StaticResource AIExpanderStyle}"
+                              Header="Mix Assistant">
+                        <StackPanel>
+                            <TextBlock Text="Auto EQ and compression suggestions"
+                                       Style="{StaticResource StatusLabelStyle}"
+                                       Margin="0,0,0,12"/>
+
+                            <!-- Genre -->
+                            <TextBlock Text="GENRE" Style="{StaticResource LabelStyle}"/>
+                            <ComboBox Style="{StaticResource AIComboBoxStyle}"
+                                      ItemsSource="{Binding MixGenres}"
+                                      SelectedItem="{Binding MixGenre}"
+                                      Margin="0,0,0,12"/>
+
+                            <!-- Analyze Button -->
+                            <Button Content="Analyze Track"
+                                    Style="{StaticResource AIButtonStyle}"
+                                    Command="{Binding AnalyzeMixCommand}"
+                                    Margin="0,0,0,12"/>
+
+                            <!-- Analysis Status -->
+                            <TextBlock Text="{Binding MixAnalysisStatus}"
+                                       Style="{StaticResource StatusLabelStyle}"
+                                       Margin="0,0,0,12"/>
+
+                            <!-- EQ Suggestions -->
+                            <TextBlock Text="EQ SUGGESTIONS" Style="{StaticResource LabelStyle}"/>
+                            <ItemsControl ItemsSource="{Binding EqSuggestions}"
+                                          Margin="0,0,0,12">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{StaticResource HoverBrush}"
+                                                CornerRadius="4"
+                                                Padding="8,6"
+                                                Margin="0,2">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{Binding DisplayText}"
+                                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                                           FontSize="11"/>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding FilterType}"
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           FontSize="10"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Compression Suggestion -->
+                            <TextBlock Text="COMPRESSION SUGGESTION"
+                                       Style="{StaticResource LabelStyle}"
+                                       Visibility="{Binding CompressionSuggestion, Converter={x:Static local:AIPanelNotNullToVisibilityConverter.Instance}}"/>
+                            <Border Background="{StaticResource HoverBrush}"
+                                    CornerRadius="4"
+                                    Padding="8"
+                                    Margin="0,0,0,12"
+                                    Visibility="{Binding CompressionSuggestion, Converter={x:Static local:AIPanelNotNullToVisibilityConverter.Instance}}">
+                                <StackPanel DataContext="{Binding CompressionSuggestion}">
+                                    <TextBlock Foreground="{StaticResource TextPrimaryBrush}" FontSize="11">
+                                        <Run Text="Threshold: "/><Run Text="{Binding ThresholdDb, StringFormat={}{0:F1} dB}" Foreground="{StaticResource AccentBrush}"/>
+                                        <Run Text=" | Ratio: "/><Run Text="{Binding Ratio, StringFormat={}{0:F1}:1}" Foreground="{StaticResource AccentBrush}"/>
+                                    </TextBlock>
+                                    <TextBlock Foreground="{StaticResource TextPrimaryBrush}" FontSize="11">
+                                        <Run Text="Attack: "/><Run Text="{Binding AttackMs, StringFormat={}{0:F0} ms}" Foreground="{StaticResource AccentBrush}"/>
+                                        <Run Text=" | Release: "/><Run Text="{Binding ReleaseMs, StringFormat={}{0:F0} ms}" Foreground="{StaticResource AccentBrush}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Apply Buttons -->
+                            <WrapPanel>
+                                <Button Content="Apply EQ"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Command="{Binding ApplyEqSuggestionsCommand}"
+                                        IsEnabled="{Binding EqSuggestions.Count, Converter={x:Static local:AIPanelGreaterThanZeroConverter.Instance}}"
+                                        Margin="0,0,8,0"/>
+                                <Button Content="Apply Compression"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Command="{Binding ApplyCompressionSuggestionCommand}"
+                                        IsEnabled="{Binding CompressionSuggestion, Converter={x:Static local:AIPanelNotNullConverter.Instance}}"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Expander>
+
+                    <!-- Mastering Assistant Section -->
+                    <Expander Style="{StaticResource AIExpanderStyle}"
+                              Header="Mastering Assistant">
+                        <StackPanel>
+                            <TextBlock Text="One-click AI mastering"
+                                       Style="{StaticResource StatusLabelStyle}"
+                                       Margin="0,0,0,12"/>
+
+                            <!-- Target Platform -->
+                            <TextBlock Text="TARGET PLATFORM" Style="{StaticResource LabelStyle}"/>
+                            <ComboBox Style="{StaticResource AIComboBoxStyle}"
+                                      ItemsSource="{Binding MasteringTargets}"
+                                      SelectedItem="{Binding MasteringTarget}"
+                                      Margin="0,0,0,12"/>
+
+                            <!-- Target LUFS -->
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="TARGET LUFS" Style="{StaticResource LabelStyle}"/>
+                                    <TextBlock Text="{Binding TargetLufs, StringFormat={}{0:F1} LUFS}"
+                                               Style="{StaticResource ValueLabelStyle}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="ESTIMATED OUTPUT" Style="{StaticResource LabelStyle}"/>
+                                    <TextBlock Text="{Binding OutputLufs, StringFormat={}{0:F1} LUFS}"
+                                               Style="{StaticResource ValueLabelStyle}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Create Chain Button -->
+                            <Button Content="Create Mastering Chain"
+                                    Style="{StaticResource AIButtonStyle}"
+                                    Command="{Binding CreateMasteringChainCommand}"
+                                    Margin="0,0,0,12"/>
+
+                            <!-- A/B Preview -->
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="A/B PREVIEW"
+                                           Style="{StaticResource LabelStyle}"
+                                           VerticalAlignment="Center"/>
+                                <ToggleButton Grid.Column="1"
+                                              Style="{StaticResource ABToggleStyle}"
+                                              IsChecked="{Binding MasteringPreviewA}"
+                                              Command="{Binding ToggleMasteringPreviewCommand}"
+                                              Width="60">
+                                    <ToggleButton.Content>
+                                        <TextBlock>
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="B"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding MasteringPreviewA}" Value="True">
+                                                            <Setter Property="Text" Value="A"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </ToggleButton.Content>
+                                </ToggleButton>
+                            </Grid>
+
+                            <!-- Notes -->
+                            <TextBlock Text="NOTES" Style="{StaticResource LabelStyle}"/>
+                            <ItemsControl ItemsSource="{Binding MasteringNotes}"
+                                          Margin="0,0,0,12">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   FontSize="10"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,2"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Apply Button -->
+                            <Button Content="Apply Mastering"
+                                    Style="{StaticResource SuccessButtonStyle}"
+                                    Command="{Binding ApplyMasteringCommand}"/>
+
+                            <TextBlock Text="{Binding MasteringStatus}"
+                                       Style="{StaticResource StatusLabelStyle}"
+                                       Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Expander>
+
+                    <!-- Stem Separation Section -->
+                    <Expander Style="{StaticResource AIExpanderStyle}"
+                              Header="Stem Separation">
+                        <StackPanel>
+                            <TextBlock Text="AI-based source separation"
+                                       Style="{StaticResource StatusLabelStyle}"
+                                       Margin="0,0,0,12"/>
+
+                            <!-- Quality -->
+                            <TextBlock Text="QUALITY" Style="{StaticResource LabelStyle}"/>
+                            <ComboBox Style="{StaticResource AIComboBoxStyle}"
+                                      ItemsSource="{Binding SeparationQualities}"
+                                      SelectedItem="{Binding SeparationQuality}"
+                                      Margin="0,0,0,12"/>
+
+                            <!-- Separate Button -->
+                            <Button Style="{StaticResource AIButtonStyle}"
+                                    Command="{Binding SeparateStemsCommand}"
+                                    Margin="0,0,0,12">
+                                <Button.Content>
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="Separate Stems"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSeparating}" Value="True">
+                                                        <Setter Property="Text" Value="Cancel"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Button.Content>
+                            </Button>
+
+                            <!-- Progress -->
+                            <StackPanel Visibility="{Binding IsSeparating, Converter={x:Static local:AIPanelBoolToVisibilityConverter.Instance}}"
+                                        Margin="0,0,0,12">
+                                <ProgressBar Style="{StaticResource AIProgressBarStyle}"
+                                             Value="{Binding SeparationProgress, Mode=OneWay}"
+                                             Minimum="0" Maximum="1"
+                                             Margin="0,0,0,4"/>
+                                <TextBlock Text="{Binding SeparationPhase}"
+                                           Style="{StaticResource StatusLabelStyle}"/>
+                            </StackPanel>
+
+                            <!-- Stems List -->
+                            <TextBlock Text="STEMS" Style="{StaticResource LabelStyle}"/>
+                            <ItemsControl ItemsSource="{Binding Stems}"
+                                          Margin="0,0,0,12">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{StaticResource HoverBrush}"
+                                                CornerRadius="4"
+                                                Padding="8,6"
+                                                Margin="0,2">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{Binding DisplayName}"
+                                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                                           FontWeight="SemiBold"
+                                                           VerticalAlignment="Center"/>
+
+                                                <TextBlock Grid.Column="1"
+                                                           VerticalAlignment="Center"
+                                                           Margin="0,0,8,0">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="Not available"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsAvailable}" Value="True">
+                                                                    <Setter Property="Text" Value="Ready"/>
+                                                                    <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+
+                                                <Button Grid.Column="2"
+                                                        Content="Export"
+                                                        Style="{StaticResource SecondaryButtonStyle}"
+                                                        Command="{Binding DataContext.ExportStemCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        IsEnabled="{Binding IsAvailable}"
+                                                        Padding="8,4"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Export Directory -->
+                            <TextBlock Text="EXPORT DIRECTORY" Style="{StaticResource LabelStyle}"/>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0"
+                                         Text="{Binding ExportDirectory, UpdateSourceTrigger=PropertyChanged}"
+                                         Background="{StaticResource PanelBrush}"
+                                         Foreground="{StaticResource TextPrimaryBrush}"
+                                         BorderBrush="{StaticResource BorderBrush}"
+                                         Padding="8,6"
+                                         IsReadOnly="True"/>
+                                <Button Grid.Column="1"
+                                        Content="Browse"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Command="{Binding BrowseExportDirectoryCommand}"
+                                        Margin="8,0,0,0"/>
+                            </Grid>
+
+                            <!-- Export All Button -->
+                            <Button Content="Export All Stems"
+                                    Style="{StaticResource SuccessButtonStyle}"
+                                    Command="{Binding ExportAllStemsCommand}"/>
+
+                            <TextBlock Text="{Binding SeparationStatus}"
+                                       Style="{StaticResource StatusLabelStyle}"
+                                       Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Expander>
+
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+</UserControl>
