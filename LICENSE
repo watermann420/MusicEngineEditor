@@ -17,9 +17,12 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 - modify  
 - merge  
 - publish  
-- distribute  
-- sublicense  
-- and sell  
+
+You are not allowed to repackage, resell, or place this project behind a paywall.
+
+You are only allowed to sell software that builds on top of this project (for example, a DAW), provided that this project itself remains free and accessible.
+
+Any attempt to repackage, resell, or restrict access to this project may result in legal action.
 
 copies of the Software, subject to the conditions below.
 
@@ -33,12 +36,12 @@ The Software may be used freely for:
 - education  
 - research  
 - indie games  
-- commercial products  
+- You are only allowed to sell commercial products built on top of this project
 - music tools  
 - plugins  
 - services  
 
-There is **no cost**, no registration, and no permission required.
+
 
 ---
 
