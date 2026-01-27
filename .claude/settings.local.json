@@ -12,7 +12,13 @@
       "Bash(dir \"C:\\\\Users\\\\water\\\\RiderProjects\\\\MusicEditor\")",
       "Bash(dir \"C:\\\\Users\\\\water\\\\RiderProjects\\\\MusicEditor\\\\dev-docs\")",
       "Bash(dir \"C:\\\\Users\\\\water\\\\RiderProjects\\\\MusicEditor\\\\MusicEngineEditor\")",
-      "Bash(dir \"C:\\\\Users\\\\water\\\\RiderProjects\\\\MusicEditor\" /s /b)"
+      "Bash(dir \"C:\\\\Users\\\\water\\\\RiderProjects\\\\MusicEditor\" /s /b)",
+      "Bash(\"C:/Program Files/dotnet/dotnet.exe\" build MusicEngineEditor/MusicEngineEditor.csproj)",
+      "Bash(cmd /c \"dotnet build MusicEngineEditor/MusicEngineEditor.csproj\")",
+      "Bash(cmd /c:*)",
+      "Bash(C:/Program\\\\ Files/dotnet/dotnet.exe build:*)",
+      "Bash(dir /s /b \"C:\\\\Users\\\\water\\\\RiderProjects\\\\MusicEditor\\\\*.csproj\")",
+      "Bash(\"C:\\\\Program Files\\\\dotnet\\\\dotnet.exe\" build \"C:\\\\Users\\\\water\\\\RiderProjects\\\\MusicEngine\\\\MusicEngine.csproj\")"
     ]
   }
 }

@@ -812,10 +812,15 @@ public partial class MainWindow : Window
         // Check if already open
         if (_openTabs.TryGetValue(script.FilePath, out var existingTab))
         {
+            // Save current tab's content before switching
+            SaveCurrentEditorContent();
             EditorTabs.SelectedItem = existingTab;
-            CodeEditor.Text = script.Content ?? string.Empty;
+            // Note: Content will be loaded by SelectionChanged event
             return;
         }
+
+        // Save current tab's content before opening new tab
+        SaveCurrentEditorContent();
 
         // Create new tab
         var tab = new TabItem
@@ -835,14 +840,27 @@ public partial class MainWindow : Window
 
     private void EditorTabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (EditorTabs.SelectedItem is TabItem tab && _tabScripts.TryGetValue(tab, out var script))
+        // First, save content of the PREVIOUS tab (the one being switched away from)
+        if (e.RemovedItems.Count > 0 && e.RemovedItems[0] is TabItem previousTab)
         {
-            // Save current content to previous script
-            SaveCurrentEditorContent();
+            if (_tabScripts.TryGetValue(previousTab, out var previousScript))
+            {
+                if (previousScript.Content != CodeEditor.Text)
+                {
+                    previousScript.Content = CodeEditor.Text;
+                    previousScript.IsDirty = true;
+                }
+            }
+        }
 
-            // Load selected script
-            CodeEditor.Text = script.Content;
-            FileNameDisplay.Text = script.FileName;
+        // Then load the NEW tab's content
+        if (e.AddedItems.Count > 0 && e.AddedItems[0] is TabItem newTab)
+        {
+            if (_tabScripts.TryGetValue(newTab, out var script))
+            {
+                CodeEditor.Text = script.Content ?? string.Empty;
+                FileNameDisplay.Text = script.FileName ?? "Untitled";
+            }
         }
     }
 
