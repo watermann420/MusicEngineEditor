@@ -75,7 +75,9 @@ public partial class ProjectNotesPanel : UserControl
     #region Fields
 
     private bool _isUpdatingFromProperty;
+#pragma warning disable CS0414 // Field is assigned but its value is never used
     private bool _isDirty;
+#pragma warning restore CS0414
 
     #endregion
 

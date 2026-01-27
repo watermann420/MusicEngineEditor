@@ -170,7 +170,6 @@ public partial class PhaseAlignmentControl : UserControl
     private DispatcherTimer? _liveMonitorTimer;
     private bool _isLiveMonitoring;
     private double _currentCorrelation;
-    private int _selectedTargetIndex;
 
     #endregion
 

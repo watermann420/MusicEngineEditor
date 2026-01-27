@@ -108,7 +108,9 @@ public sealed class BounceInPlaceCommand : IUndoableCommand
     // State for undo
     private AudioClip? _originalClip;
     private AudioClip? _bouncedClip;
+#pragma warning disable CS0414 // Field is assigned but its value is never used
     private bool _wasTrackMuted;
+#pragma warning restore CS0414
     private string? _bouncedFilePath;
     private bool _executed;
 
@@ -431,13 +433,13 @@ public sealed class BounceInPlaceCommand : IUndoableCommand
                     if (bitDepth == 16)
                     {
                         short s16 = (short)(sample * short.MaxValue);
-                        writer.WriteData(BitConverter.GetBytes(s16), 0, 2);
+                        writer.Write(BitConverter.GetBytes(s16), 0, 2);
                     }
                     else if (bitDepth == 24)
                     {
                         int s24 = (int)(sample * 8388607); // 2^23 - 1
                         byte[] bytes = BitConverter.GetBytes(s24);
-                        writer.WriteData(bytes, 0, 3);
+                        writer.Write(bytes, 0, 3);
                     }
                 }
             }

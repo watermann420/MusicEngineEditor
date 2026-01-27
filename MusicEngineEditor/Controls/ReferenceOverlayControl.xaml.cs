@@ -56,21 +56,21 @@ public partial class ReferenceOverlayControl : UserControl
         DependencyProperty.Register(nameof(ShowDifference), typeof(bool), typeof(ReferenceOverlayControl),
             new PropertyMetadata(true));
 
-    public float[] MixSpectrum
+    public float[]? MixSpectrum
     {
-        get => (float[])GetValue(MixSpectrumProperty);
+        get => (float[]?)GetValue(MixSpectrumProperty);
         set => SetValue(MixSpectrumProperty, value);
     }
 
-    public float[] ReferenceSpectrum
+    public float[]? ReferenceSpectrum
     {
-        get => (float[])GetValue(ReferenceSpectrumProperty);
+        get => (float[]?)GetValue(ReferenceSpectrumProperty);
         set => SetValue(ReferenceSpectrumProperty, value);
     }
 
-    public float[] Frequencies
+    public float[]? Frequencies
     {
-        get => (float[])GetValue(FrequenciesProperty);
+        get => (float[]?)GetValue(FrequenciesProperty);
         set => SetValue(FrequenciesProperty, value);
     }
 
@@ -307,7 +307,7 @@ public partial class ReferenceOverlayControl : UserControl
             float[] adjustedReference = ReferenceSpectrum!;
 
             // Apply level matching if enabled
-            if (AutoLevelMatch && MixSpectrum != null)
+            if (AutoLevelMatch && MixSpectrum != null && ReferenceSpectrum != null)
             {
                 adjustedReference = ApplyLevelMatching(ReferenceSpectrum, MixSpectrum);
             }

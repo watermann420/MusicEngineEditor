@@ -300,7 +300,6 @@ public class FilterNode : EffectNodeBase
 
     // 4 stages of the ladder
     private float _stage0, _stage1, _stage2, _stage3;
-    private float _delay0, _delay1, _delay2, _delay3;
 
     // For oversampling
     private const int OversampleFactor = 2;
@@ -896,7 +895,6 @@ public class GateNode : EffectNodeBase
     public override string Category => "Dynamics";
     public override string Description => "Noise gate with sidechain";
 
-    private float _envelope;
     private float _gainSmooth;
     private int _holdCounter;
     private bool _isOpen;
@@ -1114,7 +1112,6 @@ public class ReverbNode : EffectNodeBase
     private readonly AllpassFilter[] _allpassesL = new AllpassFilter[4];
     private readonly AllpassFilter[] _allpassesR = new AllpassFilter[4];
 
-    private float _preDelayBuffer = new float();
     private int _preDelayPos;
     private float[] _preDelay = Array.Empty<float>();
 
@@ -2580,10 +2577,9 @@ public class StepSequencerNode : EffectNodeBase
 
             if (direction < -0.3f)
                 _currentStep = (_currentStep - 1 + steps) % steps; // Reverse
-            else if (direction > 0.3f)
-                _currentStep = _currentStep; // Hold
-            else
+            else if (direction <= 0.3f)
                 _currentStep = (_currentStep + 1) % steps; // Forward
+            // direction > 0.3f means Hold - do nothing
 
             triggered = true;
         }
@@ -2609,7 +2605,6 @@ public class ClockNode : EffectNodeBase
 
     private double _phase;
     private int _beatCount;
-    private bool _lastBeatState;
 
     protected override void InitializePorts()
     {

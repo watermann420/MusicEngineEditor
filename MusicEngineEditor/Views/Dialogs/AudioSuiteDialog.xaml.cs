@@ -94,7 +94,9 @@ public partial class AudioSuiteDialog : Window
     private float[]? _processedSamples;
     private int _sampleRate = 44100;
     private int _channels = 2;
+#pragma warning disable CS0414 // Field is assigned but its value is never used
     private bool _isPreviewing;
+#pragma warning restore CS0414
     private CancellationTokenSource? _previewCts;
     private bool _isComparing;
 

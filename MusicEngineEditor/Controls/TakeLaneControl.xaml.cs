@@ -149,7 +149,9 @@ public partial class TakeLaneControl : UserControl
     private bool _isDragging;
     private Point _dragStartPoint;
     private double _dragStartBeat;
+#pragma warning disable CS0414 // Field is assigned but its value is never used
     private CompRegion? _currentDragRegion;
+#pragma warning restore CS0414
     private TakeViewModel? _dragSourceTake;
     private readonly Dictionary<string, Path> _waveformPaths = new();
     private readonly List<Rectangle> _compRegionRects = new();

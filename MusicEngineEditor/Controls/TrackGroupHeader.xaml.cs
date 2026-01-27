@@ -182,7 +182,9 @@ public partial class TrackGroupHeader : UserControl
     /// <summary>
     /// Event raised when the volume changes.
     /// </summary>
+#pragma warning disable CS0067 // Event is never used - available for binding
     public event EventHandler<float>? VolumeChanged;
+#pragma warning restore CS0067
 
     #endregion
 

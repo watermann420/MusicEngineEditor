@@ -228,7 +228,9 @@ public partial class SpectralSelectionControl : UserControl
     private Shapes.Polyline? _lassoPath;
     private List<Point> _lassoPoints = [];
     private Image? _spectrogramImage;
+#pragma warning disable CS0414 // Field is assigned but its value is never used
     private double _brushRadius = 20;
+#pragma warning restore CS0414
 
     // Cached calculations
     private double _frequencyPerBin;

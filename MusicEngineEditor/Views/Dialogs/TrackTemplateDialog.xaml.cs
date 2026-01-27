@@ -288,7 +288,7 @@ public class TrackTemplateEditDialog : Window
     /// <summary>
     /// Gets the edited template.
     /// </summary>
-    public TrackTemplate? Template { get; private set; }
+    public new TrackTemplate? Template { get; private set; }
 
     public TrackTemplateEditDialog(TrackTemplate template)
     {

@@ -631,7 +631,9 @@ public class ArpeggiatorEffect : ObservableObject, IMIDIInsertEffect
     private double _rate = 0.25; // Quarter notes
 
     private readonly List<int> _heldNotes = [];
+#pragma warning disable CS0414 // Field is assigned but its value is never used
     private int _currentStep;
+#pragma warning restore CS0414
 
     public bool IsEnabled
     {

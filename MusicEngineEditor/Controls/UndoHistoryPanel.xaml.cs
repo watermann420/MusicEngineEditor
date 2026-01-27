@@ -25,7 +25,9 @@ public partial class UndoHistoryPanel : UserControl, IDisposable
     /// <summary>
     /// Event raised when the panel requests to be closed.
     /// </summary>
+#pragma warning disable CS0067 // Event is never used - available for future external consumers
     public event EventHandler? CloseRequested;
+#pragma warning restore CS0067
 
     /// <summary>
     /// Creates a new UndoHistoryPanel.

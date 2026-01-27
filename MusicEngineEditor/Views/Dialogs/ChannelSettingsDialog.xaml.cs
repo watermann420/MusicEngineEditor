@@ -106,9 +106,13 @@ public partial class ChannelSettingsDialog : Window
     // Original values for reset/cancel
     private float _originalVolume;
     private float _originalPan;
+#pragma warning disable CS0414 // Field is assigned but its value is never used
     private float _originalInputGain;
+#pragma warning restore CS0414
     private bool _originalPhaseInvert;
+#pragma warning disable CS0414 // Field is assigned but its value is never used
     private bool _originalMono;
+#pragma warning restore CS0414
 
     #endregion
 

@@ -260,7 +260,9 @@ public partial class TrackNotesPanel : UserControl, IDisposable
     };
 
     private readonly TrackNotesPanelViewModel _viewModel;
+#pragma warning disable CS0649 // Field is never assigned - will be set via UI interaction when implemented
     private System.Windows.Controls.RichTextBox? _activeRichTextBox;
+#pragma warning restore CS0649
     private bool _isDirty;
     private DateTime _lastSaveTime = DateTime.MinValue;
     private System.Windows.Threading.DispatcherTimer? _autoSaveTimer;

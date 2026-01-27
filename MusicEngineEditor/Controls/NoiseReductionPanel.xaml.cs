@@ -19,7 +19,9 @@ public partial class NoiseReductionPanel : UserControl
     private CancellationTokenSource? _learningCts;
     private bool _hasNoiseProfile;
     private bool _isBypassed;
+#pragma warning disable CS0414 // Field is assigned but its value is never used
     private bool _isShowingOriginal;
+#pragma warning restore CS0414
 
     /// <summary>
     /// Event raised when a parameter value changes.

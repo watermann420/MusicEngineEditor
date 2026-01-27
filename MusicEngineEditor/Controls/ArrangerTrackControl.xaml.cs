@@ -44,7 +44,6 @@ public partial class ArrangerTrackControl : UserControl
     private Point _dragStartPoint;
     private double _dragStartBeat;
     private bool _isDragging;
-    private bool _isResizing;
     private double _contextMenuBeat;
 
     /// <summary>

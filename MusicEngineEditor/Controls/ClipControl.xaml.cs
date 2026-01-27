@@ -103,7 +103,9 @@ public partial class ClipControl : UserControl
     /// <summary>
     /// Event raised when fade is changed.
     /// </summary>
+#pragma warning disable CS0067 // Event is never used - available for external fade change handling
     public event EventHandler<ClipFadeChangedEventArgs>? FadeChanged;
+#pragma warning restore CS0067
 
     #endregion
 
@@ -285,8 +287,8 @@ public partial class ClipControl : UserControl
         if (Clip != null)
         {
             Clip.IsSelected = true;
+            ClipSelected?.Invoke(this, Clip);
         }
-        ClipSelected?.Invoke(this, Clip);
 
         CaptureMouse();
         e.Handled = true;

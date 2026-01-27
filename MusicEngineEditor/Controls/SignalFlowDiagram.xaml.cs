@@ -126,7 +126,9 @@ public partial class SignalFlowDiagram : UserControl
     /// <summary>
     /// Event raised when a connection is requested.
     /// </summary>
+#pragma warning disable CS0067 // Event is never used - available for external routing requests
     public event EventHandler<(string fromId, string toId)>? ConnectionRequested;
+#pragma warning restore CS0067
 
     #endregion
 

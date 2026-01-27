@@ -49,27 +49,27 @@ public partial class TransferFunctionView : UserControl
         DependencyProperty.Register(nameof(Frequencies), typeof(double[]), typeof(TransferFunctionView),
             new PropertyMetadata(null));
 
-    public double[] BeforeCurve
+    public double[]? BeforeCurve
     {
-        get => (double[])GetValue(BeforeCurveProperty);
+        get => (double[]?)GetValue(BeforeCurveProperty);
         set => SetValue(BeforeCurveProperty, value);
     }
 
-    public double[] AfterCurve
+    public double[]? AfterCurve
     {
-        get => (double[])GetValue(AfterCurveProperty);
+        get => (double[]?)GetValue(AfterCurveProperty);
         set => SetValue(AfterCurveProperty, value);
     }
 
-    public double[] PhaseCurve
+    public double[]? PhaseCurve
     {
-        get => (double[])GetValue(PhaseCurveProperty);
+        get => (double[]?)GetValue(PhaseCurveProperty);
         set => SetValue(PhaseCurveProperty, value);
     }
 
-    public double[] Frequencies
+    public double[]? Frequencies
     {
-        get => (double[])GetValue(FrequenciesProperty);
+        get => (double[]?)GetValue(FrequenciesProperty);
         set => SetValue(FrequenciesProperty, value);
     }
 

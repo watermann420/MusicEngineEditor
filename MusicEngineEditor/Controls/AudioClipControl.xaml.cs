@@ -425,9 +425,10 @@ public partial class AudioClipControl : UserControl
 
         IsSelected = true;
         if (Clip != null)
+        {
             Clip.IsSelected = true;
-
-        ClipSelected?.Invoke(this, Clip);
+            ClipSelected?.Invoke(this, Clip);
+        }
 
         CaptureMouse();
         e.Handled = true;

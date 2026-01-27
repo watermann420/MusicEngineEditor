@@ -86,11 +86,14 @@ public sealed partial class StepRecordingService : ObservableObject, IDisposable
     [ObservableProperty]
     private double _durationMultiplier = 1.0;
 
+    #endregion
+
+    #region Internal State
+
     /// <summary>
-    /// The currently held notes for chord input.
+    /// The currently held notes for chord input (internal state, not observable).
     /// </summary>
-    [ObservableProperty]
-    private List<PendingNote> _heldNotes = [];
+    private readonly List<PendingNote> _heldNotes = [];
 
     #endregion
 

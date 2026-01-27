@@ -27,7 +27,9 @@ public partial class DrumEditorView : UserControl
     private int _currentStep = -1;
     private int _stepCount = 16;
     private double _swingAmount;
+#pragma warning disable CS0414 // Field is assigned but its value is never used
     private bool _isPlaying;
+#pragma warning restore CS0414
     private double _bpm = 120;
 
     /// <summary>

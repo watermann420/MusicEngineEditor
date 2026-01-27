@@ -36,8 +36,7 @@ public partial class MidiMonitorPanel : UserControl, INotifyPropertyChanged
     private readonly DispatcherTimer[] _channelDecayTimers = new DispatcherTimer[16];
     private readonly DateTime[] _lastChannelActivity = new DateTime[16];
 
-    private bool _isRecording = true;
-    private bool _isPaused;
+    // Note: IsRecording and IsPaused are managed via dependency properties
     private int _maxMessages = DefaultMaxMessages;
     private int _selectedChannelFilter = -1; // -1 = All
     private MidiDirection _selectedDirectionFilter = MidiDirection.All;
@@ -93,7 +92,7 @@ public partial class MidiMonitorPanel : UserControl, INotifyPropertyChanged
     /// <summary>
     /// Occurs when a property value changes.
     /// </summary>
-    public new event PropertyChangedEventHandler? PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>
     /// Occurs when a MIDI message is received.

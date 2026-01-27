@@ -40,14 +40,12 @@ public partial class NoteExpressionLane : UserControl, INotifyPropertyChanged
 
     #region Private Fields
 
-    private ObservableCollection<PianoRollNote>? _notes;
     private PianoRollNote? _selectedNote;
     private NoteExpressionType _expressionType = NoteExpressionType.PitchBend;
     private ExpressionDrawTool _currentTool = ExpressionDrawTool.Draw;
     private readonly List<ExpressionPoint> _expressionPoints = [];
     private readonly List<ExpressionPoint> _clipboard = [];
 
-    private double _zoomX = 1.0;
     private double _scrollX;
     private bool _isDrawing;
     private Point _lastDrawPoint;
@@ -147,7 +145,7 @@ public partial class NoteExpressionLane : UserControl, INotifyPropertyChanged
     /// <summary>
     /// Occurs when a property value changes.
     /// </summary>
-    public new event PropertyChangedEventHandler? PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>
     /// Occurs when expression data changes.

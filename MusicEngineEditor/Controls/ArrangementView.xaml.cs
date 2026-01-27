@@ -55,8 +55,8 @@ public partial class ArrangementView : UserControl
     private bool _isClipResizingLeft;
     private bool _isClipResizingRight;
     private Point _clipDragStartPoint;
-    private double _clipDragStartPosition;
-    private double _clipDragStartLength;
+    private double _clipDragStartPosition = 0.0;
+    private double _clipDragStartLength = 0.0;
     private double _clipContextMenuPosition;
 
     /// <summary>

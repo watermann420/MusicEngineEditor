@@ -22,9 +22,11 @@ public partial class ReferenceTrackControl : UserControl
 {
     private ReferenceTrack? _referenceTrack;
     private readonly DispatcherTimer _positionTimer;
+#pragma warning disable CS0414 // Field is assigned but its value is never used
     private bool _isDraggingLoop;
     private bool _isDraggingLoopStart;
     private bool _isDraggingLoopEnd;
+#pragma warning restore CS0414
     private float[]? _waveformPeaks;
     private bool _isAnalyzing;
 

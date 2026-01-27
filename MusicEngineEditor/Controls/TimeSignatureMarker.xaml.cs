@@ -90,7 +90,9 @@ public partial class TimeSignatureMarker : UserControl
     /// <summary>
     /// Event raised when a jump to bar is requested.
     /// </summary>
+#pragma warning disable CS0067 // Event is never used - available for external jump handling
     public event EventHandler<int>? JumpToBarRequested;
+#pragma warning restore CS0067
 
     public TimeSignatureMarker()
     {

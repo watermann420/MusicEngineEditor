@@ -17,7 +17,9 @@ public sealed class ReverseAudioCommand : IUndoableCommand
 {
     private readonly ClipViewModel _clip;
     private readonly float[]? _originalWaveformData;
+#pragma warning disable CS0414 // Field is assigned but its value is never used
     private readonly bool _wasReversed;
+#pragma warning restore CS0414
 
     /// <inheritdoc/>
     public string Description => $"Reverse Audio Clip \"{_clip.Name}\"";

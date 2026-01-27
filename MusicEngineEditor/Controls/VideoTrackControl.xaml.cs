@@ -35,12 +35,9 @@ public partial class VideoTrackControl : UserControl, INotifyPropertyChanged
     #region Private Fields
 
     private string? _videoPath;
-    private double _duration;
     private double _frameRate = DefaultFrameRate;
     private int _videoWidth;
     private int _videoHeight;
-    private double _offset;
-    private double _currentPosition;
     private bool _isScrubbing;
     private Point _scrubStartPoint;
     private readonly List<BitmapSource> _thumbnails = [];
@@ -161,7 +158,7 @@ public partial class VideoTrackControl : UserControl, INotifyPropertyChanged
     /// <summary>
     /// Occurs when a property value changes.
     /// </summary>
-    public new event PropertyChangedEventHandler? PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>
     /// Occurs when a video frame is requested at a specific time.

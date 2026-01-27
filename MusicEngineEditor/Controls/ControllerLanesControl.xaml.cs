@@ -127,7 +127,6 @@ public partial class ControllerLanesControl : UserControl
     private bool _isDragging;
     private CCLaneData? _activeLane;
     private CCLanePoint? _draggedPoint;
-    private Point _lastDrawPoint;
     private double _lastDrawBeat = -1;
 
     #endregion

@@ -107,7 +107,9 @@ public partial class FadeCurveEditor : UserControl
     #region Fields
 
     private bool _isDragging;
+#pragma warning disable CS0414 // Field is assigned but its value is never used
     private bool _isDraggingStart;
+#pragma warning restore CS0414
     private Point _dragStartPoint;
     private bool _isUpdatingUI;
     private readonly Line[] _gridLines = new Line[5];

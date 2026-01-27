@@ -52,15 +52,15 @@ public partial class MixRadarView : UserControl
         DependencyProperty.Register(nameof(AnimateOnUpdate), typeof(bool), typeof(MixRadarView),
             new PropertyMetadata(true));
 
-    public double[] BandLevels
+    public double[]? BandLevels
     {
-        get => (double[])GetValue(BandLevelsProperty);
+        get => (double[]?)GetValue(BandLevelsProperty);
         set => SetValue(BandLevelsProperty, value);
     }
 
-    public double[] ReferenceLevels
+    public double[]? ReferenceLevels
     {
-        get => (double[])GetValue(ReferenceLevelsProperty);
+        get => (double[]?)GetValue(ReferenceLevelsProperty);
         set => SetValue(ReferenceLevelsProperty, value);
     }
 
