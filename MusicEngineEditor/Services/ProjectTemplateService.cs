@@ -29,6 +29,47 @@ public class ProjectTemplateService : IProjectTemplateService
     private readonly string _builtInTemplatesFolder;
     private bool _isInitialized;
 
+    /// <summary>
+    /// Path to the MusicEngine test_script.csx file used as default startup content.
+    /// </summary>
+    private static readonly string TestScriptPath = GetTestScriptPath();
+
+    private static string GetTestScriptPath()
+    {
+        // Try to find test_script.csx relative to the application
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+
+        // Navigate up from bin/Debug/net8.0-windows to find MusicEngine sibling folder
+        var dir = new DirectoryInfo(baseDir);
+        while (dir != null && dir.Parent != null)
+        {
+            var testScriptPath = Path.Combine(dir.Parent.FullName, "MusicEngine", "test_script.csx");
+            if (File.Exists(testScriptPath))
+            {
+                return testScriptPath;
+            }
+
+            // Also check in RiderProjects parent
+            var riderProjectsPath = Path.Combine(dir.FullName, "..", "..", "MusicEngine", "test_script.csx");
+            if (File.Exists(riderProjectsPath))
+            {
+                return Path.GetFullPath(riderProjectsPath);
+            }
+
+            dir = dir.Parent;
+        }
+
+        // Fallback: Try common development paths
+        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var fallbackPath = Path.Combine(userProfile, "RiderProjects", "MusicEngine", "test_script.csx");
+        if (File.Exists(fallbackPath))
+        {
+            return fallbackPath;
+        }
+
+        return string.Empty;
+    }
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -856,6 +897,7 @@ public class ProjectTemplateService : IProjectTemplateService
 
     /// <summary>
     /// Creates a default script for a template-based project.
+    /// Uses the MusicEngine test_script.csx content if available.
     /// </summary>
     private MusicScript CreateTemplateScript(MusicProject project, ProjectTemplate template)
     {
@@ -863,21 +905,31 @@ public class ProjectTemplateService : IProjectTemplateService
         var scriptPath = Path.Combine(projectDir, "Scripts", "Main.me");
         var ns = $"{project.Namespace}.Scripts";
 
-        var trackSetup = new System.Text.StringBuilder();
-        foreach (var track in template.Tracks)
+        string content;
+
+        // Use MusicEngine test_script.csx content if available
+        if (!string.IsNullOrEmpty(TestScriptPath) && File.Exists(TestScriptPath))
         {
-            if (track.Type == TemplateTrackType.Master)
-                continue;
-
-            trackSetup.AppendLine($"            // {track.Name} Track");
-            if (track.Type == TemplateTrackType.Midi && !string.IsNullOrEmpty(track.DefaultInstrument))
-            {
-                trackSetup.AppendLine($"            // var {ToVariableName(track.Name)} = new {track.DefaultInstrument}();");
-            }
-            trackSetup.AppendLine();
+            content = File.ReadAllText(TestScriptPath);
         }
+        else
+        {
+            // Fallback to template-based content
+            var trackSetup = new System.Text.StringBuilder();
+            foreach (var track in template.Tracks)
+            {
+                if (track.Type == TemplateTrackType.Master)
+                    continue;
 
-        var content = $@"// ============================================
+                trackSetup.AppendLine($"            // {track.Name} Track");
+                if (track.Type == TemplateTrackType.Midi && !string.IsNullOrEmpty(track.DefaultInstrument))
+                {
+                    trackSetup.AppendLine($"            // var {ToVariableName(track.Name)} = new {track.DefaultInstrument}();");
+                }
+                trackSetup.AppendLine();
+            }
+
+            content = $@"// ============================================
 // MusicEngine Script
 // Project: {project.Name}
 // Template: {template.TemplateName}
@@ -919,6 +971,7 @@ namespace {ns}
     }}
 }}
 ";
+        }
 
         return new MusicScript
         {

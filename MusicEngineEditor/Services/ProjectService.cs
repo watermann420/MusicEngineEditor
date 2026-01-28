@@ -24,8 +24,50 @@ public class ProjectService : IProjectService
     private const int MaxRecentProjects = 10;
     private const string RecentProjectsFileName = "recent.json";
 
+    /// <summary>
+    /// Path to the MusicEngine test_script.csx file used as default startup content.
+    /// This is resolved relative to the solution directory.
+    /// </summary>
+    private static readonly string TestScriptPath = GetTestScriptPath();
+
     private readonly List<RecentProjectEntry> _recentProjects = new();
     private readonly string _recentProjectsPath;
+
+    private static string GetTestScriptPath()
+    {
+        // Try to find test_script.csx relative to the application
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+
+        // Navigate up from bin/Debug/net8.0-windows to find MusicEngine sibling folder
+        var dir = new DirectoryInfo(baseDir);
+        while (dir != null && dir.Parent != null)
+        {
+            var testScriptPath = Path.Combine(dir.Parent.FullName, "MusicEngine", "test_script.csx");
+            if (File.Exists(testScriptPath))
+            {
+                return testScriptPath;
+            }
+
+            // Also check in RiderProjects parent
+            var riderProjectsPath = Path.Combine(dir.FullName, "..", "..", "MusicEngine", "test_script.csx");
+            if (File.Exists(riderProjectsPath))
+            {
+                return Path.GetFullPath(riderProjectsPath);
+            }
+
+            dir = dir.Parent;
+        }
+
+        // Fallback: Try common development paths
+        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var fallbackPath = Path.Combine(userProfile, "RiderProjects", "MusicEngine", "test_script.csx");
+        if (File.Exists(fallbackPath))
+        {
+            return fallbackPath;
+        }
+
+        return string.Empty;
+    }
 
     public MusicProject? CurrentProject { get; private set; }
 
@@ -247,7 +289,17 @@ public class ProjectService : IProjectService
         ns ??= $"{project.Namespace}.Scripts";
         filePath ??= Path.Combine(projectDir, "Scripts", $"{name}{ScriptExtension}");
 
-        var header = $@"// ============================================
+        string content;
+
+        if (isEntryPoint && !string.IsNullOrEmpty(TestScriptPath) && File.Exists(TestScriptPath))
+        {
+            // Use the MusicEngine test_script.csx content as the default startup script
+            content = File.ReadAllText(TestScriptPath);
+        }
+        else
+        {
+            // Fallback to the original template format
+            var header = $@"// ============================================
 // MusicEngine Script
 // Project: {project.Name}
 // Namespace: {ns}
@@ -258,7 +310,7 @@ public class ProjectService : IProjectService
 #project {project.Name}
 ";
 
-        var content = isEntryPoint ? $@"{header}
+            content = isEntryPoint ? $@"{header}
 namespace {ns}
 {{
     public class {name} : MusicScript
@@ -293,6 +345,7 @@ namespace {ns}
     }}
 }}
 ";
+        }
 
         return new MusicScript
         {
